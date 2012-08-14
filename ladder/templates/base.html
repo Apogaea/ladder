@@ -1,0 +1,62 @@
+<!doctype HTML>
+{% load compress %}
+{% load url from future %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="{% block seo_description %}{% endblock %}" />
+  <meta name="keywords" content="{% block seo_keywords %}{% endblock %}" />
+  <title>{% block title %}Project name{% endblock %}</title>
+  {% compress css %}
+    <link rel="stylesheet" href="{% static '/css/bootstrap.css' %}" />
+    <link rel="stylesheet" href="{% static '/css/bootstrap-responsive.css' %}" />
+     <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+  {% endcompress %}
+  {% compress js %}
+    <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+  {% endcompress %}
+</head>
+<body>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <a class="brand" href="#">Ladder</a>
+      <ul class="nav">
+        <li><a href="{% url 'site_index' %}">Home</a></li>
+        <li><a href="#">Link</a></li>
+      </ul>
+      {% if user.is_authenticated %}
+      {% else %}
+        <form method="post" class="form-inline pull-right" action="{% url 'login' %}">
+          <input type="text" class="input-medium" name="username" placeholder="Email">
+          <input type="password" class="input-medium" name="password" placeholder="Password">
+           {% csrf_token %}
+          <button type="submit" class="btn">Log In</button>
+        </form>
+        <a href="{% url 'socialauth_begin' 'google-oauth2' %}">Google</a>
+        <a href="{% url 'socialauth_begin' 'facebook' %}">Google</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="container">
+    {% block messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          <button class="close" data-dismiss="alert">×</button>
+          <h4 class="alert=heading">{{ message.tags|title }}</h4>
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endblock %}
+    {% block content %}
+    {% endblock %}
+  </div>
+  <div id="footer">
+  </div>
+</body>
+</html>

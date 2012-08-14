@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="row">
+    <div class="span4 offset4">
+      <form class="well">
+        {% csrf_token %}
+        {% for field in form %}
+          <fieldset class="control-group {{ field.css_classes }}">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+          </fieldset>
+        {% endfor %}
+      </form>
+    </div>
+  </div>
+{% endblock %}
