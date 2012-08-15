@@ -105,6 +105,10 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'ladder.urls'
 
+# Twilio
+TWILIO_ACCOUNT_SID = 'AC61ba87497e9fcf70da6a8d1c3bd0c564'
+TWILIO_AUTH_TOKEN = '844ad0006218f9c79770c581bb98a065'
+
 AUTHENTICATION_BACKENDS = (
         'social_auth.backends.google.GoogleOAuth2Backend',
         'fusionbox.auth.backends.CustomModelBackend',

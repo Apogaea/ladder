@@ -1,8 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm, UserCreationForm as DjangoUserCreationForm
 from django.utils.translation import ugettext_lazy as _
-
-from social_auth.db.django_models import UserSocialAuth
+from django.contrib.localflavor.us import models as us_models
 
 from accounts.models import User
 
@@ -34,5 +33,8 @@ class UserCreationForm(DjangoUserCreationForm):
 
 
 class NewUserForm(forms.ModelForm):
+    phone_number = us_models.PhoneNumberField()
+
     class Meta:
-        model = UserSocialAuth
+        model = User
+        fields = ('preferred_name', 'phone_number')
