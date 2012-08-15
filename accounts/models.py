@@ -3,6 +3,7 @@ import time
 
 from django.db import models
 from django.contrib.auth.models import User as DjangoUser, UserManager as DjangoUserManager
+from django.contrib.localflavor.us import models as us_models
 
 from fusionbox import behaviors
 from fusionbox.db.models import QuerySetManager
@@ -13,13 +14,21 @@ class UserManager(QuerySetManager, DjangoUserManager):
 
 
 class User(behaviors.QuerySetManagerModel, DjangoUser):
-    preferred_name = models.CharField(max_length=255)
+    display_name = models.CharField(max_length=255, blank=True)
 
-    phone_number = models.CharField(max_length=255)
+    phone_number = us_models.PhoneNumberField(max_length=255)
     is_verified = models.BooleanField(blank=True, default=False)
     verified_at = models.DateTimeField(blank=True, null=True)
 
     objects = UserManager()
+
+    def __unicode__(self):
+        if self.display_name:
+            return self.display_name
+        elif self.first_name or self.last_name:
+            return '{0} {1}'.format(self.first_name, self.last_name).strip()
+        else:
+            super(User, self).__unicode__()
 
 
 class PhoneVerification(behaviors.Timestampable):

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block content %}
+  <div class="well">
+    <a href="{% url 'account_edit' %}">Edit</a>
+    <dl class="dl-horizontal">
+      <dt>Display Name</dt>
+      <dd>{{ user }}</dd>
+      <dt>Phone Number</dt>
+      <dd>
+        {% if user.phone_number %}
+          {{ user.phone_number }}
+          {% if not user.is_verified %}
+            <span class="badge badge-warning">Not Verified</span>
+          {% endif %}
+        {% else %}
+          Not Entered
+        {% endif %}
+      </dd>
+    </dl>
+  </div>
+{% endblock %}

@@ -124,7 +124,7 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/account/'
 LOGIN_ERROR_URL = '/login-error/'
 
-SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/account/new-user/'
+SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/account/edit/'
 
 SOCIAL_AUTH_CREATE_USERS = True
 
