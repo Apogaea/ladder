@@ -32,6 +32,9 @@ urlpatterns += patterns('',
     # Accounts Urls
     url(r'^account/', include('accounts.urls')),
 
+    # Exchange Urls
+    url(r'^exchange/', include('exchange.urls')),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

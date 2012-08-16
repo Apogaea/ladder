@@ -2,22 +2,60 @@
 {% load url from future %}
 
 {% block content %}
-  <div class="well">
-    <a href="{% url 'account_edit' %}">Edit</a>
-    <dl class="dl-horizontal">
-      <dt>Display Name</dt>
-      <dd>{{ user }}</dd>
-      <dt>Phone Number</dt>
-      <dd>
-        {% if user.phone_number %}
-          {{ user.phone_number }}
-          {% if not user.is_verified %}
-            <span class="badge badge-warning">Not Verified</span>
-          {% endif %}
-        {% else %}
-          Not Entered
-        {% endif %}
-      </dd>
-    </dl>
-  </div>
+  {% if not user.phone_number %}
+    <div class="well">
+      <p>To begin using the Apogaea Ladder program, we require you to verify your
+      account via a code sent to your phone.</p>
+      <form class="form-inline" method="post" action="{% url 'account_edit' %}">
+        {% csrf_token %}
+        {{ phone_form.non_field_errors }}
+        <fieldset class="control-group {{ phone_form.phone_number.css_classes }}">
+          {{ phone_form.phone_number.label_tag }}
+          {{ phone_form.phone_number }}
+          <span class="add-on">XXX-XXX-XXXX</span>
+          <span class="help-inline">{{ phone_form.phone_number.errors }}</span>
+          <button type="submit" class="btn" name="_verify">Submit and Verify</button>
+        </fieldset>
+      </form>
+    </div>
+  {% else %}
+    <div class="row show-grid">
+      <div class="span8">
+        <div class="well">
+          <h3>I have a ticket to offer</h3>
+          <p>If you have a ticket that you would like to offer to someone,
+          begin that process here.</p>
+          <a href="{% url 'offer_ticket' %}" class="btn btn-info btn-large">List Ticket</a>
+        </div>
+
+        <div class="well">
+          <h3>I need a ticket</h3>
+          <p>If you are in need of a ticket, create your ticket request
+          here.</p>
+          <a class="btn btn-info btn-large">Request a Ticket</a>
+        </div>
+      </div>
+      <div class="span4">
+        <div class="well">
+          <h3>
+            Account Information
+            {% if not user.is_verified %}
+              <small class="badge badge-warning">Not Verified</small>
+            {% else %}
+              <small class="badge badge-success">Verified</small>
+            {% endif %}
+          </h3>
+          <a href="{% url 'account_edit' %}">Edit</a>
+          <dl class="dl-horizontal">
+            <dt>Display Name:</dt>
+            <dd>{{ user }}</dd>
+            <dt>Phone Number:</dt>
+            <dd>
+              {{ user.phone_number }}
+            </dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}

@@ -109,6 +109,10 @@ ROOT_URLCONF = 'ladder.urls'
 TWILIO_ACCOUNT_SID = 'AC61ba87497e9fcf70da6a8d1c3bd0c564'
 TWILIO_AUTH_TOKEN = '844ad0006218f9c79770c581bb98a065'
 
+TWILIO_CODE_MAX_ATTEMPTS = 3
+TWILIO_CODE_EXPIRE_MINUTES = 60 * 24
+TWILIO_RESEND_MINUTES = 60
+
 AUTHENTICATION_BACKENDS = (
         'social_auth.backends.google.GoogleOAuth2Backend',
         'fusionbox.auth.backends.CustomModelBackend',

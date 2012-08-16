@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block content %}
+  <div class="well">
+    <h2>Offer Your Ticket</h2>
+    <p>Tickets may be destributed in one of two ways.</p>
+    <dl class="dl-horizontal">
+      <dt>Manual:</dt>
+      <dd>Manually choose the recipient of your ticket.  You will be provided
+      with a set of applicants and allowed to choose which applicant recieves
+      your ticket.</dd>
+      <dt>Automatic:</dt>
+      <dd>Your ticket will be matched with an applicant automatically.</dd>
+    </dl>
+    <form class="" method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <fieldset class="control-group {{ form.type.css_classes }}">
+        {{ form.type.label_tag }}
+        {% for radio in form.type %}
+          <button name="{{ form.type.html_name }}">{{ radio.choice }}</button>
+        {% endfor %}
+        <span class="help-inline">{{ form.type.errors }}</span>
+      </fieldset>
+      <button type="submit" class="btn btn-success">Verify</button>
+      <a class="btn" href="{% url 'dashboard' %}">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

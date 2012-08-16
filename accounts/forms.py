@@ -1,7 +1,12 @@
+import re
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm, UserCreationForm as DjangoUserCreationForm
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.localflavor.us import forms as us_forms
+#from django.contrib.localflavor.us import forms as us_forms
+#from django.core.exceptions import ValidationError
+
+from ladder.forms import CssForm, CssModelForm
 
 from accounts.models import User
 
@@ -32,12 +37,42 @@ class UserCreationForm(DjangoUserCreationForm):
         fields = ('username', 'email',)
 
 
-class NewUserForm(forms.ModelForm):
-    error_css_class = 'error'
-    required_css_class = 'required'
-
-    phone_number = us_forms.USPhoneNumberField()
-
+class UserForm(CssModelForm):
     class Meta:
         model = User
         fields = ('display_name', 'phone_number')
+        widgets = {
+                'phone_number': forms.TextInput(attrs={'placeholder': 'XXX-XXX-XXXX'}),
+                }
+
+    def save(self, commit=True):
+        original = User.objects.get(pk=self.instance.pk)
+        user = super(UserForm, self).save(commit=False)
+        if not original.phone_number == user.phone_number:
+            user.codes.all().delete()
+            user.is_verified = False
+            user.verified_at = None
+        if commit:
+            user.save()
+        return user
+
+
+class PhoneNumberForm(CssModelForm):
+    class Meta:
+        model = User
+        fields = ('display_name', 'phone_number')
+
+
+class PhoneVerificationForm(CssForm):
+    verification_code = forms.CharField(label="Verification Code:")
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(PhoneVerificationForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_verification_code(self):
+        code = self.cleaned_data.get('verification_code')
+        code = re.sub(r'[^\d]+', '', code)
+
+        return code

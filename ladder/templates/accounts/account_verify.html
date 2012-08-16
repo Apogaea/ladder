@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block content %}
+  <div class="well">
+    <p>Enter your account verification code</p>
+    {% if user.can_send_code %}
+      <a href="{% url 'account_send_code' %}" class="btn">Resend Code</a>
+    {% endif %}
+    <form class="form-inline" method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <fieldset class="control-group {{ form.verification_code.css_classes }}">
+        {{ form.verification_code.label_tag }}
+        {{ form.verification_code }}
+        <span class="help-inline">{{ form.verification_code.errors }}</span>
+        <button type="submit" class="btn btn-success">Verify</button>
+      </fieldset>
+    </form>
+  </div>
+{% endblock %}
