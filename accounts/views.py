@@ -1,7 +1,7 @@
 from django.views.generic.edit import FormView
 from django.contrib import messages
 from django.views.generic.base import TemplateView, RedirectView
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
@@ -35,6 +35,7 @@ dashboard = DashboardView.as_view()
 class EditAccountView(FormView):
     template_name = 'accounts/account_edit.html'
     form_class = UserForm
+    success_url = reverse_lazy('dashboard')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -43,11 +44,7 @@ class EditAccountView(FormView):
     def get_form_kwargs(self):
         kwargs = super(EditAccountView, self).get_form_kwargs()
         kwargs['instance'] = self.request.user
-
         return kwargs
-
-    def get_success_url(self):
-        return reverse('dashboard')
 
     def form_valid(self, form):
         user = form.save()
@@ -90,6 +87,7 @@ account_send_verification_code = SendCodeView.as_view()
 class VerifyPhoneView(FormView):
     template_name = 'accounts/account_verify.html'
     form_class = PhoneVerificationForm
+    success_url = reverse_lazy('dashboard')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -97,13 +95,9 @@ class VerifyPhoneView(FormView):
             raise PermissionDenied("Resending verification code too soon")
         return super(VerifyPhoneView, self).dispatch(request, *args, **kwargs)
 
-    def get_success_url(self):
-        return reverse('dashboard')
-
     def get_form_kwargs(self):
         kwargs = super(VerifyPhoneView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
-
         return kwargs
 
     def form_valid(self, form):

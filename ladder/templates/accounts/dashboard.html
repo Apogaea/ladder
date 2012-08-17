@@ -25,14 +25,14 @@
           <h3>I have a ticket to offer</h3>
           <p>If you have a ticket that you would like to offer to someone,
           begin that process here.</p>
-          <a href="{% url 'offer_ticket' %}" class="btn btn-info btn-large">List Ticket</a>
+          <a href="{% url 'listing_create' %}" class="btn btn-info btn-large">List Ticket</a>
         </div>
 
         <div class="well">
           <h3>I need a ticket</h3>
           <p>If you are in need of a ticket, create your ticket request
           here.</p>
-          <a class="btn btn-info btn-large">Request a Ticket</a>
+          <a href="{% url 'request_create' %}" class="btn btn-info btn-large">Request a Ticket</a>
         </div>
       </div>
       <div class="span4">

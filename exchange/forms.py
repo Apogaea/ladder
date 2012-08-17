@@ -2,12 +2,12 @@ from django import forms
 
 from ladder.forms import CssModelForm
 
-from exchange.models import TicketOffer, TicketRequest
+from exchange.models import TicketListing, TicketRequest
 
 
-class TicketOfferForm(CssModelForm):
+class TicketListingForm(CssModelForm):
     class Meta:
-        model = TicketOffer
+        model = TicketListing
         fields = ('type',)
         widgets = {
                 'type': forms.RadioSelect(),
@@ -17,4 +17,4 @@ class TicketOfferForm(CssModelForm):
 class TicketRequestForm(CssModelForm):
     class Meta:
         model = TicketRequest
-        fields = tuple()
+        fields = ('message',)

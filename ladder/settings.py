@@ -105,6 +105,15 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'ladder.urls'
 
+# rabbitmq
+
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+
+CELERY_RESULT_EXCHANGE = 'celeryresults'
+CELERY_RESULT_PERSISTENT = True
+CELERY_RESULT_BACKEND = "amqp://guest:guest@localhost:5672/"
+CELERY_TASK_RESULT_EXPIRES = 60 * 60 * 5  # 5 Hours
+
 # Twilio
 TWILIO_ACCOUNT_SID = 'AC61ba87497e9fcf70da6a8d1c3bd0c564'
 TWILIO_AUTH_TOKEN = '844ad0006218f9c79770c581bb98a065'
@@ -159,10 +168,12 @@ INSTALLED_APPS = (
     'south',
     'django_extensions',
     'social_auth',
+    'djcelery',
 
     # Project Apps
     'accounts',
     'exchange',
+    'ladder',
 )
 
 # A sample logging configuration. The only tangible logging

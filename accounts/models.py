@@ -9,12 +9,12 @@ from django.contrib.auth.models import User as DjangoUser, UserManager as Django
 from django.contrib.localflavor.us import models as us_models
 from django.conf import settings
 
-from twilio.rest import TwilioRestClient
-
 from fusionbox import behaviors
 from fusionbox.db.models import QuerySetManager
 
 from ladder.util import now
+
+from ladder.tasks import send_sms
 
 
 class UserManager(QuerySetManager, DjangoUserManager):
@@ -62,7 +62,7 @@ class User(behaviors.QuerySetManagerModel, DjangoUser):
         return latest.can_send
 
     @property
-    def can_offer_ticket(self):
+    def can_list_ticket(self):
         if not self.is_verified:
             return False
         if self.requests.active().exists():
@@ -73,7 +73,7 @@ class User(behaviors.QuerySetManagerModel, DjangoUser):
     def can_request_ticket(self):
         if not self.is_verified:
             return False
-        if self.offers.active().exists():
+        if self.listings.active().exists():
             return False
         return True
 
@@ -117,13 +117,12 @@ class PhoneVerification(behaviors.QuerySetManagerModel, behaviors.Timestampable)
         self.code = '{0:06d}'.format(code)
 
     def send(self):
-        client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-        client.sms.messages.create(
+        send_sms.delay(
                 to=self.user.phone_number,
                 from_='+12404282876',
                 body='Apogaea Ladder Verification Code: "{code}"'.format(code=self.code),
                 )
-        self.sent_at = datetime.datetime.now()
+        self.sent_at = now()
         self.save()
 
     @property

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block content %}
+  <div class="page-heading">
+    <h2>Ticket Listing 
+      <small>Status: 
+        {% if listing.is_cancelled %}
+          <span class="label">Cancelled</span>
+        {% elif listing.request %}
+          <span class="label label-success">Matched</span>
+        {% else %}
+          <span class="label label-info">Active</span>
+        {% endif %}
+      </small>
+    </h2>
+  </div>
+  {% if listing.is_cancelled %}
+    {% include 'exchange/listing_detail-cancelled.html' %}
+  {% elif listing.request %}
+    {% include 'exchange/listing_detail-success.html' %}
+  {% else %}
+    {% include 'exchange/listing_detail-active.html' %}
+  {% endif %}
+{% endblock %}
