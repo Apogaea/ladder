@@ -79,11 +79,11 @@ class User(behaviors.QuerySetManagerModel, DjangoUser):
 
 
 class PhoneVerification(behaviors.QuerySetManagerModel, behaviors.Timestampable):
-    user = models.ForeignKey(User, related_name='codes')
+    user = models.ForeignKey(User, related_name='codes', editable=False)
     phone_number = us_models.PhoneNumberField("Phone Number", max_length=255, blank=True)
     code = models.CharField(max_length=255, blank=True, editable=False)
 
-    attempts = models.PositiveIntegerField(default=0, blank=True)
+    attempts = models.PositiveIntegerField(default=0, blank=True, editable=False)
     sent_at = models.DateTimeField(blank=True, null=True, editable=False)
 
     class Meta:
@@ -113,8 +113,8 @@ class PhoneVerification(behaviors.QuerySetManagerModel, behaviors.Timestampable)
                 timestamp=time.time(),
                 )
         hasher.update(hash_string)
-        code = hasher.hexdigest().__hash__() % 1000000
-        self.code = '{0:06d}'.format(code)
+        code = hasher.hexdigest().__hash__() % (10 ** settings.ACTIVATION_CODE_LENGTH)
+        self.code = '{0:0' + str(settings.ACTIVATION_CODE_LENGTH) + 'd}'.format(code)
 
     def send(self):
         send_sms.delay(
