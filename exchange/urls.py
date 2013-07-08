@@ -1,9 +1,10 @@
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns('exchange.views',
-        # Listings
-        url(r'^list-ticket/$', 'listing_create', name='listing_create'),
-        url(r'^listing-status/(?P<pk>\d+)/$', 'listing_detail', name='listing_detail'),
+        # Offers
+        url(r'^offer-ticket/$', 'offer_create', name='offer_create'),
+        url(r'^offer-status/(?P<pk>\d+)/$', 'offer_detail', name='offer_detail'),
+        url(r'^offer-status/(?P<pk>\d+)/select-recipient/$', 'offer_select_recipient', name='offer_select_recipient'),
 
         # Requests
         url(r'^request-ticket/$', 'request_create', name='request_create'),

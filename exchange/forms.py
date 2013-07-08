@@ -1,20 +1,17 @@
 from django import forms
 
-from ladder.forms import CssModelForm
+from fusionbox.forms import BaseModelForm
 
-from exchange.models import TicketListing, TicketRequest
+from exchange.models import TicketOffer, TicketRequest
 
 
-class TicketListingForm(CssModelForm):
+class TicketOfferForm(BaseModelForm):
     class Meta:
-        model = TicketListing
-        fields = ('type',)
-        widgets = {
-                'type': forms.RadioSelect(),
-                }
+        model = TicketOffer
+        fields = ('is_automatch',)
 
 
-class TicketRequestForm(CssModelForm):
+class TicketRequestForm(BaseModelForm):
     class Meta:
         model = TicketRequest
         fields = ('message',)

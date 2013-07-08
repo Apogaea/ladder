@@ -5,28 +5,28 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.core.urlresolvers import reverse
 
 from fusionbox.http import HttpResponseSeeOther
 
-from exchange.models import TicketListing, TicketRequest
-from exchange.forms import TicketListingForm, TicketRequestForm
+from authtools.views import LoginRequired
+
+from exchange.models import TicketOffer, TicketRequest
+from exchange.forms import TicketOfferForm, TicketRequestForm
 
 
-class CreateListingView(CreateView):
-    template_name = 'exchange/listing_create.html'
-    model = TicketListing
-    form_class = TicketListingForm
+class CreateOfferView(LoginRequired, CreateView):
+    template_name = 'exchange/offer_create.html'
+    model = TicketOffer
+    form_class = TicketOfferForm
 
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         if not request.user.can_list_ticket:
             raise PermissionDenied("User not eligable for ticket listing")
-        return super(CreateListingView, self).dispatch(request, *args, **kwargs)
+        return super(CreateOfferView, self).dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super(CreateListingView, self).get_context_data(**kwargs)
-        context['radios'] = dict([(r.choice_value, r.choice_label) for r in context['form']['type']])
-        return context
+    def get_success_url(self):
+        return reverse('exchange.views.offer_detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
         listing = form.save(commit=False)
@@ -36,18 +36,18 @@ class CreateListingView(CreateView):
 
         return HttpResponseSeeOther(listing.get_absolute_url())
 
-listing_create = CreateListingView.as_view()
+offer_create = CreateOfferView.as_view()
 
 
-class ListingDetailView(DetailView):
+class OfferDetailView(DetailView):
     template_name = 'exchange/listing_detail.html'
-    model = TicketListing
+    model = TicketOffer
     context_object_name = 'listing'
 
     def get_queryset(self):
         return self.request.user.listings.all()
 
-listing_detail = ListingDetailView.as_view()
+listing_detail = OfferDetailView.as_view()
 
 
 class RequestTicketView(CreateView):
@@ -74,15 +74,10 @@ request_create = RequestTicketView.as_view()
 
 class RequestDetailView(DetailView):
     template_name = 'exchange/request_detail.html'
-    model = TicketListing
-    context_object_name = 'listing'
+    model = TicketRequest
+    context_object_name = 'ticket_request'
 
     def get_queryset(self):
         return self.request.user.requests.active()
-
-    def get_object(self, queryset=None):
-        if queryset is None:
-            queryset = self.get_queryset()
-        return get_object_or_404(queryset)
 
 request_detail = RequestDetailView.as_view()

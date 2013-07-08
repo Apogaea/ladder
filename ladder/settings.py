@@ -11,13 +11,16 @@ HOST_NAME = socket.gethostname()
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+
+DEFAULT_ACCEPT_TIME = 60 * 60 * 24  # 1 Day
+
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
 
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Aaron Merriam', 'amerriam@fusionbox.com'),
 )
 
 MANAGERS = ADMINS
@@ -114,6 +117,17 @@ CELERY_RESULT_PERSISTENT = True
 CELERY_RESULT_BACKEND = "amqp://guest:guest@localhost:5672/"
 CELERY_TASK_RESULT_EXPIRES = 60 * 60 * 5  # 5 Hours
 
+from kombu import Exchange, Queue
+
+CELERY_QUEUES = (
+        Queue('default', Exchange('default'), routing_key='default'),
+        Queue('high', Exchange('default'), routing_key='default.high'),
+        )
+
+CELERY_DEFAULT_QUEUE = 'default'
+CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
+CELERY_DEFAULT_ROUTING_KEY = 'default'
+
 # Twilio
 TWILIO_ACCOUNT_SID = 'AC61ba87497e9fcf70da6a8d1c3bd0c564'
 TWILIO_AUTH_TOKEN = '844ad0006218f9c79770c581bb98a065'
@@ -205,7 +219,8 @@ LOGGING = {
     }
 }
 
-SEND_BROKEN_LINK_EMAILS = True
+FUSIONBOX_SEND_BROKEN_LINK_EMAILS = True
+SEND_BROKEN_LINK_EMAILS = False
 
 SCSS_IMPORTS = (
         STATICFILES_DIRS[0] + '/css',
