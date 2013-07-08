@@ -13,3 +13,4 @@ django-pagination==1.0.7
 python-memcached==1.48
 twilio==3.3.6
 django-authtools==0.1.2
+django-social-auth==0.7.7

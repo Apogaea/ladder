@@ -136,6 +136,10 @@ TWILIO_CODE_MAX_ATTEMPTS = 3
 TWILIO_CODE_EXPIRE_MINUTES = 60 * 24
 TWILIO_RESEND_MINUTES = 60
 
+# Activation Code
+
+ACTIVATION_CODE_LENGTH = 6
+
 AUTHENTICATION_BACKENDS = (
         'social_auth.backends.google.GoogleOAuth2Backend',
         'fusionbox.auth.backends.CustomModelBackend',
