@@ -80,7 +80,7 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -146,13 +146,15 @@ SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/account/edit/'
 SOCIAL_AUTH_CREATE_USERS = True
 
 SOCIAL_AUTH_USER_MODEL = 'accounts.User'
-CUSTOM_USER_MODEL = 'accounts.models.User'
+AUTH_USER_MODEL = 'accounts.User'
+
+DEFAULT_ACCEPT_TIME = 2 * 24 * 60 * 60
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'ladder.wsgi.application'
 
 TEMPLATE_DIRS = (
-        os.path.join(PROJECT_PATH, 'templates')
+    os.path.join(PROJECT_PATH, 'templates')
 )
 
 INSTALLED_APPS = (
