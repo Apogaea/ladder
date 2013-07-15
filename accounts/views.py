@@ -1,22 +1,22 @@
-from django.views.generic.edit import FormView
+from django.views.generic import FormView, CreateView, TemplateView
 from django.contrib import messages
-from django.views.generic.base import TemplateView
 from django.core.urlresolvers import reverse_lazy
 
-from accounts.forms import UserForm
+from authtools.views import LoginRequiredMixin
 
-from authtools.views import LoginRequired
+from accounts.forms import UserChangeForm, UserCreationForm
+from accounts.models import User
 
 
-class DashboardView(LoginRequired, TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/dashboard.html'
 
 dashboard = DashboardView.as_view()
 
 
-class EditAccountView(LoginRequired, FormView):
+class EditAccountView(LoginRequiredMixin, FormView):
     template_name = 'accounts/account_edit.html'
-    form_class = UserForm
+    form_class = UserChangeForm
     success_url = reverse_lazy('dashboard')
 
     def get_form_kwargs(self):
@@ -34,3 +34,18 @@ class EditAccountView(LoginRequired, FormView):
 
 
 account_edit = EditAccountView.as_view()
+
+
+class RegisterView(CreateView):
+    template_name = 'accounts/register.html'
+    model = User
+    form_class = UserCreationForm
+    success_url = reverse_lazy('register_success')
+
+register = RegisterView.as_view()
+
+
+class RegistrationSuccess(TemplateView):
+    template_name = 'accounts/register_success.html'
+
+register_success = RegistrationSuccess.as_view()

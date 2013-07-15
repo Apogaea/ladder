@@ -19,7 +19,7 @@ twilio_client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AU
 
 
 class TicketRequest(behaviors.Timestampable, behaviors.QuerySetManagerModel):
-    user = models.ForeignKey(User, related_name='requests')
+    user = models.ForeignKey(User, related_name='ticket_requests')
     message = models.TextField(max_length=1000)
 
     is_cancelled = models.BooleanField(blank=True, default=False)
@@ -49,7 +49,7 @@ class TicketRequest(behaviors.Timestampable, behaviors.QuerySetManagerModel):
 
 
 class TicketOffer(behaviors.Timestampable, behaviors.QuerySetManagerModel):
-    user = models.ForeignKey(User, related_name='listings')
+    user = models.ForeignKey(User, related_name='ticket_offers')
 
     is_automatch = models.BooleanField(blank=True, default=True)
     is_cancelled = models.BooleanField(blank=True, default=False)
@@ -113,7 +113,7 @@ class LadderProfile(behaviors.QuerySetManagerModel):
         return latest.can_send
 
     @property
-    def can_list_ticket(self):
+    def can_offer_ticket(self):
         if self.verified_at is None:
             return False
         if self.requests.is_active().exists():

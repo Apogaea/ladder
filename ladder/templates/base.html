@@ -24,10 +24,18 @@
 <body>
   <div class="navbar">
     <div class="navbar-inner">
-      <a class="brand" href="#">Ladder</a>
+      <a class="brand" href="{% url 'site_index' %}">Ladder</a>
       <ul class="nav">
-        <li><a href="{% url 'site_index' %}">Home</a></li>
-        <li><a href="#">Link</a></li>
+        {% if user.is_authenticated %}
+          {% if user.ladder_profile.can_request_ticket %}
+            <li><a href="{% url 'request_create' %}">Request a ticket</a></li>
+          {% endif %}
+          {% if user.ladder_profile.can_offer_ticket %}
+            <li><a href="{% url 'offer_create' %}">Offer a ticket</a></li>
+          {% endif %}
+        {% else %}
+          <li><a href="{% url 'register' %}">Register</a></li>
+        {% endif %}
       </ul>
       {% if user.is_authenticated %}
       {% else %}
@@ -37,7 +45,6 @@
            {% csrf_token %}
           <button type="submit" class="btn">Log In</button>
         </form>
-        <a href="{% url 'socialauth_begin' 'google-oauth2' %}">Google</a>
       {% endif %}
     </div>
   </div>
