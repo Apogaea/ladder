@@ -18,3 +18,4 @@ static
 django-storages
 boto
 django-localflavor-us==1.1
+django-s3-folder-storage==0.1
