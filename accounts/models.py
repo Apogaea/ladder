@@ -1,10 +1,6 @@
-import datetime
-
 from django.db import models
-from django.db.models import F
-from django.db.models.query import QuerySet
-from django.conf import settings
-from django.utils import timezone
+
+from django_localflavor_us import models as us_models
 
 from fusionbox import behaviors
 
@@ -29,27 +25,9 @@ class User(behaviors.QuerySetManagerModel, behaviors.Timestampable, AbstractEmai
     def __unicode__(self):
         return self.display_name
 
-    def validate(self, code):
-        assert code
-        if self.codes.active().filter(code=code):
-            self.is_verified = True
-            self.verified_at = timezone.now()
-            self.save()
-            return True
-        else:
-            self.codes.update(attempts=F('attempts') + 1)
-            return False
-
     #|
     #|  Permission Shortcuts
     #|
-    @property
-    def can_send_code(self):
-        if not self.codes.exists():
-            return False
-        latest = self.codes.latest('sent_at')
-        return latest.can_send
-
     @property
     def can_list_ticket(self):
         if not self.is_verified:
@@ -65,62 +43,3 @@ class User(behaviors.QuerySetManagerModel, behaviors.Timestampable, AbstractEmai
         if self.listings.active().exists():
             return False
         return True
-
-
-class PhoneVerification(behaviors.QuerySetManagerModel, behaviors.Timestampable):
-    user = models.ForeignKey(User, related_name='codes', editable=False)
-    phone_number = us_models.PhoneNumberField("Phone Number", max_length=255, blank=True)
-    code = models.CharField(max_length=255, blank=True, editable=False)
-
-    attempts = models.PositiveIntegerField(default=0, blank=True, editable=False)
-    sent_at = models.DateTimeField(blank=True, null=True, editable=False)
-
-    class Meta:
-        ordering = ('-sent_at',)
-        get_latest_by = 'created_at'
-
-    class QuerySet(QuerySet):
-        def active(self):
-            expire_cutoff = timezone.now() - datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES)
-            return self.filter(
-                    sent_at__gte=expire_cutoff,
-                    attempts__lte=settings.TWILIO_CODE_MAX_ATTEMPTS,
-                    phone_number=F('user__phone_number'),
-                    )
-
-    def save(self, *args, **kwargs):
-        if not self.id and not self.code:
-            self.phone_number = self.user.phone_number
-            self.set_code()
-        super(PhoneVerification, self).save(*args, **kwargs)
-
-    def set_code(self):
-        hasher = hashlib.md5()
-        # TODO make this more secure
-        hash_string = '{user.user_ptr_id}:{user.id}:{timestamp}'.format(
-                user=self.user,
-                timestamp=time.time(),
-                )
-        hasher.update(hash_string)
-        code = hasher.hexdigest().__hash__() % (10 ** settings.ACTIVATION_CODE_LENGTH)
-        self.code = '{0:0' + str(settings.ACTIVATION_CODE_LENGTH) + 'd}'.format(code)
-
-    def send(self):
-        send_sms.delay(
-                to=self.user.phone_number,
-                from_='+12404282876',
-                body='Apogaea Ladder Verification Code: "{code}"'.format(code=self.code),
-                )
-        self.sent_at = timezone.now()
-        self.save()
-
-    @property
-    def can_send(self):
-        # Sanity check
-        if not self.phone_number == self.user.phone_number:
-            assert False
-        if self.sent_at:
-            resend_time = self.sent_at + datetime.timedelta(minutes=settings.TWILIO_RESEND_MINUTES)
-            return timezone.now() < resend_time
-        else:
-            return True
