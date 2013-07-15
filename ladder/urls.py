@@ -9,12 +9,11 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    url('^robots.txt$', 'django.views.generic.simple.direct_to_template', {'template': 'robots.txt', 'mimetype': 'text/plain'}),
-    # url('^sitemap.xml$', 'django.views.generic.simple.direct_to_template', {'template': 'sitemap.xml', 'mimetype': 'application/xml'}),
+    #url('^robots.txt$', 'django.views.generic.simple.direct_to_template', {'template': 'robots.txt', 'mimetype': 'text/plain'}),
+    #url('^sitemap.xml$', 'django.views.generic.simple.direct_to_template', {'template': 'sitemap.xml', 'mimetype': 'application/xml'}),
 
     # Site Urls
     url(r'^$', 'ladder.views.index', name='site_index'),
-    #url(r'^ladder/', include('ladder.foo.urls')),
 )
 
 # Auth Urls
@@ -38,12 +37,7 @@ urlpatterns += patterns(
     # Exchange Urls
     url(r'^exchange/', include('exchange.urls')),
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Social Auth Urls
-    url(r'', include('social_auth.urls')),
-
+    # Admin Site
     url(r'^admin/', include(admin.site.urls)),
 )
 

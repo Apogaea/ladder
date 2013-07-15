@@ -1,21 +1,22 @@
 import datetime
 import hashlib
-import time
 
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from django.conf import settings
 from django.db.models import F
-from django.contrib.localflavor.us import models as us_models
+from django_localflavor_us import models as us_models
 
 from fusionbox import behaviors
+
 from twilio.rest import TwilioRestClient
 
 from accounts.models import User
 
 
 twilio_client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+
 
 class TicketRequest(behaviors.Timestampable, behaviors.QuerySetManagerModel):
     user = models.ForeignKey(User, related_name='requests')
@@ -96,8 +97,9 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
 
 
 class LadderProfile(behaviors.QuerySetManagerModel):
+    user = models.OneToOneField('accounts.User', related_name='ladder_profile')
     phone_number = us_models.PhoneNumberField("Phone Number", max_length=255,
-            help_text=u"US Phone Number (XXX-XXX-XXXX)")
+                                              help_text=u"US Phone Number (XXX-XXX-XXXX)")
     verified_at = models.DateTimeField(blank=True, null=True)
 
     #|
@@ -143,10 +145,10 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
         def active(self):
             expire_cutoff = timezone.now() - datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES)
             return self.filter(
-                    last_sent_at__gte=expire_cutoff,
-                    attempts__lte=settings.TWILIO_CODE_MAX_ATTEMPTS,
-                    phone_number=F('user__phone_number'),
-                    )
+                last_sent_at__gte=expire_cutoff,
+                attempts__lte=settings.TWILIO_CODE_MAX_ATTEMPTS,
+                phone_number=F('user__phone_number'),
+            )
 
         # TODO: get this code out of the model.
         def validate(self, code):
@@ -166,9 +168,9 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
         hasher = hashlib.sha256()
         # TODO make this more secure
         hash_string = '{user.pk}:{user.created_at}:{self.pk}:{self.created_at}'.format(
-                self=self,
-                user=self.user,
-                )
+            self=self,
+            user=self.user,
+        )
         hasher.update(hash_string)
         code = hasher.hexdigest().__hash__() % 1000000
         self.code = '{0:06d}'.format(code)

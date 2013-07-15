@@ -32,6 +32,7 @@ class CreateOfferView(LoginRequired, CreateView):
         listing = form.save(commit=False)
         listing.user = self.request.user
         listing.save()
+        # TODO: auto match if `is_automatch`
         messages.success(self.request, "Your listing has been created.")
 
         return HttpResponseSeeOther(listing.get_absolute_url())
