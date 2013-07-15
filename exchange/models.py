@@ -2,11 +2,13 @@ import datetime
 import hashlib
 
 from django.db import models
+from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from django.conf import settings
 from django.db.models import F
 from django_localflavor_us import models as us_models
+from django.utils.functional import cached_property
 
 from fusionbox import behaviors
 
@@ -14,56 +16,94 @@ from twilio.rest import TwilioRestClient
 
 from accounts.models import User
 
-
 twilio_client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
 
-class TicketRequest(behaviors.Timestampable, behaviors.QuerySetManagerModel):
-    user = models.ForeignKey(User, related_name='ticket_requests')
-    message = models.TextField(max_length=1000)
+def default_match_expiration():
+    return timezone.now() + datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
 
+
+class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
     is_cancelled = models.BooleanField(blank=True, default=False)
     is_terminated = models.BooleanField(blank=True, default=False)
 
+    class Meta:
+        abstract = True
+
     class QuerySet(QuerySet):
         def is_fulfilled(self):
-            pass
+            return self.filter(
+                matches__accepted_at__isnull=False,
+                matches__is_terminated=False,
+            )
 
-        def is_reserved(sefl):
-            pass
+        def is_reserved(self):
+            return self.exclude(
+                matches__accepted_at__isnull=False,
+                matches__is_terminated=False,
+            ).filter(
+                matches__accepted_at__isnull=True,
+                matches__created_at__lt=timezone.now() - datetime.timezone(seconds=settings.DEFAULT_ACCEPT_TIME),
+                matches__is_terminated=False,
+            )
 
         def is_active(self):
-            pass
+            return self.exclude(
+                Q(is_cancelled=True) | Q(is_terminated=True)
+            ).exclude(
+                Q(
+                    matches__accepted_at__isnull=False,
+                    matches__is_terminated=False,
+                ) | Q(
+                    matches__accepted_at__isnull=True,
+                    matches__is_terminated=False,
+                    matches__created_at__lt=timezone.now() - datetime.timezone(seconds=settings.DEFAULT_ACCEPT_TIME),
+                )
+            )
+
+    @cached_property
+    def is_fulfilled(self):
+        return self.filter(
+            accepted_at__isnull=False,
+            is_terminated=False,
+        ).exists()
+
+    @cached_property
+    def is_reserved(self):
+        return self.matches.filter(
+            accepted_at__isnull=True,
+            is_terminated=False,
+            created_at__lt=timezone.now() - datetime.timezone(seconds=settings.DEFAULT_ACCEPT_TIME),
+        ).exists()
+
+    @cached_property
+    def is_active(self):
+        if self.is_cancelled or self.is_terminated:
+            return False
+        return not self.matches.filter(
+            Q(
+                accepted_at__isnull=True,
+                is_terminated=False,
+                created_at__lt=timezone.now() - datetime.timezone(seconds=settings.DEFAULT_ACCEPT_TIME),
+            ) | Q(
+                accepted_at__isnull=False,
+                is_terminated=False,
+            )
+        )
+
+
+class TicketRequest(BaseMatchModel):
+    user = models.ForeignKey(User, related_name='ticket_requests')
+    message = models.TextField(max_length=1000)
 
     class Meta:
         ordering = ('created_at',)
 
-    def is_reserved(self):
-        pass
 
-    def is_fulfilled(self):
-        pass
-
-    def is_active(self):
-        pass
-
-
-class TicketOffer(behaviors.Timestampable, behaviors.QuerySetManagerModel):
+class TicketOffer(BaseMatchModel):
     user = models.ForeignKey(User, related_name='ticket_offers')
 
     is_automatch = models.BooleanField(blank=True, default=True)
-    is_cancelled = models.BooleanField(blank=True, default=False)
-    is_terminated = models.BooleanField(blank=True, default=False)
-
-    class QuerySet(QuerySet):
-        def is_fulfilled(self):
-            pass
-
-        def is_reserved(sefl):
-            pass
-
-        def is_active(self):
-            pass
 
     class Meta:
         ordering = ('created_at',)
@@ -72,26 +112,12 @@ class TicketOffer(behaviors.Timestampable, behaviors.QuerySetManagerModel):
     def get_absolute_url(self):
         return ('exchange.views.listing_detail', [], {'pk': self.pk})
 
-    def is_reserved(self):
-        pass
-
-    def is_fulfilled(self):
-        pass
-
-    def is_active(self):
-        pass
-
-
-def default_match_expiration():
-    return timezone.now() + datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
-
 
 class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
     ticket_request = models.ForeignKey('TicketRequest', related_name='matches')
     ticket_offer = models.ForeignKey('TicketOffer', related_name='matches')
 
-    expires_at = models.DateTimeField(default=default_match_expiration)
-    is_accepted = models.BooleanField(default=False, blank=True)
+    accepted_at = models.DateTimeField(null=True)
 
     is_terminated = models.BooleanField(default=False, blank=True)
 

@@ -1,6 +1,5 @@
 from django.views.generic import DetailView, CreateView, UpdateView, ListView
 from django.contrib import messages
-from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
