@@ -27,6 +27,8 @@
       <a class="brand" href="{% url 'site_index' %}">Ladder</a>
       <ul class="nav">
         {% if user.is_authenticated %}
+          <li><a href="{% url 'dashboard' %}">Account Dashboard</a></li>
+          <li><a href="{% url 'logout' %}">Logout</a></li>
           {% if user.ladder_profile.can_request_ticket %}
             <li><a href="{% url 'request_create' %}">Request a ticket</a></li>
           {% endif %}
