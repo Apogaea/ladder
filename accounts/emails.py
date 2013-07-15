@@ -61,7 +61,7 @@ class RegistrationVerificationEmail(UserTokenEmailMixin, LadderEmail):
         user = self.get_user()
         kwargs.update({
             'user': user,
-            'reset_url': self.reverse_token_url('accounts.views.verify_email'),
+            'verify_url': self.reverse_token_url('accounts.views.verify_email'),
         })
         return kwargs
 

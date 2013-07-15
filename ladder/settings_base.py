@@ -126,11 +126,6 @@ TWILIO_RESEND_MINUTES = 60
 
 ACTIVATION_CODE_LENGTH = 6
 
-AUTHENTICATION_BACKENDS = (
-        'social_auth.backends.google.GoogleOAuth2Backend',
-        'fusionbox.auth.backends.CustomModelBackend',
-        )
-
 # The name that google displays in the 'allow authentication' screen
 GOOGLE_DISPLAY_NAME = 'Apogaea Ticket Exchange'
 

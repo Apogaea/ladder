@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="row">
+    <div class="span4 offset4">
+      {% if valid_token %}
+        <p>Set your account password</p>
+        <form method="post" class="well">
+          {% include 'form_as_fieldsets.html' %}
+          <button type="submit">Continue</button>
+        </form>
+      {% else %}
+        <p>It appears you are using an expired or invalid registration
+        confirmation link.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
