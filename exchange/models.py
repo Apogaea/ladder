@@ -9,6 +9,8 @@ from django.conf import settings
 from django.db.models import F
 from django_localflavor_us import models as us_models
 from django.utils.functional import cached_property
+from django.core.urlresolvers import reverse
+from django.utils import crypto
 
 from fusionbox import behaviors
 
@@ -81,13 +83,15 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
     def is_active(self):
         if self.is_cancelled or self.is_terminated:
             return False
-        return not self.matches.exclude(
-            accepted_at__isnull=False,
-            is_terminated=False,
-        ).exclude(
-            accepted_at__isnull=True,
-            is_terminated=False,
-            created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+        return not self.matches.filter(
+            Q(
+                accepted_at__isnull=False,
+                is_terminated=False,
+            ) | Q(
+                accepted_at__isnull=True,
+                is_terminated=False,
+                created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            )
         ).exists()
 
 
@@ -98,6 +102,9 @@ class TicketRequest(BaseMatchModel):
     class Meta:
         ordering = ('created_at',)
 
+    def get_absolute_url(self):
+        return reverse('exchange.views.request_detail', kwargs={'pk': self.pk})
+
 
 class TicketOffer(BaseMatchModel):
     user = models.ForeignKey(User, related_name='ticket_offers')
@@ -107,9 +114,8 @@ class TicketOffer(BaseMatchModel):
     class Meta:
         ordering = ('created_at',)
 
-    @models.permalink
     def get_absolute_url(self):
-        return ('exchange.views.listing_detail', [], {'pk': self.pk})
+        return reverse('exchange.views.offer_detail', kwargs={'pk': self.pk})
 
 
 class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
@@ -120,12 +126,23 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
 
     is_terminated = models.BooleanField(default=False, blank=True)
 
+    def get_absolute_url(self):
+        return reverse('exchange.views.match_detail', kwargs={'pk': self.pk})
+
 
 class LadderProfile(behaviors.QuerySetManagerModel):
     user = models.OneToOneField('accounts.User', related_name='ladder_profile')
     phone_number = us_models.PhoneNumberField("Phone Number", max_length=255,
                                               help_text=u"US Phone Number (XXX-XXX-XXXX)")
     verified_at = models.DateTimeField(blank=True, null=True)
+
+    class QuerySet(QuerySet):
+        def is_verified(self):
+            return self.filter(verified_at__isnull=False)
+
+    @cached_property
+    def is_verified(self):
+        return not self.verified_at is None
 
     #|
     #|  Permission Shortcuts
@@ -141,7 +158,9 @@ class LadderProfile(behaviors.QuerySetManagerModel):
     def can_offer_ticket(self):
         if self.verified_at is None:
             return False
-        if self.requests.is_active().exists():
+        elif self.ticket_requests.is_active().exists():
+            return False
+        elif self.ticket_requests.is_reserved().exists():
             return False
         return True
 
@@ -149,15 +168,30 @@ class LadderProfile(behaviors.QuerySetManagerModel):
     def can_request_ticket(self):
         if self.verified_at is None:
             return False
-        if self.listings.is_active().exists():
+        elif self.ticket_requests.is_active().exists():
+            return False
+        elif self.ticket_requests.is_reserved().exists():
             return False
         return True
+
+
+def get_a_verification_code(self):
+    """
+    Uses `get_random_string` from `django.utils.crypto` to generate a
+    random string of characters which are then converted to a 6-digit
+    numeric code padded with zeros.
+    """
+    random_string = crypto.get_random_string(50, 'abcdefghijklmnopqrstuvwxyz0123456789')
+    code = hash(random_string) % 1000000
+    return '{0:06d}'.format(code)
 
 
 class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
     user = models.ForeignKey('LadderProfile', related_name='codes')
     phone_number = us_models.PhoneNumberField("Phone Number", max_length=255, blank=True)
-    confirmation_code = models.CharField(max_length=255, blank=True, editable=False)
+    confirmation_code = models.CharField(max_length=255, blank=True,
+                                         editable=False,
+                                         default=get_a_verification_code)
 
     attempts = models.PositiveIntegerField(default=0, blank=True)
     last_sent_at = models.DateTimeField(blank=True, null=True, editable=False)
@@ -167,40 +201,14 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
         get_latest_by = 'created_at'
 
     class QuerySet(QuerySet):
-        def active(self):
-            expire_cutoff = timezone.now() - datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES)
+        def is_verified(self):
             return self.filter(
-                last_sent_at__gte=expire_cutoff,
-                attempts__lte=settings.TWILIO_CODE_MAX_ATTEMPTS,
+                last_sent_at__gt=timezone.now() - datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES),
+                attempts__lt=settings.TWILIO_CODE_MAX_ATTEMPTS,
                 phone_number=F('user__phone_number'),
             )
 
-        # TODO: get this code out of the model.
-        def validate(self, code):
-            assert code
-            if self.active().filter(code=code):
-                return True
-            else:
-                return False
-
-    def save(self, *args, **kwargs):
-        if not self.id and not self.code:
-            self.phone_number = self.user.phone_number
-            self.set_code()
-        super(PhoneNumber, self).save(*args, **kwargs)
-
-    def set_code(self):
-        hasher = hashlib.sha256()
-        # TODO make this more secure
-        hash_string = '{user.pk}:{user.created_at}:{self.pk}:{self.created_at}'.format(
-            self=self,
-            user=self.user,
-        )
-        hasher.update(hash_string)
-        code = hasher.hexdigest().__hash__() % 1000000
-        self.code = '{0:06d}'.format(code)
-
-    def send(self):
+    def send_sms(self):
         twilio_client.sms.messages.create(
             to=self.user.phone_number,
             from_='+12404282876',
@@ -213,10 +221,10 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
     @property
     def can_send(self):
         # Sanity check
-        if not self.phone_number == self.user.phone_number:
-            assert False
-        if self.sent_at:
+        if self.attempts >= settings.TWILIO_CODE_MAX_ATTEMPTS:
+            return False
+        if self.last_sent_at:
             resend_time = self.last_sent_at + datetime.timedelta(minutes=settings.TWILIO_RESEND_MINUTES)
-            return timezone.now() < resend_time
+            return timezone.now() > resend_time
         else:
             return True

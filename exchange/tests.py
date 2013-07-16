@@ -52,21 +52,21 @@ class TestTicketRequestQueries(TestCase):
         request = TicketRequest.objects.create(user=self.user1, is_cancelled=True)
         offer = TicketOffer.objects.create(user=self.user2, is_cancelled=True)
 
-        self.assertIn(request, TicketRequest.objects.is_active())
-        self.assertTrue(request.is_active)
+        self.assertNotIn(request, TicketRequest.objects.is_active())
+        self.assertFalse(request.is_active)
 
-        self.assertIn(offer, TicketOffer.objects.is_active())
-        self.assertTrue(offer.is_active)
+        self.assertNotIn(offer, TicketOffer.objects.is_active())
+        self.assertFalse(offer.is_active)
 
     def test_request_and_offer_termination(self):
         request = TicketRequest.objects.create(user=self.user1, is_terminated=True)
         offer = TicketOffer.objects.create(user=self.user2, is_terminated=True)
 
-        self.assertIn(request, TicketRequest.objects.is_active())
-        self.assertTrue(request.is_active)
+        self.assertNotIn(request, TicketRequest.objects.is_active())
+        self.assertFalse(request.is_active)
 
-        self.assertIn(offer, TicketOffer.objects.is_active())
-        self.assertTrue(offer.is_active)
+        self.assertNotIn(offer, TicketOffer.objects.is_active())
+        self.assertFalse(offer.is_active)
 
     def test_is_reserved(self):
         request = TicketRequest.objects.create(user=self.user1)
@@ -91,6 +91,9 @@ class TestTicketRequestQueries(TestCase):
         self.assertFalse(offer.is_fulfilled)
 
         with patch_now(timezone.now() + datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME + 1)):
+            # Using cached_propertys so we need to refetch them.
+            request = TicketRequest.objects.get(pk=request.pk)
+            offer = TicketOffer.objects.get(pk=offer.pk)
             self.assertIn(request, TicketRequest.objects.is_active())
             self.assertTrue(request.is_active)
             self.assertNotIn(request, TicketRequest.objects.is_reserved())
