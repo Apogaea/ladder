@@ -8,8 +8,32 @@ from django.core.urlresolvers import reverse
 
 from authtools.views import LoginRequiredMixin
 
-from exchange.models import TicketOffer, TicketRequest, TicketMatch
+from exchange.models import (
+    TicketOffer, TicketRequest, TicketMatch, PhoneNumber
+)
 from exchange.forms import TicketOfferForm, TicketRequestForm, AcceptTicketOfferForm
+
+
+class CreatePhoneNumberView(LoginRequiredMixin, CreateView):
+    """
+    Presents the user with a form to add a new phone number to their account.
+    """
+    template_name = 'exchange/account/phone_number_form.html'
+    model = PhoneNumber
+
+    def get_success_url(self):
+        return reverse('verify_phone_number', kwargs={'pk': self.object.pk})
+
+    def form_valid(self, form):
+        form.instance.profile = self.request.user.ladder_profile
+        return super(CreatePhoneNumberView, self).form_valid()
+
+create_phone_number = CreatePhoneNumberView.as_view()
+
+
+class VerifyPhoneNumberView(LoginRequiredMixin, UpdateView):
+    # TODO
+    pass
 
 
 class CreateOfferView(LoginRequiredMixin, CreateView):

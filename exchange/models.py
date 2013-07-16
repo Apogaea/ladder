@@ -3,6 +3,7 @@ import hashlib
 
 from django.db import models
 from django.db.models import Q
+from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from django.conf import settings
@@ -132,24 +133,22 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
 
 class LadderProfile(behaviors.QuerySetManagerModel):
     user = models.OneToOneField('accounts.User', related_name='ladder_profile')
-    phone_number = us_models.PhoneNumberField("Phone Number", max_length=255,
-                                              help_text=u"US Phone Number (XXX-XXX-XXXX)")
-    verified_at = models.DateTimeField(blank=True, null=True)
+    verified_phone_number = models.ForeignKey('exchange.PhoneNumber', null=True, editable=False)
 
     class QuerySet(QuerySet):
         def is_verified(self):
-            return self.filter(verified_at__isnull=False)
+            return self.filter(verified_phone_number__isnull=False)
 
     @cached_property
     def is_verified(self):
-        return not self.verified_at is None
+        return not self.verified_phone_number is None
 
     #|
     #|  Permission Shortcuts
     #|
     @property
     def can_send_code(self):
-        if not self.codes.exists():
+        if not self.phone_numbers.exists():
             return False
         latest = self.codes.latest('last_sent_at')
         return latest.can_send
@@ -175,6 +174,15 @@ class LadderProfile(behaviors.QuerySetManagerModel):
         return True
 
 
+def create_ladder_profile(sender, instance, created, raw, **kwargs):
+    if created and not raw:
+        LadderProfile.objects.get_or_create(user=instance)
+
+# Connect to the post_save signal of our `User` model to create a blank
+# LadderProfile.
+post_save.connect(create_ladder_profile, sender=User)
+
+
 def get_a_verification_code(self):
     """
     Uses `get_random_string` from `django.utils.crypto` to generate a
@@ -187,8 +195,10 @@ def get_a_verification_code(self):
 
 
 class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
-    user = models.ForeignKey('LadderProfile', related_name='codes')
-    phone_number = us_models.PhoneNumberField("Phone Number", max_length=255, blank=True)
+    profile = models.ForeignKey('LadderProfile', related_name='phone_numbers')
+    phone_number = us_models.PhoneNumberField("Phone Number", max_length=255,
+                                              help_text=u"US Phone Number (XXX-XXX-XXXX)")
+    verified_at = models.DateTimeField(null=True, editable=False)
     confirmation_code = models.CharField(max_length=255, blank=True,
                                          editable=False,
                                          default=get_a_verification_code)
@@ -202,15 +212,30 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
 
     class QuerySet(QuerySet):
         def is_verified(self):
+            return self.filter(verified_at__isnull=False)
+
+        def is_verifiable(self):
             return self.filter(
+                verified_at__isnull=True,
                 last_sent_at__gt=timezone.now() - datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES),
                 attempts__lt=settings.TWILIO_CODE_MAX_ATTEMPTS,
-                phone_number=F('user__phone_number'),
             )
+
+    @property
+    def is_verified(self):
+        return self.verified_at is not None
+
+    @property
+    def is_verifiable(self):
+        if self.is_verified:
+            return False
+        if self.attempts >= settings.TWILIO_CODE_MAX_ATTEMPTS:
+            return False
+        return True
 
     def send_sms(self):
         twilio_client.sms.messages.create(
-            to=self.user.phone_number,
+            to=self.phone_number,
             from_='+12404282876',
             body='Apogaea Ladder Verification Code: "{code}"'.format(code=self.code),
         )
@@ -220,8 +245,7 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
 
     @property
     def can_send(self):
-        # Sanity check
-        if self.attempts >= settings.TWILIO_CODE_MAX_ATTEMPTS:
+        if not self.is_verifiable:
             return False
         if self.last_sent_at:
             resend_time = self.last_sent_at + datetime.timedelta(minutes=settings.TWILIO_RESEND_MINUTES)
