@@ -20,3 +20,4 @@ boto
 django-localflavor-us==1.1
 django-s3-folder-storage==0.1
 psycopg2==2.4.2
+mock==1.0.1

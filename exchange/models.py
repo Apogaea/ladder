@@ -43,7 +43,7 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
                 matches__is_terminated=False,
             ).filter(
                 matches__accepted_at__isnull=True,
-                matches__created_at__lt=timezone.now() - datetime.timezone(seconds=settings.DEFAULT_ACCEPT_TIME),
+                matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
                 matches__is_terminated=False,
             )
 
@@ -51,45 +51,44 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
             return self.exclude(
                 Q(is_cancelled=True) | Q(is_terminated=True)
             ).exclude(
-                Q(
-                    matches__accepted_at__isnull=False,
-                    matches__is_terminated=False,
-                ) | Q(
-                    matches__accepted_at__isnull=True,
-                    matches__is_terminated=False,
-                    matches__created_at__lt=timezone.now() - datetime.timezone(seconds=settings.DEFAULT_ACCEPT_TIME),
-                )
+                matches__accepted_at__isnull=True,
+                matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+                matches__is_terminated=False,
+            ).exclude(
+                matches__accepted_at__isnull=False,
+                matches__is_terminated=False,
             )
 
     @cached_property
     def is_fulfilled(self):
-        return self.filter(
+        return self.matches.filter(
             accepted_at__isnull=False,
             is_terminated=False,
         ).exists()
 
     @cached_property
     def is_reserved(self):
-        return self.matches.filter(
+        return self.matches.exclude(
+            accepted_at__isnull=False,
+            is_terminated=False,
+        ).filter(
             accepted_at__isnull=True,
             is_terminated=False,
-            created_at__lt=timezone.now() - datetime.timezone(seconds=settings.DEFAULT_ACCEPT_TIME),
+            created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
         ).exists()
 
     @cached_property
     def is_active(self):
         if self.is_cancelled or self.is_terminated:
             return False
-        return not self.matches.filter(
-            Q(
-                accepted_at__isnull=True,
-                is_terminated=False,
-                created_at__lt=timezone.now() - datetime.timezone(seconds=settings.DEFAULT_ACCEPT_TIME),
-            ) | Q(
-                accepted_at__isnull=False,
-                is_terminated=False,
-            )
-        )
+        return not self.matches.exclude(
+            accepted_at__isnull=False,
+            is_terminated=False,
+        ).exclude(
+            accepted_at__isnull=True,
+            is_terminated=False,
+            created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+        ).exists()
 
 
 class TicketRequest(BaseMatchModel):

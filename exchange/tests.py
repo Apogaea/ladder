@@ -32,7 +32,7 @@ class TestTicketRequestQueries(TestCase):
 
     def test_is_active(self):
         request = TicketRequest.objects.create(user=self.user1)
-        offer = TicketRequest.objects.creaet(user=self.user2)
+        offer = TicketOffer.objects.create(user=self.user2)
 
         self.assertIn(request, TicketRequest.objects.is_active())
         self.assertTrue(request.is_active)
@@ -50,7 +50,7 @@ class TestTicketRequestQueries(TestCase):
 
     def test_request_and_offer_cancellation(self):
         request = TicketRequest.objects.create(user=self.user1, is_cancelled=True)
-        offer = TicketRequest.objects.creaet(user=self.user2, is_cancelled=True)
+        offer = TicketOffer.objects.create(user=self.user2, is_cancelled=True)
 
         self.assertIn(request, TicketRequest.objects.is_active())
         self.assertTrue(request.is_active)
@@ -60,7 +60,7 @@ class TestTicketRequestQueries(TestCase):
 
     def test_request_and_offer_termination(self):
         request = TicketRequest.objects.create(user=self.user1, is_terminated=True)
-        offer = TicketRequest.objects.creaet(user=self.user2, is_terminated=True)
+        offer = TicketOffer.objects.create(user=self.user2, is_terminated=True)
 
         self.assertIn(request, TicketRequest.objects.is_active())
         self.assertTrue(request.is_active)
@@ -70,9 +70,9 @@ class TestTicketRequestQueries(TestCase):
 
     def test_is_reserved(self):
         request = TicketRequest.objects.create(user=self.user1)
-        offer = TicketRequest.objects.creaet(user=self.user2)
+        offer = TicketOffer.objects.create(user=self.user2)
         TicketMatch.objects.create(
-            ticket_requests=request,
+            ticket_request=request,
             ticket_offer=offer,
         )
 
@@ -107,9 +107,9 @@ class TestTicketRequestQueries(TestCase):
 
     def test_terminated_reservation(self):
         request = TicketRequest.objects.create(user=self.user1)
-        offer = TicketRequest.objects.creaet(user=self.user2)
+        offer = TicketOffer.objects.create(user=self.user2)
         TicketMatch.objects.create(
-            ticket_requests=request,
+            ticket_request=request,
             ticket_offer=offer,
             is_terminated=True,
         )
@@ -130,9 +130,9 @@ class TestTicketRequestQueries(TestCase):
 
     def test_is_fullfilled(self):
         request = TicketRequest.objects.create(user=self.user1)
-        offer = TicketRequest.objects.creaet(user=self.user2)
+        offer = TicketOffer.objects.create(user=self.user2)
         TicketMatch.objects.create(
-            ticket_requests=request,
+            ticket_request=request,
             ticket_offer=offer,
             accepted_at=timezone.now()
         )
