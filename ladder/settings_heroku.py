@@ -10,9 +10,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Allow all host headers
 ALLOWED_HOSTS = ['*']
 
+import os
 # Amazon S3 Stuff
-AWS_ACCESS_KEY_ID = 'AKIAIQ3JWY6YCMRCXPDA'
-AWS_SECRET_ACCESS_KEY = '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'
+# These values should be set as environment variables for Heroku.
+AWS_ACCESS_KEY_ID = os.environ.setdefault("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.setdefault("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = 'apo-ladder'
 
 # S3 Storage Stuff
@@ -30,3 +32,7 @@ COMPRESS_URL = '//s3.amazonaws.com/{0}/'.format(AWS_STORAGE_BUCKET_NAME)
 STATIC_URL = COMPRESS_URL
 
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
+
+# Twilio credentials
+TWILIO_ACCOUNT_SID = os.environ.setdefault("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.setdefault("TWILIO_AUTH_TOKEN")
