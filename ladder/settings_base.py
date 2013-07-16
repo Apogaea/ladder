@@ -83,8 +83,26 @@ STATICFILES_FINDERS = (
     #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '9p=xzq1kk(h(4mpxag(^&amp;i=hf#4zt3#!)06ofd%8y@@g+5o+&amp;c'
+# Secret key generation that is the same as django uses in startproject.
+from django.utils.crypto import get_random_string
+
+
+def generate_secret_key():
+    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+    return get_random_string(50, chars)
+
+# Generate secret key file that is unique for each installation.  This way we
+# don't have to worry about having the key in github.
+try:
+    from secret_key import SECRET_KEY
+except ImportError:
+    SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
+    with open(os.path.join(SETTINGS_DIR, 'secret_key.py'), 'w') as secret_key_file:
+        secret_key_file.write("SECRET_KEY = '{0}'".format(generate_secret_key()))
+
+    from secret_key import SECRET_KEY  # NOQA
+
+#SECRET_KEY = '9p=xzq1kk(h(4mpxag(^&amp;i=hf#4zt3#!)06ofd%8y@@g+5o+&amp;c'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (

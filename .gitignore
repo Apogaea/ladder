@@ -7,4 +7,5 @@ media/*
 .sass-cache/
 tmp/
 settings_local.py
+secret_key.py
 build/
