@@ -31,17 +31,16 @@ class SelectTicketRequestForm(BaseForm):
     ticket_request = forms.ModelChoiceField(queryset=TicketRequest.objects.none())
 
 
-class AcceptTicketOfferForm(BaseModelForm):
-    """
-    This form marks a ticket match as accepted when saved.
-    """
+class NoFieldsTicketOfferForm(BaseModelForm):
     class Meta:
         model = TicketMatch
         fields = tuple()
 
-    def save(self, *args, **kwargs):
-        self.instance.accepted_at = timezone.now()
-        super(AcceptTicketOfferForm, self).save(*args, **kwargs)
+
+class NoFieldsTicketRequestForm(BaseModelForm):
+    class Meta:
+        model = TicketRequest
+        fields = tuple()
 
 
 class PhoneNumberForm(BaseModelForm):
@@ -82,7 +81,7 @@ class VerifyPhoneNumberForm(BaseModelForm):
         return super(VerifyPhoneNumberForm, self).save(*args, **kwargs)
 
 
-class SetPrimaryPhoneNumberForm(BaseModelForm):
+class NoFieldsPhoneNumberForm(BaseModelForm):
     class Meta:
         model = PhoneNumber
         fields = tuple()

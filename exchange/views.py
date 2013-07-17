@@ -2,10 +2,12 @@ from django.views.generic import (
     DetailView, CreateView, UpdateView, FormView, DeleteView,
 )
 from django.contrib import messages
+from django.db.models import Q
 from django.shortcuts import redirect, get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.core.urlresolvers import reverse, reverse_lazy
 
 from authtools.views import LoginRequiredMixin
@@ -14,8 +16,13 @@ from exchange.models import (
     TicketOffer, TicketRequest, TicketMatch, PhoneNumber
 )
 from exchange.forms import (
-    TicketOfferForm, TicketRequestForm, AcceptTicketOfferForm, PhoneNumberForm,
+    TicketOfferForm, TicketRequestForm, NoFieldsTicketOfferForm, PhoneNumberForm,
     VerifyPhoneNumberForm, SelectTicketRequestForm, SetPrimaryPhoneNumberForm,
+    NoFieldsTicketRequestForm,
+)
+from exchange.emails import (
+    send_offer_confirmation_email, send_request_fulfilled_email,
+    send_offer_accepted_email,
 )
 
 
@@ -113,10 +120,12 @@ class CreateOfferView(LoginRequiredMixin, CreateView):
             # the same time.  Two matches will be created.
             try:
                 ticket_request = TicketRequest.objects.is_active().order_by('created_at')[0]
-                TicketMatch.objects.create(
+                match = TicketMatch.objects.create(
                     ticket_offer=ticket_offer,
                     ticket_request=ticket_request,
                 )
+                # Send an email to the ticket requester with a confirmation link.
+                send_offer_confirmation_email(match)
                 messages.success(self.request, "Your ticket offer has been matched with a ticket request.")
             except IndexError:
                 messages.success(self.request, "Your ticket offer has been created and will be automatically matched to the next ticket request that enters the system")
@@ -135,6 +144,24 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
         return self.request.user.ticket_offers.all()
 
 offer_detail = OfferDetailView.as_view()
+
+
+class OfferCancelView(LoginRequiredMixin, UpdateView):
+    template_name = 'exchange/listing_detail.html'
+    model = TicketOffer
+    form_class = NoFieldsTicketOfferForm
+    context_object_name = 'ticket_offer'
+    success_url = reverse_lazy('dashboard')
+
+    def get_queryset(self):
+        return self.request.user.ticket_offers.is_active()
+
+    def form_valid(self, form):
+        form.instance.is_cancelled = True
+        messages.success(self.request, 'Your ticket offer has been cancelled')
+        return super(OfferCancelView, self).form_valid(form)
+
+offer_cancel = OfferCancelView.as_view()
 
 
 class OfferSelectRecipientView(LoginRequiredMixin, FormView):
@@ -215,7 +242,29 @@ class RequestTicketUpdateView(UpdateView):
     model = TicketRequest
     context_object_name = 'ticket_request'
 
+    def get_queryset(self):
+        return self.request.user.ticket_requests.is_active()
+
+
 request_edit = RequestTicketUpdateView.as_view()
+
+
+class RequestCancelView(UpdateView):
+    template_name = 'exchange/request_cancel.html'
+    model = TicketRequest
+    from_class = NoFieldsTicketRequestForm
+    context_object_name = 'ticket_request'
+    success_url = reverse_lazy('dashboard')
+
+    def get_queryset(self):
+        return self.request.user.ticket_requests.is_active()
+
+    def form_valid(self, form):
+        form.instance.is_cancelled = True
+        messages.success(self.request, 'Your ticket request has been cancelled')
+        return super(RequestCancelView, self).form_valid(form)
+
+request_cancel = RequestCancelView.as_view()
 
 
 class RequestDetailView(DetailView):
@@ -224,16 +273,37 @@ class RequestDetailView(DetailView):
     context_object_name = 'ticket_request'
 
     def get_queryset(self):
-        return self.request.user.ticket_requests.active()
+        return self.request.user.ticket_requests.all()
 
 request_detail = RequestDetailView.as_view()
 
 
-class AcceptTicketOfferView(UpdateView):
+class MatchDetailView(DetailView):
+    template_name = 'exchange/match_detail.html'
+    model = TicketMatch
+    context_object_name = 'ticket_match'
+
+    def get_queryset(self):
+        return TicketMatch.objects.filter(
+            Q(
+                ticket_request__user=self.request.user,
+            ) | Q(
+                ticket_offer__user=self.request.user,
+            )
+        )
+
+
+class ConfirmTicketOfferView(UpdateView):
     template_name = 'exchange/accept_ticket_offer.html'
     model = TicketMatch
-    context_object_name = 'match'
-    form_class = AcceptTicketOfferForm
+    context_object_name = 'ticket_match'
+    form_class = NoFieldsTicketOfferForm
+
+    def get_success_url(self):
+        return self.object.ticket_request.get_absolute_url()
+
+    def queryset(self):
+        return TicketMatch.objects.is_awaiting_confirmation(ticket_request__user=self.request.user)
 
     def form_valid(self, form):
         if '_reject' in self.request.POST:
@@ -246,4 +316,11 @@ class AcceptTicketOfferView(UpdateView):
             return redirect(reverse('dashboard'))
         else:
             messages.info(self.request, 'You have successfully accepted the offered ticket.')
-            return super(AcceptTicketOfferView, self).form_valid(form)
+            form.instance.accepted_at = timezone.now()
+            match = form.save()
+            # Send both users an email with info on how to get in touch with each other.
+            send_offer_accepted_email(match, match.ticket_offer.user)
+            send_request_fulfilled_email(match, match.ticket_request.user)
+            return redirect(self.get_success_url())
+
+match_confirm = ConfirmTicketOfferView.as_view()
