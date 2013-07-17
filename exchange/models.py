@@ -183,7 +183,7 @@ def create_ladder_profile(sender, instance, created, raw, **kwargs):
 post_save.connect(create_ladder_profile, sender=User)
 
 
-def get_a_verification_code(self):
+def get_a_verification_code():
     """
     Uses `get_random_string` from `django.utils.crypto` to generate a
     random string of characters which are then converted to a 6-digit
