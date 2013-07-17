@@ -1,4 +1,4 @@
-from django.views.generic import FormView, CreateView, TemplateView
+from django.views.generic import FormView, CreateView, TemplateView, UpdateView
 from django.contrib import auth
 from django.contrib import messages
 from django.utils.http import base36_to_int
@@ -29,24 +29,17 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 dashboard = DashboardView.as_view()
 
 
-class EditAccountView(LoginRequiredMixin, FormView):
+class EditAccountView(LoginRequiredMixin, UpdateView):
     template_name = 'accounts/account_edit.html'
     form_class = UserChangeForm
     success_url = reverse_lazy('dashboard')
 
-    def get_form_kwargs(self):
-        kwargs = super(EditAccountView, self).get_form_kwargs()
-        kwargs['instance'] = self.request.user
-        return kwargs
+    def get_object(self):
+        return self.request.user
 
     def form_valid(self, form):
         messages.success(self.request, "Your profile was successfully updated")
         return super(EditAccountView, self).form_valid(form)
-
-    def form_invalid(self, form):
-        messages.error(self.request, "There was an error updating your profile.  Please correct the errors below")
-        return super(EditAccountView, self).form_invalid(form)
-
 
 account_edit = EditAccountView.as_view()
 
