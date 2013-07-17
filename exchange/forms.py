@@ -80,3 +80,9 @@ class VerifyPhoneNumberForm(BaseModelForm):
     def save(self, *args, **kwargs):
         self.instance.verified_at = timezone.now()
         return super(VerifyPhoneNumberForm, self).save(*args, **kwargs)
+
+
+class SetPrimaryPhoneNumberForm(BaseModelForm):
+    class Meta:
+        model = PhoneNumber
+        fields = tuple()

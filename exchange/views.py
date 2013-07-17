@@ -1,4 +1,6 @@
-from django.views.generic import DetailView, CreateView, UpdateView, FormView
+from django.views.generic import (
+    DetailView, CreateView, UpdateView, FormView, DeleteView,
+)
 from django.contrib import messages
 from django.shortcuts import redirect, get_object_or_404
 from django.core.exceptions import PermissionDenied
@@ -13,7 +15,7 @@ from exchange.models import (
 )
 from exchange.forms import (
     TicketOfferForm, TicketRequestForm, AcceptTicketOfferForm, PhoneNumberForm,
-    VerifyPhoneNumberForm, SelectTicketRequestForm
+    VerifyPhoneNumberForm, SelectTicketRequestForm, SetPrimaryPhoneNumberForm,
 )
 
 
@@ -41,6 +43,10 @@ class VerifyPhoneNumberView(LoginRequiredMixin, UpdateView):
     model = PhoneNumber
     form_class = VerifyPhoneNumberForm
     success_url = reverse_lazy('dashboard')
+    context_object_name = 'phone_number'
+
+    def get_queryset(self):
+        return self.request.user.ladder_profile.phone_numbers.is_verifiable()
 
     def form_valid(self, form):
         self.object = form.save()
@@ -52,6 +58,40 @@ class VerifyPhoneNumberView(LoginRequiredMixin, UpdateView):
         return redirect(self.get_success_url())
 
 verify_phone_number = VerifyPhoneNumberView.as_view()
+
+
+class SetPrimaryPhoneNumberView(LoginRequiredMixin, UpdateView):
+    template_name = 'exchange/set_primary_phone_number.html'
+    model = PhoneNumber
+    form_class = SetPrimaryPhoneNumberForm
+    success_url = reverse_lazy('dashboard')
+    context_object_name = 'phone_number'
+
+    def get_queryset(self):
+        return self.request.user.ladder_profile.phone_numbers.is_verified()
+
+    def form_valid(self, form):
+        ladder_profile = self.request.user.ladder_profile
+        ladder_profile.verify_phone_number = form.instance
+        return super(SetPrimaryPhoneNumberView, self).form_valid(form)
+
+set_primary_phone_number = SetPrimaryPhoneNumberView.as_view()
+
+
+class DeletePhoneNumberView(LoginRequiredMixin, DeleteView):
+    template_name = 'exchange/delete_phone_number.html'
+    model = PhoneNumber
+    success_url = reverse_lazy('dashboard')
+    context_object_name = 'phone_number'
+
+    def get_queryset(self):
+        return self.request.user.ladder_profile.phone_numbers.all()
+
+    def get_success_url(self):
+        messages.success(self.request, 'Phone number deleted')
+        return super(DeletePhoneNumberView, self).get_success_url()
+
+delete_phone_number = DeletePhoneNumberView.as_view()
 
 
 class CreateOfferView(LoginRequiredMixin, CreateView):

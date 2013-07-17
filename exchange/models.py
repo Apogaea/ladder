@@ -227,8 +227,6 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
 
     @property
     def is_deletable(self):
-        if not self.profile.phone_numbers.exclude(pk=self.pk).exists():
-            return True
         return not self.is_primary
 
     @property

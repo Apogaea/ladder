@@ -11,4 +11,6 @@ urlpatterns += patterns(
     'exchange.views',
     url(r'^add-phone-number/$', 'create_phone_number', name='create_phone_number'),
     url(r'^verify-phone-number/(?P<pk>\d+)/$', 'verify_phone_number', name='verify_phone_number'),
+    url(r'^delete-phone-number/(?P<pk>\d+)/$', 'delete_phone_number', name='delete_phone_number'),
+    url(r'^set-primary-phone-number/(?P<pk>\d+)/$', 'delete_phone_number', name='delete_phone_number'),
 )

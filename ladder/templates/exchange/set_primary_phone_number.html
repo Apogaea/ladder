@@ -3,12 +3,12 @@
 {% block content %}
   <div class="row">
     <div class="span4 offset4">
-      <p>Enter the verification code to verify your phone number</p>
+      <p>Are you sure you would like to set {{ phone_number }} as your primary
+      phone number?</p>
       <form method="post" class="well">
         {% include 'form_as_fieldsets.html' %}
-        <button type="submit" class="btn">Verify</button>
+        <button type="submit" class="btn">Set Primary Phone Number</button>
       </form>
     </div>
   </div>
 {% endblock %}
-

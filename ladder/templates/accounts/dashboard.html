@@ -54,12 +54,7 @@
             {% if user.ladder_profile.verified_phone_number %}
               {% with phone_number=user.ladder_profile.verified_phone_number %}
                 <dt>Primary Number:</dt>
-                <dd>
-                  {{ phone_number }} 
-                  {% if phone_number.is_deletable %}
-                    <a href="#" title="Remove Phone Number"><i class="icon-remove"></i></a>
-                  {% endif %}
-                </dd>
+                <dd>{{ phone_number }} </dd>
               {% endwith %}
             {% endif %}
             {% for phone_number in user.ladder_profile.phone_numbers.all %}
@@ -68,17 +63,18 @@
                 <dd>
                   {{ phone_number }} 
                   {% if phone_number.is_verified %}
-                    <a href="#" title="Set as primary phone number."><i class="icon-star"></i></a>
+                    <a href="{% url 'set_primary_phone_number' pk=phone_number.pk %}#" title="Set as primary phone number."><i class="icon-star"></i></a>
                   {% else %}
                     <a href="{% url 'verify_phone_number' pk=phone_number.pk %}" title="Veryfy phone number"><i class="icon-wrench"></i></a>
                   {% endif %}
                   {% if phone_number.is_deletable %}
-                    <a href="#" title="Remove phone number"><i class="icon-remove"></i></a>
+                    <a href="{% url 'delete_phone_number' pk=phone_number.pk %}#" title="Remove phone number"><i class="icon-remove"></i></a>
                   {% endif %}
                 </dd>
               {% endif %}
             {% endfor %}
           </dl>
+          <a href="{% url 'create_phone_number' %}">Add a phone number</a>
         </div>
       </div>
     </div>
