@@ -10,6 +10,8 @@ from django.contrib.auth.tokens import default_token_generator as token_generato
 
 from authtools.views import LoginRequiredMixin
 
+from exchange.forms import PhoneNumberForm
+
 from accounts.forms import UserChangeForm, UserCreationForm
 from accounts.models import User
 from accounts.emails import send_registration_verification_email
@@ -17,6 +19,12 @@ from accounts.emails import send_registration_verification_email
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        kwargs = super(DashboardView, self).get_context_data(**kwargs)
+        if not self.request.user.ladder_profile.phone_numbers.exists():
+            kwargs['phone_number_form'] = PhoneNumberForm()
+        return kwargs
 
 dashboard = DashboardView.as_view()
 

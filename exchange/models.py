@@ -147,13 +147,6 @@ class LadderProfile(behaviors.QuerySetManagerModel):
     #|  Permission Shortcuts
     #|
     @property
-    def can_send_code(self):
-        if not self.phone_numbers.exists():
-            return False
-        latest = self.codes.latest('last_sent_at')
-        return latest.can_send
-
-    @property
     def can_offer_ticket(self):
         if self.verified_at is None:
             return False
@@ -221,6 +214,9 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
                 attempts__lt=settings.TWILIO_CODE_MAX_ATTEMPTS,
             )
 
+    def __unicode__(self):
+        return self.phone_number
+
     @property
     def is_verified(self):
         return self.verified_at is not None
@@ -237,7 +233,7 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
         twilio_client.sms.messages.create(
             to=self.phone_number,
             from_='+12404282876',
-            body='Apogaea Ladder Verification Code: "{code}"'.format(code=self.code),
+            body='Apogaea Ladder Verification Code: "{code}"'.format(code=self.confirmation_code),
         )
         self.last_sent_at = timezone.now()
         self.attempts += 1

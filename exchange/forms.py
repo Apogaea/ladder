@@ -57,3 +57,26 @@ class PhoneNumberForm(BaseModelForm):
         if PhoneNumber.objects.is_verified().exclude(pk=self.instance.pk).filter(phone_number=cd['phone_number']).exists():
             raise forms.ValidationError('That phone number is already associated with an account')
         return cd['phone_number']
+
+
+class VerifyPhoneNumberForm(BaseModelForm):
+    code = forms.CharField(label='Confirmation Code')
+
+    class Meta:
+        model = PhoneNumber
+        fields = tuple()
+
+    def clean_code(self):
+        code = self.cleaned_data['code']
+        # strip whitespace
+        code = code.strip()
+        # remove any dashes
+        code = code.replace('-', '')
+
+        if not code == self.instance.confirmation_code:
+            raise forms.ValidationError('Incorrect confirmation code')
+        return code
+
+    def save(self, *args, **kwargs):
+        self.instance.verified_at = timezone.now()
+        return super(VerifyPhoneNumberForm, self).save(*args, **kwargs)

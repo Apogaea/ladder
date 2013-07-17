@@ -4,36 +4,54 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 
 from authtools.views import LoginRequiredMixin
 
 from exchange.models import (
     TicketOffer, TicketRequest, TicketMatch, PhoneNumber
 )
-from exchange.forms import TicketOfferForm, TicketRequestForm, AcceptTicketOfferForm
+from exchange.forms import (
+    TicketOfferForm, TicketRequestForm, AcceptTicketOfferForm, PhoneNumberForm,
+    VerifyPhoneNumberForm,
+)
 
 
 class CreatePhoneNumberView(LoginRequiredMixin, CreateView):
     """
     Presents the user with a form to add a new phone number to their account.
     """
-    template_name = 'exchange/account/phone_number_form.html'
     model = PhoneNumber
+    form_class = PhoneNumberForm
 
     def get_success_url(self):
         return reverse('verify_phone_number', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
         form.instance.profile = self.request.user.ladder_profile
-        return super(CreatePhoneNumberView, self).form_valid()
+        self.object = phone_number = form.save()
+        phone_number.send_sms()
+        return redirect(self.get_success_url())
 
 create_phone_number = CreatePhoneNumberView.as_view()
 
 
 class VerifyPhoneNumberView(LoginRequiredMixin, UpdateView):
-    # TODO
-    pass
+    template_name = 'exchange/verify_phone_number.html'
+    model = PhoneNumber
+    form_class = VerifyPhoneNumberForm
+    success_url = reverse_lazy('dashboard')
+
+    def form_valid(self, form):
+        self.object = form.save()
+        ladder_profile = self.request.user.ladder_profile
+        if not ladder_profile.verified_phone_number:
+            ladder_profile.verified_phone_number = self.object
+            ladder_profile.save()
+        messages.success(self.request, 'Your phone number has been verified')
+        return redirect(self.get_success_url())
+
+verify_phone_number = VerifyPhoneNumberView.as_view()
 
 
 class CreateOfferView(LoginRequiredMixin, CreateView):

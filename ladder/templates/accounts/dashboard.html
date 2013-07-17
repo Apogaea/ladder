@@ -2,22 +2,24 @@
 {% load url from future %}
 
 {% block content %}
-  {% if not user.phone_number %}
+  {% if phone_number_form %}
     <div class="well">
-      <p>To begin using the Apogaea Ladder program, we require you to verify your
-      account via a code sent to your phone.</p>
-      <form class="form-inline" method="post" action="{% url 'account_edit' %}">
+      <p>To begin using the Apogaea Ladder program, you will need to add and
+      verify a phone number.</p>
+      <form class="form-inline" method="post" action="{% url 'create_phone_number' %}">
         {% csrf_token %}
-        {{ phone_form.non_field_errors }}
-        <fieldset class="control-group {{ phone_form.phone_number.css_classes }}">
-          {{ phone_form.phone_number.label_tag }}
-          {{ phone_form.phone_number }}
+        <fieldset class="control-group {{ phone_number_form.phone_number.css_classes }}">
+          {{ phone_number_form.phone_number.label_tag }}
+          {{ phone_number_form.phone_number }}
           <span class="add-on">XXX-XXX-XXXX</span>
-          <span class="help-inline">{{ phone_form.phone_number.errors }}</span>
-          <button type="submit" class="btn" name="_verify">Submit and Verify</button>
+          <span class="help-inline">{{ phone_number_form.phone_number.errors }}</span>
+          <button type="submit" class="btn">Submit and Verify</button>
         </fieldset>
       </form>
     </div>
+  {% elif not user.ladder_profile.is_verified %}
+    <p>Something</p>
+  {# something #}
   {% else %}
     <div class="row show-grid">
       <div class="span8">
@@ -25,7 +27,7 @@
           <h3>I have a ticket to offer</h3>
           <p>If you have a ticket that you would like to offer to someone,
           begin that process here.</p>
-          <a href="{% url 'listing_create' %}" class="btn btn-info btn-large">List Ticket</a>
+          <a href="{% url 'offer_create' %}" class="btn btn-info btn-large">List Ticket</a>
         </div>
 
         <div class="well">
@@ -39,7 +41,7 @@
         <div class="well">
           <h3>
             Account Information
-            {% if not user.is_verified %}
+            {% if not user.ladder_profile.is_verified %}
               <small class="badge badge-warning">Not Verified</small>
             {% else %}
               <small class="badge badge-success">Verified</small>
@@ -49,10 +51,25 @@
           <dl class="dl-horizontal">
             <dt>Display Name:</dt>
             <dd>{{ user }}</dd>
-            <dt>Phone Number:</dt>
-            <dd>
-              {{ user.phone_number }}
-            </dd>
+            {% if user.ladder_profile.verified_phone_number %}
+              <dt>Primary Phone Number:</dt>
+              <dd>
+                {{ user.ladder_profile.verified_phone_number }} 
+                <small class="badge badge-success">Primary</small>
+              </dd>
+            {% endif %}
+            {% for phone_number in user.ladder_profile.phone_numbers.all %}
+              {% if not phone_number == user.ladder_profile.verified_phone_number %}
+                <dd>
+                  {{ phone_number }} 
+                  {% if phone_number.is_verified %}
+                    <small class="badge badge-success">Verified</small>
+                  {% else %}
+                    <small class="badge badge-warning">Not Verified</small>
+                  {% endif %}
+                </dd>
+              {% endif %}
+            {% endfor %}
           </dl>
         </div>
       </div>
