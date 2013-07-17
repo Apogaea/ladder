@@ -232,7 +232,7 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
     def send_sms(self):
         twilio_client.sms.messages.create(
             to=self.phone_number,
-            from_='+12404282876',
+            from_=settings.TWILIO_PHONE_NUMBER,
             body='Apogaea Ladder Verification Code: "{code}"'.format(code=self.confirmation_code),
         )
         self.last_sent_at = timezone.now()

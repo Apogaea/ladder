@@ -36,3 +36,4 @@ ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 # Twilio credentials
 TWILIO_ACCOUNT_SID = os.environ.setdefault("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.setdefault("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = '+12404282876'
