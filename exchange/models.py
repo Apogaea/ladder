@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.db.models import F
 from django_localflavor_us import models as us_models
-from django.utils.functional import cached_property
+from django.utils.functional import cached_property, SimpleLazyObject
 from django.core.urlresolvers import reverse
 from django.utils import crypto
 
@@ -19,7 +19,7 @@ from twilio.rest import TwilioRestClient
 
 from accounts.models import User
 
-twilio_client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+twilio_client = SimpleLazyObject(lambda: TwilioRestClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN))
 
 
 def default_match_expiration():

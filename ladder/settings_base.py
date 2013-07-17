@@ -125,8 +125,8 @@ ROOT_URLCONF = 'ladder.urls'
 
 # Twilio
 # These codes should be eithe set in an untracked settings file.
-#TWILIO_ACCOUNT_SID =
-#TWILIO_AUTH_TOKEN =
+TWILIO_ACCOUNT_SID = ''
+TWILIO_AUTH_TOKEN = ''
 
 TWILIO_CODE_MAX_ATTEMPTS = 3
 TWILIO_CODE_EXPIRE_MINUTES = 60 * 24
