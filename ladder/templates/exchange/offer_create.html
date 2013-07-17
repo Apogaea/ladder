@@ -14,14 +14,14 @@
           <p>Manually choose the recipient of your ticket.  You will be provided
           with a set of applicants and allowed to choose which applicant recieves
           your ticket.</p>
-          <button class="btn btn-large" type="submit" name="{{ form.type.html_name }}" value="direct">{{ radios.direct }}</button>
+          <button class="btn btn-large" type="submit" name="{{ form.is_automatch.html_name }}" value="False">Manually</button>
         </div>
       </div>
       <div class="span6">
         <div class="hero-unit">
           <h2>Automatic</h2>
           <p>Your ticket will be matched with an applicant automatically.</p>
-          <button class="btn btn-large" type="submit" name="{{ form.type.html_name }}" value="automatic">{{ radios.automatic }}</button>
+          <button class="btn btn-large" type="submit" name="{{ form.is_automatch.html_name }}" value="True">Automatic</button>
         </div>
       </div>
     </div>

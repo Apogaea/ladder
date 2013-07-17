@@ -13,7 +13,7 @@ from exchange.models import (
 )
 from exchange.forms import (
     TicketOfferForm, TicketRequestForm, AcceptTicketOfferForm, PhoneNumberForm,
-    VerifyPhoneNumberForm,
+    VerifyPhoneNumberForm, SelectTicketRequestForm
 )
 
 
@@ -60,12 +60,12 @@ class CreateOfferView(LoginRequiredMixin, CreateView):
     form_class = TicketOfferForm
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.can_list_ticket:
+        if not request.user.ladder_profile.can_offer_ticket:
             raise PermissionDenied("User not eligable for ticket offer")
         return super(CreateOfferView, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        ticket_offer = form.save(commit=False)
+        self.object = ticket_offer = form.save(commit=False)
         ticket_offer.user = self.request.user
         ticket_offer.save()
         if ticket_offer.is_automatch:
@@ -80,7 +80,8 @@ class CreateOfferView(LoginRequiredMixin, CreateView):
                 messages.success(self.request, "Your ticket offer has been matched with a ticket request.")
             except IndexError:
                 messages.success(self.request, "Your ticket offer has been created and will be automatically matched to the next ticket request that enters the system")
-        return redirect(self.get_success_url())
+            return redirect(self.get_success_url())
+        return redirect(reverse('offer_select_recipient', kwargs={'pk': ticket_offer.pk}))
 
 offer_create = CreateOfferView.as_view()
 
@@ -102,6 +103,7 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
     requests.
     """
     template_name = 'exchange/select_offer_recipient.html'
+    form_class = SelectTicketRequestForm
 
     def get_ticket_offer(self):
         return get_object_or_404(
@@ -110,8 +112,7 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
         )
 
     def get_ticket_request_queryset(self):
-        qs = super(OfferSelectRecipientView, self).get_queryset()
-        return qs.is_active().order_by('created_at')[:3]
+        return TicketRequest.objects.is_active().order_by('created_at')[:3]
 
     def get_form(self, form_class):
         form = super(OfferSelectRecipientView, self).get_form(form_class)
@@ -145,7 +146,7 @@ class RequestTicketView(LoginRequiredMixin, CreateView):
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.can_request_ticket:
+        if not request.user.ladder_profile.can_request_ticket:
             raise PermissionDenied("User not eligable for ticket reuqest.")
         return super(RequestTicketView, self).dispatch(request, *args, **kwargs)
 

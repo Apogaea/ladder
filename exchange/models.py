@@ -148,21 +148,21 @@ class LadderProfile(behaviors.QuerySetManagerModel):
     #|
     @property
     def can_offer_ticket(self):
-        if self.verified_at is None:
+        if not self.is_verified:
             return False
-        elif self.ticket_requests.is_active().exists():
+        elif self.user.ticket_requests.is_active().exists():
             return False
-        elif self.ticket_requests.is_reserved().exists():
+        elif self.user.ticket_requests.is_reserved().exists():
             return False
         return True
 
     @property
     def can_request_ticket(self):
-        if self.verified_at is None:
+        if not self.is_verified:
             return False
-        elif self.ticket_requests.is_active().exists():
+        elif self.user.ticket_requests.is_active().exists():
             return False
-        elif self.ticket_requests.is_reserved().exists():
+        elif self.user.ticket_requests.is_reserved().exists():
             return False
         return True
 
@@ -220,6 +220,16 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
     @property
     def is_verified(self):
         return self.verified_at is not None
+
+    @property
+    def is_primary(self):
+        return self.profile.verified_phone_number_id == self.pk
+
+    @property
+    def is_deletable(self):
+        if not self.profile.phone_numbers.exclude(pk=self.pk).exists():
+            return True
+        return not self.is_primary
 
     @property
     def is_verifiable(self):

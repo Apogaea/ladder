@@ -52,20 +52,28 @@
             <dt>Display Name:</dt>
             <dd>{{ user }}</dd>
             {% if user.ladder_profile.verified_phone_number %}
-              <dt>Primary Phone Number:</dt>
-              <dd>
-                {{ user.ladder_profile.verified_phone_number }} 
-                <small class="badge badge-success">Primary</small>
-              </dd>
+              {% with phone_number=user.ladder_profile.verified_phone_number %}
+                <dt>Primary Number:</dt>
+                <dd>
+                  {{ phone_number }} 
+                  {% if phone_number.is_deletable %}
+                    <a href="#" title="Remove Phone Number"><i class="icon-remove"></i></a>
+                  {% endif %}
+                </dd>
+              {% endwith %}
             {% endif %}
             {% for phone_number in user.ladder_profile.phone_numbers.all %}
-              {% if not phone_number == user.ladder_profile.verified_phone_number %}
+              {% if not phone_number.is_primary %}
+                <dt>Alternate Number:</dt>
                 <dd>
                   {{ phone_number }} 
                   {% if phone_number.is_verified %}
-                    <small class="badge badge-success">Verified</small>
+                    <a href="#" title="Set as primary phone number."><i class="icon-star"></i></a>
                   {% else %}
-                    <small class="badge badge-warning">Not Verified</small>
+                    <a href="{% url 'verify_phone_number' pk=phone_number.pk %}" title="Veryfy phone number"><i class="icon-wrench"></i></a>
+                  {% endif %}
+                  {% if phone_number.is_deletable %}
+                    <a href="#" title="Remove phone number"><i class="icon-remove"></i></a>
                   {% endif %}
                 </dd>
               {% endif %}
