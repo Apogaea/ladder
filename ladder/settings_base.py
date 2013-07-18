@@ -249,12 +249,11 @@ INTERNAL_IPS = (
 EMAIL_LAYOUT = 'mail/base.html'
 
 IGNORABLE_404_URLS = (
-    re.compile(r'\.(php|cgi)$'),
-    re.compile(r'/null/?$'),  # This could be being caused by us.  Investigate?
+    re.compile(r'\.(php|cgi)$', re.IGNORECASE),
     re.compile(r'^/phpmyadmin/', re.IGNORECASE),
-    re.compile(r'^/wp-admin/'),
-    re.compile(r'^/cgi-bin/'),
-    re.compile(r'^(?!/static/).*\.(css|js)/?$'),
+    re.compile(r'^/wp-admin/', re.IGNORECASE),
+    re.compile(r'^/cgi-bin/', re.IGNORECASE),
+    re.compile(r'^(?!/static/).*\.(css|js)/?$', re.IGNORECASE),
 )
 
 try:
