@@ -127,6 +127,27 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
 
     is_terminated = models.BooleanField(default=False, blank=True)
 
+    class QuerySet(QuerySet):
+        def is_accepted(self):
+            return self.filter(
+                accepted_at__isnull=False,
+                is_terminated=False
+            )
+
+        def is_awaiting_confirmation(self):
+            return self.filter(
+                accepted_at__isnull=True,
+                is_terminated=False,
+                created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            )
+
+        def has_expired(self):
+            return self.filter(
+                accepted_at__isnull=True,
+                is_terminated=False,
+                created_at__lte=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            )
+
     def get_absolute_url(self):
         return reverse('exchange.views.match_detail', kwargs={'pk': self.pk})
 
