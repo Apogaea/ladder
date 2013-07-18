@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.conf import settings
+from django.views.generic import TemplateView
 
 from django.template.loader import add_to_builtins
 add_to_builtins('cachebuster.templatetags.cachebuster')
@@ -9,8 +10,8 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    #url('^robots.txt$', 'django.views.generic.simple.direct_to_template', {'template': 'robots.txt', 'mimetype': 'text/plain'}),
-    #url('^sitemap.xml$', 'django.views.generic.simple.direct_to_template', {'template': 'sitemap.xml', 'mimetype': 'application/xml'}),
+    url('^robots.txt$', TemplateView.as_view(content_type='text/plain', template_name='robots.txt')),
+    #url('^sitemap.xml$', TemplateView.as_view(content_type='application/xml', template_name='sitemap.xml')),
 
     # Site Urls
     url(r'^$', 'ladder.views.index', name='site_index'),
