@@ -293,6 +293,8 @@ class MatchDetailView(DetailView):
             )
         )
 
+match_detail = MatchDetailView.as_view()
+
 
 class ConfirmTicketOfferView(UpdateView):
     template_name = 'exchange/accept_ticket_offer.html'
