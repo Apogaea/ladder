@@ -21,10 +21,10 @@ from exchange.models import (
 from exchange.forms import (
     TicketOfferForm, TicketRequestForm, NoFieldsTicketOfferForm, PhoneNumberForm,
     VerifyPhoneNumberForm, SelectTicketRequestForm, NoFieldsPhoneNumberForm,
-    NoFieldsTicketRequestForm,
+    NoFieldsTicketRequestForm, NoFieldsTicketMatchForm,
 )
 from exchange.emails import (
-    send_offer_confirmation_email, send_request_fulfilled_email,
+    send_match_confirmation_email, send_request_fulfilled_email,
     send_offer_accepted_email,
 )
 
@@ -40,7 +40,12 @@ class CreatePhoneNumberView(LoginRequiredMixin, CreateView):
         return reverse('verify_phone_number', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
-        form.instance.profile = self.request.user.ladder_profile
+        phone_number = form.cleaned_data['phone_number']
+        ladder_profile = self.request.user.ladder_profile
+        form.instance.profile = ladder_profile
+        if ladder_profile.phone_numbers.filter(phone_number=phone_number).exists():
+            form.field_error('phone_number', 'That phone number is already associated with your account')
+            return self.form_invalid(form)
         self.object = phone_number = form.save()
         try:
             phone_number.send_sms()
@@ -136,7 +141,7 @@ class CreateOfferView(LoginRequiredMixin, CreateView):
                     ticket_request=ticket_request,
                 )
                 # Send an email to the ticket requester with a confirmation link.
-                send_offer_confirmation_email(match)
+                send_match_confirmation_email(match)
                 messages.success(self.request, "Your ticket offer has been matched with a ticket request.")
             except IndexError:
                 messages.success(self.request, "Your ticket offer has been created and will be automatically matched to the next ticket request that enters the system")
@@ -310,13 +315,13 @@ class ConfirmTicketOfferView(UpdateView):
     template_name = 'exchange/accept_ticket_offer.html'
     model = TicketMatch
     context_object_name = 'ticket_match'
-    form_class = NoFieldsTicketOfferForm
+    form_class = NoFieldsTicketMatchForm
 
     def get_success_url(self):
         return self.object.ticket_request.get_absolute_url()
 
-    def queryset(self):
-        return TicketMatch.objects.is_awaiting_confirmation(ticket_request__user=self.request.user)
+    def get_queryset(self):
+        return TicketMatch.objects.filter(ticket_request__user=self.request.user).is_awaiting_confirmation()
 
     def form_valid(self, form):
         if '_reject' in self.request.POST:
@@ -325,6 +330,14 @@ class ConfirmTicketOfferView(UpdateView):
             ticket_request.save()
             form.instance.is_terminated = True
             form.instance.save()
+            if TicketRequest.objects.is_active().exists():
+                ticket_request = TicketRequest.objects.is_active().order_by('created_at')[0]
+                new_match = TicketMatch.objects.create(
+                    ticket_offer=form.instance.ticket_offer,
+                    ticket_request=ticket_request,
+                )
+                # Send an email to the ticket requester with a confirmation link.
+                send_match_confirmation_email(new_match)
             messages.info(self.request, 'Your ticket request has been successfully cancelled.')
             return redirect(reverse('dashboard'))
         else:

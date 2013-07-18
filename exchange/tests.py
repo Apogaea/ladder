@@ -8,6 +8,7 @@ import unittest
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
+from django.core import mail
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
@@ -113,6 +114,31 @@ class TestTicketRequestQueries(TestCase):
             self.assertNotIn(offer, TicketOffer.objects.is_fulfilled())
             self.assertFalse(offer.is_fulfilled)
 
+    def test_not_reserved_when_other_party_cancels(self):
+        request = TicketRequest.objects.create(user=self.user1)
+        offer = TicketOffer.objects.create(user=self.user2)
+        TicketMatch.objects.create(
+            ticket_request=request,
+            ticket_offer=offer,
+        )
+        request.is_cancelled = True
+        request.save()
+
+        self.assertFalse(offer.is_reserved)
+        self.assertNotIn(offer, TicketOffer.objects.is_reserved())
+        self.assertTrue(offer.is_active)
+        self.assertIn(offer, TicketOffer.objects.is_active())
+
+        request.is_cancelled = False
+        request.save()
+        offer.is_cancelled = True
+        offer.save()
+
+        self.assertFalse(request.is_reserved)
+        self.assertNotIn(request, TicketRequest.objects.is_reserved())
+        self.assertTrue(request.is_active)
+        self.assertIn(request, TicketRequest.objects.is_active())
+
     def test_terminated_reservation(self):
         request = TicketRequest.objects.create(user=self.user1)
         offer = TicketOffer.objects.create(user=self.user2)
@@ -160,10 +186,57 @@ class TestTicketRequestQueries(TestCase):
         self.assertTrue(offer.is_fulfilled)
 
 
+class TestTicketMatchQueryAPI(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create(**get_user_kwargs())
+        self.user2 = User.objects.create(**get_user_kwargs())
+        self.ticket_request = TicketRequest.objects.create(user=self.user1)
+        self.ticket_offer = TicketOffer.objects.create(user=self.user2)
+
+    def test_is_awaiting_confirmation(self):
+        match = TicketMatch.objects.create(
+            ticket_request=self.ticket_request,
+            ticket_offer=self.ticket_offer,
+        )
+        self.assertTrue(match.is_awaiting_confirmation)
+        self.assertIn(match, TicketMatch.objects.is_awaiting_confirmation())
+
+    def test_is_accepted(self):
+        match = TicketMatch.objects.create(
+            ticket_request=self.ticket_request,
+            ticket_offer=self.ticket_offer,
+            accepted_at=timezone.now(),
+        )
+        self.assertTrue(match.is_accepted)
+        self.assertIn(match, TicketMatch.objects.is_accepted())
+
+    def test_is_expired(self):
+        match = TicketMatch.objects.create(
+            ticket_request=self.ticket_request,
+            ticket_offer=self.ticket_offer,
+        )
+        with patch_now(timezone.now() + datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME + 1)):
+            self.assertTrue(match.is_expired)
+            self.assertIn(match, TicketMatch.objects.is_expired())
+
+
 class TestLadderProfileAPI(TestCase):
     def setUp(self):
         self.user = User.objects.create(is_active=True, **get_user_kwargs())
         self.lp = self.user.ladder_profile
+        self.other_user = User.objects.create(is_active=True, **get_user_kwargs())
+        self.other_lp = self.other_user.ladder_profile
+
+    def verify_users(self):
+        self.lp.verified_phone_number = self.lp.phone_numbers.create(**get_phone_number_kwargs(True))
+        self.lp.save()
+        self.other_lp.verified_phone_number = self.other_lp.phone_numbers.create(**get_phone_number_kwargs(True))
+        self.other_lp.save()
+        self.refresh_users()
+
+    def refresh_users(self):
+        self.lp = LadderProfile.objects.get(pk=self.lp.pk)
+        self.other_lp = LadderProfile.objects.get(pk=self.other_lp.pk)
 
     def test_is_verified(self):
         self.assertFalse(self.lp.is_verified)
@@ -171,10 +244,7 @@ class TestLadderProfileAPI(TestCase):
         self.assertFalse(self.lp.can_request_ticket)
         self.assertNotIn(self.lp, LadderProfile.objects.is_verified())
 
-        self.lp.verified_phone_number = self.lp.phone_numbers.create(**get_phone_number_kwargs(True))
-        self.lp.save()
-        # LadderProfile.is_verified uses a cached_property
-        self.lp = LadderProfile.objects.get(pk=self.lp.pk)
+        self.verify_users()
 
         self.assertTrue(self.lp.is_verified)
         self.assertTrue(self.lp.can_offer_ticket)
@@ -182,52 +252,96 @@ class TestLadderProfileAPI(TestCase):
         self.assertIn(self.lp, LadderProfile.objects.is_verified())
 
     def test_can_offer(self):
-        self.lp.verified_phone_number = self.lp.phone_numbers.create(**get_phone_number_kwargs(True))
-        self.lp.save()
-        # LadderProfile.is_verified uses a cached_property
-        self.lp = LadderProfile.objects.get(pk=self.lp.pk)
-
-        self.assertTrue(self.lp.can_offer_ticket)
-        self.assertTrue(self.lp.can_request_ticket)
-
-        self.user.ticket_offers.create()
-
-        # LadderProfile.is_verified uses a cached_property
-        self.lp = LadderProfile.objects.get(pk=self.lp.pk)
-        self.assertTrue(self.lp.can_offer_ticket)
-        self.assertFalse(self.lp.can_request_ticket)
-
-    def test_can_request(self):
-        self.lp.verified_phone_number = self.lp.phone_numbers.create(**get_phone_number_kwargs(True))
-        self.lp.save()
-        # LadderProfile.is_verified uses a cached_property
-        self.lp = LadderProfile.objects.get(pk=self.lp.pk)
-
-        self.assertTrue(self.lp.can_offer_ticket)
-        self.assertTrue(self.lp.can_request_ticket)
+        self.verify_users()
 
         self.user.ticket_requests.create()
+        self.other_user.ticket_offers.create()
 
-        # LadderProfile.is_verified uses a cached_property
-        self.lp = LadderProfile.objects.get(pk=self.lp.pk)
+        self.refresh_users()
+
+        self.assertFalse(self.lp.can_offer_ticket)
+        self.assertTrue(self.other_lp.can_offer_ticket)
+
+    def test_can_request(self):
+        self.verify_users()
+
+        self.user.ticket_requests.create()
+        self.other_user.ticket_offers.create()
+
+        self.refresh_users()
+
+        self.assertFalse(self.lp.can_request_ticket)
+        self.assertFalse(self.other_lp.can_request_ticket)
+
+    def test_exchange_permissions_with_pending_match(self):
+        self.verify_users()
+
+        ticket_request = self.user.ticket_requests.create()
+        ticket_offer = self.other_user.ticket_offers.create()
+        TicketMatch.objects.create(
+            ticket_request=ticket_request,
+            ticket_offer=ticket_offer,
+        )
+
+        self.refresh_users()
+
         self.assertFalse(self.lp.can_offer_ticket)
         self.assertFalse(self.lp.can_request_ticket)
 
-    @unittest.expectedFailure
-    def test_can_request_with_pending_match(self):
-        self.assertFalse(True, 'no test for this yet')
+        self.assertTrue(self.other_lp.can_offer_ticket)
+        self.assertFalse(self.other_lp.can_request_ticket)
 
-    @unittest.expectedFailure
     def test_can_request_with_fulfilled_match(self):
-        self.assertFalse(True, 'no test for this yet')
+        self.verify_users()
 
-    @unittest.expectedFailure
+        ticket_request = self.user.ticket_requests.create()
+        ticket_offer = self.other_user.ticket_offers.create()
+        TicketMatch.objects.create(
+            ticket_request=ticket_request,
+            ticket_offer=ticket_offer,
+            accepted_at=timezone.now(),
+        )
+
+        self.refresh_users()
+
+        self.assertTrue(self.lp.can_offer_ticket)
+        self.assertTrue(self.lp.can_request_ticket)
+
+        self.assertTrue(self.other_lp.can_offer_ticket)
+        self.assertTrue(self.other_lp.can_request_ticket)
+
     def test_can_request_with_cancelled_request(self):
-        self.assertFalse(True, 'no test for this yet')
+        self.verify_users()
 
-    @unittest.expectedFailure
+        ticket_request = self.user.ticket_requests.create()
+        ticket_offer = self.other_user.ticket_offers.create()
+        TicketMatch.objects.create(
+            ticket_request=ticket_request,
+            ticket_offer=ticket_offer,
+        )
+        ticket_request.is_cancelled = True
+        ticket_request.save()
+
+        self.refresh_users()
+
+        self.assertTrue(self.lp.can_offer_ticket)
+        self.assertTrue(self.lp.can_request_ticket)
+
+        self.assertTrue(self.other_lp.can_offer_ticket)
+        self.assertFalse(self.other_lp.can_request_ticket)
+
     def test_can_request_with_cancelled_offer(self):
-        self.assertFalse(True, 'no test for this yet')
+        self.verify_users()
+
+        ticket_offer = self.user.ticket_offers.create()
+
+        self.assertFalse(self.lp.can_request_ticket)
+
+        ticket_offer.is_cancelled = True
+        ticket_offer.save()
+
+        self.refresh_users()
+        self.assertTrue(self.lp.can_request_ticket)
 
 
 def get_phone_number_kwargs(is_verified=False):
@@ -247,7 +361,7 @@ TWILIO_TEST_SETTINGS = {
 
 
 @override_settings(**TWILIO_TEST_SETTINGS)
-class TestTwilioPhoneInteractions(TestCase):
+class TestPhoneNumberInteractions(TestCase):
     TWILIO_VALID_NUMBER = '+15005550006'
     TWILIO_INVALID_NUMBER = '+15005550001'
     TWILIO_CANNOT_SMS_NUMBER = '+15005550002'
@@ -329,6 +443,34 @@ class TestTwilioPhoneInteractions(TestCase):
         self.assertTrue(lp.is_verified)
         self.assertEqual(lp.verified_phone_number_id, phone_number.pk)
 
+    def test_adding_duplicate_number(self):
+        self.lp.phone_numbers.create(phone_number='500-555-0006')
+        self.assertEqual(self.lp.phone_numbers.count(), 1)
+
+        # unformatted
+        response = self.client.post(reverse('create_phone_number'), {'phone_number': '5005550006'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.lp.phone_numbers.count(), 1)
+
+        # formatted
+        response = self.client.post(reverse('create_phone_number'), {'phone_number': '500-555-0006'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.lp.phone_numbers.count(), 1)
+
+    def test_adding_someone_elses_number(self):
+        other_user = User.objects.create(is_active=True, **get_user_kwargs())
+        other_user.ladder_profile.phone_numbers.create(phone_number='500-555-0006', verified_at=timezone.now())
+
+        # unformatted
+        response = self.client.post(reverse('create_phone_number'), {'phone_number': '5005550006'})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.lp.phone_numbers.exists())
+
+        # formatted
+        response = self.client.post(reverse('create_phone_number'), {'phone_number': '500-555-0006'})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.lp.phone_numbers.exists())
+
     @unittest.expectedFailure
     def test_sms_to_invalid_number(self):
         self.assertFalse(True, 'No test for this')
@@ -338,13 +480,160 @@ class TestTwilioPhoneInteractions(TestCase):
         self.assertFalse(True, 'No test for this')
 
     @unittest.expectedFailure
-    def test_adding_duplicate_number(self):
-        self.assertFalse(True, 'No test for this')
-
-    @unittest.expectedFailure
     def test_sms_to_non_sms_number(self):
         self.assertFalse(True, 'No test for this')
 
     @unittest.expectedFailure
     def test_sms_to_blacklist_number(self):
         self.assertFalse(True, 'No test for this')
+
+
+class TestExchangeOfferViews(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(is_active=True, **get_user_kwargs())
+        self.lp = self.user.ladder_profile
+        self.lp.verified_phone_number = self.lp.phone_numbers.create(phone_number='500-555-0006', verified_at=timezone.now())
+        self.lp.save()
+        self.user.set_password('arstarst')
+        self.user.save()
+        self.client.login(email=self.user.email, password='arstarst')
+
+        self.other_user = User.objects.create(is_active=True, **get_user_kwargs())
+        self.other_lp = self.other_user.ladder_profile
+        self.other_lp.save()
+        self.other_lp.verified_phone_number = self.other_lp.phone_numbers.create(phone_number='500-555-0006', verified_at=timezone.now())
+
+    def test_automatic_offer_creation_view(self):
+        ticket_request = self.other_user.ticket_requests.create()
+
+        response = self.client.get(reverse('offer_create'))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFalse(self.user.ticket_offers.exists())
+        self.assertFalse(TicketMatch.objects.exists())
+        self.assertEqual(len(mail.outbox), 0)
+
+        response = self.client.post(reverse('offer_create'), {'is_automatch': True})
+        self.assertEqual(response.status_code, 302)
+
+        self.assertTrue(self.user.ticket_offers.exists())
+        self.assertTrue(TicketMatch.objects.exists())
+
+        ticket_offer = self.user.ticket_offers.get()
+
+        self.assertTrue(ticket_offer.is_reserved)
+        self.assertTrue(ticket_request.is_reserved)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(mail.outbox[0].to, self.other_user.email)
+
+    def test_manual_offer_creation_doesnt_match(self):
+        ticket_request = self.other_user.ticket_requests.create()
+
+        response = self.client.get(reverse('offer_create'))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFalse(self.user.ticket_offers.exists())
+        self.assertFalse(TicketMatch.objects.exists())
+        self.assertEqual(len(mail.outbox), 0)
+
+        response = self.client.post(reverse('offer_create'), {'is_automatch': False})
+        self.assertEqual(response.status_code, 302)
+
+        self.assertTrue(self.user.ticket_offers.exists())
+        self.assertFalse(TicketMatch.objects.exists())
+
+        ticket_offer = self.user.ticket_offers.get()
+
+        self.assertTrue(ticket_offer.is_active)
+        self.assertTrue(ticket_request.is_active)
+
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_offer_confirmation(self):
+        ticket_offer = self.other_user.ticket_offers.create()
+        ticket_request = self.user.ticket_requests.create()
+        ticket_match = TicketMatch.objects.create(
+            ticket_request=ticket_request,
+            ticket_offer=ticket_offer,
+        )
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        response = self.client.get(reverse('match_confirm', kwargs={'pk': ticket_match.pk}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(reverse('match_confirm', kwargs={'pk': ticket_match.pk}))
+        self.assertEqual(response.status_code, 302)
+
+        ticket_offer = TicketOffer.objects.get(pk=ticket_offer.pk)
+        ticket_request = TicketRequest.objects.get(pk=ticket_request.pk)
+        ticket_match = TicketMatch.objects.get(pk=ticket_match.pk)
+
+        self.assertTrue(ticket_offer.is_fulfilled)
+        self.assertTrue(ticket_request.is_fulfilled)
+        self.assertTrue(ticket_match.is_accepted)
+
+        self.assertEqual(len(mail.outbox), 2)
+        to_addresses = [message.to[0] for message in mail.outbox]
+        self.assertIn(self.other_user.email, to_addresses)
+        self.assertIn(self.user.email, to_addresses)
+
+    def test_offer_rejection(self):
+        ticket_offer = self.other_user.ticket_offers.create()
+        ticket_request = self.user.ticket_requests.create()
+        ticket_match = TicketMatch.objects.create(
+            ticket_request=ticket_request,
+            ticket_offer=ticket_offer,
+        )
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        response = self.client.get(reverse('match_confirm', kwargs={'pk': ticket_match.pk}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(
+            reverse('match_confirm', kwargs={'pk': ticket_match.pk}),
+            {'_reject': True},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        ticket_offer = TicketOffer.objects.get(pk=ticket_offer.pk)
+        ticket_request = TicketRequest.objects.get(pk=ticket_request.pk)
+        ticket_match = TicketMatch.objects.get(pk=ticket_match.pk)
+
+        self.assertTrue(ticket_offer.is_active)
+        self.assertTrue(ticket_request.is_cancelled)
+        self.assertTrue(ticket_match.is_terminated)
+
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_offer_rejection_is_automatched(self):
+        ticket_offer = self.other_user.ticket_offers.create()
+        ticket_request = self.user.ticket_requests.create()
+        ticket_match = TicketMatch.objects.create(
+            ticket_request=ticket_request,
+            ticket_offer=ticket_offer,
+        )
+        user3 = User.objects.create(**get_user_kwargs())
+        pending_request = user3.ticket_requests.create()
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        response = self.client.post(
+            reverse('match_confirm', kwargs={'pk': ticket_match.pk}),
+            {'_reject': True},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        ticket_offer = TicketOffer.objects.get(pk=ticket_offer.pk)
+        ticket_request = TicketRequest.objects.get(pk=ticket_request.pk)
+        ticket_match = TicketMatch.objects.get(pk=ticket_match.pk)
+
+        self.assertTrue(ticket_offer.is_reserved)
+        self.assertTrue(pending_request.is_reserved)
+        self.assertTrue(ticket_request.is_cancelled)
+        self.assertTrue(ticket_match.is_terminated)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(mail.outbox[0].to, user3.email)

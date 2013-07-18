@@ -45,6 +45,12 @@ class NoFieldsTicketRequestForm(BaseModelForm):
         fields = tuple()
 
 
+class NoFieldsTicketMatchForm(BaseModelForm):
+    class Meta:
+        model = TicketMatch
+        fields = tuple()
+
+
 class PhoneNumberForm(BaseModelForm):
     class Meta:
         model = PhoneNumber
@@ -52,9 +58,6 @@ class PhoneNumberForm(BaseModelForm):
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data['phone_number']
-        if self.instance.pk:
-            if self.instance.profile.phone_numbers.filter(phone_number=phone_number).exists():
-                raise forms.ValidationError('That phone number is already associated with your account')
         if PhoneNumber.objects.is_verified().exclude(pk=self.instance.pk).filter(phone_number=phone_number).exists():
             raise forms.ValidationError('That phone number is already associated with an account')
 

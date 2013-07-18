@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block content %}
+  <form class="" method="post">
+    {% csrf_token %}
+    <div class="page-header">
+      <h1>Confirm or Release Your Ticket</h1>
+    </div>
+    <div class="row">
+      <div class="span6">
+        <div class="hero-unit">
+          <h2>Reject the Ticket</h2>
+          <p>If you no longer need this ticket, then you can choose to release
+          the ticket back onto the exchange.  Your ticket request will be
+          cancelled if you choose this option.</p>
+          <button class="btn btn-danger btn-large" type="submit" name="_reject" value="True">I No Longer Need This Ticket</button>
+        </div>
+      </div>
+      <div class="span6">
+        <div class="hero-unit">
+          <h2>Accept the Ticket</h2>
+          <p>Confirm that you still need a ticket.  You and the ticket-holder
+          will receive an email with contact information on how to get in touch
+          with each other.</p>
+          <button class="btn btn-success btn-large" type="submit">Confirm and Get my Ticket</button>
+        </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}
+

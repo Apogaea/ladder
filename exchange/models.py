@@ -46,6 +46,10 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
                 matches__accepted_at__isnull=True,
                 matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
                 matches__is_terminated=False,
+                matches__ticket_request__is_cancelled=False,
+                matches__ticket_request__is_terminated=False,
+                matches__ticket_offer__is_cancelled=False,
+                matches__ticket_offer__is_terminated=False,
             )
 
         def is_active(self):
@@ -55,6 +59,10 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
                 matches__accepted_at__isnull=True,
                 matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
                 matches__is_terminated=False,
+                matches__ticket_request__is_cancelled=False,
+                matches__ticket_request__is_terminated=False,
+                matches__ticket_offer__is_cancelled=False,
+                matches__ticket_offer__is_terminated=False,
             ).exclude(
                 matches__accepted_at__isnull=False,
                 matches__is_terminated=False,
@@ -73,6 +81,10 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
             accepted_at__isnull=False,
             is_terminated=False,
         ).filter(
+            ticket_request__is_cancelled=False,
+            ticket_request__is_terminated=False,
+            ticket_offer__is_cancelled=False,
+            ticket_offer__is_terminated=False,
             accepted_at__isnull=True,
             is_terminated=False,
             created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
@@ -90,6 +102,10 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
                 accepted_at__isnull=True,
                 is_terminated=False,
                 created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+                ticket_request__is_cancelled=False,
+                ticket_request__is_terminated=False,
+                ticket_offer__is_cancelled=False,
+                ticket_offer__is_terminated=False,
             )
         ).exists()
 
@@ -124,6 +140,7 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
     accepted_at = models.DateTimeField(null=True)
 
     is_terminated = models.BooleanField(default=False, blank=True)
+    # TODO:  I don't believe this flag is necessary, so confirm and then refactor it out.
 
     class QuerySet(QuerySet):
         def is_accepted(self):
@@ -137,14 +154,50 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
                 accepted_at__isnull=True,
                 is_terminated=False,
                 created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+                ticket_request__is_cancelled=False,
+                ticket_request__is_terminated=False,
+                ticket_offer__is_cancelled=False,
+                ticket_offer__is_terminated=False,
             )
 
-        def has_expired(self):
+        def is_expired(self):
             return self.filter(
                 accepted_at__isnull=True,
                 is_terminated=False,
                 created_at__lte=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+                ticket_request__is_cancelled=False,
+                ticket_request__is_terminated=False,
+                ticket_offer__is_cancelled=False,
+                ticket_offer__is_terminated=False,
             )
+
+    @cached_property
+    def is_accepted(self):
+        return self.accepted_at is not None and not self.is_terminated
+
+    @cached_property
+    def is_awaiting_confirmation(self):
+        return all((
+            self.accepted_at is None,
+            self.is_terminated is False,
+            self.created_at > timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            self.ticket_request.is_cancelled is False,
+            self.ticket_request.is_terminated is False,
+            self.ticket_offer.is_cancelled is False,
+            self.ticket_offer.is_terminated is False,
+        ))
+
+    @cached_property
+    def is_expired(self):
+        return all((
+            self.accepted_at is None,
+            self.is_terminated is False,
+            self.created_at < timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            self.ticket_request.is_cancelled is False,
+            self.ticket_request.is_terminated is False,
+            self.ticket_offer.is_cancelled is False,
+            self.ticket_offer.is_terminated is False,
+        ))
 
     def get_absolute_url(self):
         return reverse('exchange.views.match_detail', kwargs={'pk': self.pk})
