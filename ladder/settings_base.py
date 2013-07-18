@@ -17,8 +17,11 @@ DEBUG_TOOLBAR_CONFIG = {
 
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Piper', 'piper@thefuckingunicorns.com'),
 )
+
+# TODO: get this email address.
+DEFAULT_FROM_EMAIL = 'ladder@apogaea.com'
 
 MANAGERS = ADMINS
 

@@ -45,3 +45,12 @@ ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 TWILIO_ACCOUNT_SID = os.environ.setdefault("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.setdefault("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = '+12404282876'
+
+# Sendgrid Email settings
+DEFAULT_FROM_EMAIL = 'app16920803@heroku.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST_USER = os.environ['SENDGRID_USERNAME']
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_PASSWORD = os.environ['SENDGRID_PASSWORD']
