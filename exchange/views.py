@@ -17,7 +17,7 @@ from exchange.models import (
 )
 from exchange.forms import (
     TicketOfferForm, TicketRequestForm, NoFieldsTicketOfferForm, PhoneNumberForm,
-    VerifyPhoneNumberForm, SelectTicketRequestForm, SetPrimaryPhoneNumberForm,
+    VerifyPhoneNumberForm, SelectTicketRequestForm, NoFieldsPhoneNumberForm,
     NoFieldsTicketRequestForm,
 )
 from exchange.emails import (
@@ -70,7 +70,7 @@ verify_phone_number = VerifyPhoneNumberView.as_view()
 class SetPrimaryPhoneNumberView(LoginRequiredMixin, UpdateView):
     template_name = 'exchange/set_primary_phone_number.html'
     model = PhoneNumber
-    form_class = SetPrimaryPhoneNumberForm
+    form_class = NoFieldsPhoneNumberForm
     success_url = reverse_lazy('dashboard')
     context_object_name = 'phone_number'
 
@@ -80,7 +80,8 @@ class SetPrimaryPhoneNumberView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         ladder_profile = self.request.user.ladder_profile
         ladder_profile.verify_phone_number = form.instance
-        return super(SetPrimaryPhoneNumberView, self).form_valid(form)
+        ladder_profile.save()
+        return redirect(self.get_success_url())
 
 set_primary_phone_number = SetPrimaryPhoneNumberView.as_view()
 
