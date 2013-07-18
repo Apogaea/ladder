@@ -24,13 +24,13 @@ AWS_STORAGE_BUCKET_NAME = 'apo-ladder'
 DEFAULT_FILE_STORAGE = 's3_folder_storage.s3.DefaultStorage'
 DEFAULT_S3_PATH = "media"
 
-STATICFILES_STORAGE = 's3_folder_storage.s3.DefaultStorage'
+STATICFILES_STORAGE = 's3_folder_storage.s3.StaticStorage'
 STATIC_S3_PATH = "static"
 
 # Django Compressor
 COMPRESS_ENABLED = True
 COMPRESS_URL = '//s3.amazonaws.com/{0}/'.format(AWS_STORAGE_BUCKET_NAME)
-#COMPRESS_ROOT = STATIC_ROOT
+COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_STORAGE = STATICFILES_STORAGE
 
 MEDIA_ROOT = "/{0}/".format(DEFAULT_S3_PATH)
