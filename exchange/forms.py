@@ -3,7 +3,9 @@ from django.utils import timezone
 
 from fusionbox.forms import BaseModelForm, BaseForm
 
-from exchange.models import TicketOffer, TicketRequest, TicketMatch, PhoneNumber
+from exchange.models import (
+    TicketOffer, TicketRequest, TicketMatch, PhoneNumber,
+)
 
 
 class TicketOfferForm(BaseModelForm):
@@ -49,13 +51,14 @@ class PhoneNumberForm(BaseModelForm):
         fields = ('phone_number',)
 
     def clean_phone_number(self):
-        cd = self.cleaned_data
+        phone_number = self.cleaned_data['phone_number']
         if self.instance.pk:
-            if self.instance.profile.phone_numbers.filter(phone_number=cd['phone_number']).exists():
+            if self.instance.profile.phone_numbers.filter(phone_number=phone_number).exists():
                 raise forms.ValidationError('That phone number is already associated with your account')
-        if PhoneNumber.objects.is_verified().exclude(pk=self.instance.pk).filter(phone_number=cd['phone_number']).exists():
+        if PhoneNumber.objects.is_verified().exclude(pk=self.instance.pk).filter(phone_number=phone_number).exists():
             raise forms.ValidationError('That phone number is already associated with an account')
-        return cd['phone_number']
+
+        return phone_number
 
 
 class VerifyPhoneNumberForm(BaseModelForm):

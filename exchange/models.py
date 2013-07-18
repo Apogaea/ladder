@@ -183,6 +183,10 @@ class LadderProfile(behaviors.QuerySetManagerModel):
             return False
         elif self.user.ticket_requests.is_reserved().exists():
             return False
+        elif self.user.ticket_offers.is_active().exists():
+            return False
+        elif self.user.ticket_offers.is_reserved().exists():
+            return False
         return True
 
 
@@ -228,8 +232,12 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
 
         def is_verifiable(self):
             return self.filter(
+                Q(
+                    last_sent_at__gt=timezone.now() - datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES),
+                ) | Q(
+                    last_sent_at__isnull=True
+                ),
                 verified_at__isnull=True,
-                last_sent_at__gt=timezone.now() - datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES),
                 attempts__lt=settings.TWILIO_CODE_MAX_ATTEMPTS,
             )
 
@@ -257,7 +265,7 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
         return True
 
     def send_sms(self):
-        twilio_client.sms.messages.create(
+        resp = twilio_client.sms.messages.create(
             to=self.phone_number,
             from_=settings.TWILIO_PHONE_NUMBER,
             body='Apogaea Ladder Verification Code: "{code}"'.format(code=self.confirmation_code),
@@ -265,6 +273,7 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
         self.last_sent_at = timezone.now()
         self.attempts += 1
         self.save()
+        return resp
 
     @property
     def can_send(self):

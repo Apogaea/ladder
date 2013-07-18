@@ -2,6 +2,7 @@ from django.views.generic import (
     DetailView, CreateView, UpdateView, FormView, DeleteView,
 )
 from django.contrib import messages
+from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import redirect, get_object_or_404
 from django.core.exceptions import PermissionDenied
@@ -9,6 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.core.urlresolvers import reverse, reverse_lazy
+
+from twilio import TwilioException
 
 from authtools.views import LoginRequiredMixin
 
@@ -39,7 +42,14 @@ class CreatePhoneNumberView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.profile = self.request.user.ladder_profile
         self.object = phone_number = form.save()
-        phone_number.send_sms()
+        try:
+            phone_number.send_sms()
+        except TwilioException as e:
+            if settings.DEBUG:
+                form.field_error('__all__', e.message)
+            else:
+                form.field_error('__all__', 'There was an error while sending your phone verification.  Please contact a site administrator to resolve this issue')
+            return self.form_invalid(form)
         return redirect(self.get_success_url())
 
 create_phone_number = CreatePhoneNumberView.as_view()
