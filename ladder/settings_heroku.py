@@ -15,8 +15,8 @@ ALLOWED_HOSTS = ['*']
 import os
 # Amazon S3 Stuff
 # These values should be set as environment variables for Heroku.
-AWS_ACCESS_KEY_ID = os.environ.setdefault("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.setdefault("AWS_SECRET_ACCESS_KEY")
+AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
 AWS_STORAGE_BUCKET_NAME = 'apo-ladder'
 
 
@@ -42,8 +42,8 @@ STATIC_URL = COMPRESS_URL
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
 # Twilio credentials
-TWILIO_ACCOUNT_SID = os.environ.setdefault("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.environ.setdefault("TWILIO_AUTH_TOKEN")
+TWILIO_ACCOUNT_SID = os.environ["TWILIO_ACCOUNT_SID"]
+TWILIO_AUTH_TOKEN = os.environ["TWILIO_AUTH_TOKEN"]
 TWILIO_PHONE_NUMBER = '+12404282876'
 
 # Sendgrid Email settings
