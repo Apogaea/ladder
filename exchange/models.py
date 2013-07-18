@@ -1,5 +1,4 @@
 import datetime
-import hashlib
 
 from django.db import models
 from django.db.models import Q
@@ -7,7 +6,6 @@ from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from django.conf import settings
-from django.db.models import F
 from django_localflavor_us import models as us_models
 from django.utils.functional import cached_property, SimpleLazyObject
 from django.core.urlresolvers import reverse
