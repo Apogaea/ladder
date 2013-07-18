@@ -46,6 +46,11 @@ TWILIO_ACCOUNT_SID = os.environ["TWILIO_ACCOUNT_SID"]
 TWILIO_AUTH_TOKEN = os.environ["TWILIO_AUTH_TOKEN"]
 TWILIO_PHONE_NUMBER = '+12404282876'
 
+if DEBUG is False:
+    # Sanity check to be sure that we aren't running production without a
+    # secure secret key.
+    assert not SECRET_KEY == 'not-really-a-very-good-secret-key-now-is-it-so-set-a-better-one'
+
 # Sendgrid Email settings
 DEFAULT_FROM_EMAIL = 'app16920803@heroku.com'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
