@@ -1,5 +1,5 @@
 from django.views.generic import (
-    DetailView, CreateView, UpdateView, FormView, DeleteView,
+    DetailView, CreateView, UpdateView, FormView, DeleteView, View,
 )
 from django.contrib import messages
 from django.conf import settings
@@ -70,6 +70,11 @@ class VerifyPhoneNumberView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         return self.request.user.ladder_profile.phone_numbers.is_verifiable()
 
+    def form_invalid(self, form):
+        form.instance.attempts += 1
+        form.instance.save()
+        return super(VerifyPhoneNumberView, self).form_invalid(form)
+
     def form_valid(self, form):
         self.object = form.save()
         ladder_profile = self.request.user.ladder_profile
@@ -80,6 +85,29 @@ class VerifyPhoneNumberView(LoginRequiredMixin, UpdateView):
         return redirect(self.get_success_url())
 
 verify_phone_number = VerifyPhoneNumberView.as_view()
+
+
+class SendConfirmationCodeView(LoginRequiredMixin, View):
+    def get_queryset(self):
+        return self.request.user.ladder_profile.phone_numbers.is_verifiable()
+
+    def get_object(self):
+        self.object = get_object_or_404(self.get_queryset(), pk=self.kwargs['pk'])
+        return self.object
+
+    def get_success_url(self):
+        return reverse('verify_phone_number', kwargs={'pk': self.object.pk})
+
+    def post(self, *args, **kwargs):
+        phone_number = self.get_object()
+        if phone_number.can_send:
+            phone_number.send_sms()
+            messages.success(self.request, 'Verification code has been resent')
+        else:
+            messages.info(self.request, 'An error has occured.  Try again in a few minutes, or contact a site administrator')
+        return redirect(self.get_success_url())
+
+send_confirmation_code = SendConfirmationCodeView.as_view()
 
 
 class SetPrimaryPhoneNumberView(LoginRequiredMixin, UpdateView):
@@ -152,7 +180,7 @@ offer_create = CreateOfferView.as_view()
 
 
 class OfferDetailView(LoginRequiredMixin, DetailView):
-    template_name = 'exchange/listing_detail.html'
+    template_name = 'exchange/offer_detail.html'
     model = TicketOffer
     context_object_name = 'ticket_offer'
 
@@ -163,7 +191,7 @@ offer_detail = OfferDetailView.as_view()
 
 
 class OfferCancelView(LoginRequiredMixin, UpdateView):
-    template_name = 'exchange/listing_detail.html'
+    template_name = 'exchange/offer_cancel.html'
     model = TicketOffer
     form_class = NoFieldsTicketOfferForm
     context_object_name = 'ticket_offer'

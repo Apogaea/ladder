@@ -132,6 +132,20 @@ class TicketOffer(BaseMatchModel):
     def get_absolute_url(self):
         return reverse('exchange.views.offer_detail', kwargs={'pk': self.pk})
 
+    def get_status_display(self):
+        if self.is_terminated:
+            return u'Terminated'
+        elif self.is_cancelled:
+            return u'Cancelled'
+        elif self.is_fulfilled:
+            return u'Fulfilled'
+        elif self.is_reserved:
+            return u'Reserved'
+        elif self.is_active:
+            return u'Open'
+        else:
+            return "Unknown"
+
 
 class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
     ticket_request = models.ForeignKey('TicketRequest', related_name='matches')
@@ -198,6 +212,10 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
             self.ticket_offer.is_cancelled is False,
             self.ticket_offer.is_terminated is False,
         ))
+
+    @property
+    def expires_at(self):
+        return self.created_at + datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
 
     def get_absolute_url(self):
         return reverse('exchange.views.match_detail', kwargs={'pk': self.pk})
@@ -317,14 +335,23 @@ class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
             return False
         return True
 
+    @property
+    def attempts_remaining(self):
+        return max(0, settings.TWILIO_CODE_MAX_ATTEMPTS - self.attempts)
+
+    @property
+    def expires_at(self):
+        return self.created_at + datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES)
+
     def send_sms(self):
         resp = twilio_client.sms.messages.create(
             to=self.phone_number,
             from_=settings.TWILIO_PHONE_NUMBER,
-            body='Apogaea Ladder Verification Code: "{code}"'.format(code=self.confirmation_code),
+            body='Apogaea Ladder Verification Code: "{0} {1}"'.format(
+                self.confirmation_code[:3], self.confirmation_code[3:]
+            ),
         )
         self.last_sent_at = timezone.now()
-        self.attempts += 1
         self.save()
         return resp
 

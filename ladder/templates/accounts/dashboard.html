@@ -17,25 +17,40 @@
         </fieldset>
       </form>
     </div>
-  {% elif not user.ladder_profile.is_verified %}
-    <p>Something</p>
-  {# something #}
   {% else %}
     <div class="row show-grid">
       <div class="span8">
-        <div class="well">
-          <h3>I have a ticket to offer</h3>
-          <p>If you have a ticket that you would like to offer to someone,
-          begin that process here.</p>
-          <a href="{% url 'offer_create' %}" class="btn btn-info btn-large">List Ticket</a>
-        </div>
+        {% if user.ladder_profile.is_verified %}
+          {% if user.ladder_profile.can_offer_ticket %}
+            <div class="well">
+              <h3>I have a ticket to offer</h3>
+              <p>If you have a ticket that you would like to offer to someone,
+              begin that process here.</p>
+              <a href="{% url 'offer_create' %}" class="btn btn-info btn-large">Offer a Ticket</a>
+            </div>
+          {% endif %}
+          {% if user.ticket_offers.exists %}
+          {% endif %}
 
-        <div class="well">
-          <h3>I need a ticket</h3>
-          <p>If you are in need of a ticket, create your ticket request
-          here.</p>
-          <a href="{% url 'request_create' %}" class="btn btn-info btn-large">Request a Ticket</a>
-        </div>
+          {% if user.ladder_profile.can_request_ticket %}
+            <div class="well">
+              <h3>I need a ticket</h3>
+              <p>If you are in need of a ticket, create your ticket request
+              here.</p>
+              <a href="{% url 'request_create' %}" class="btn btn-info btn-large">Request a Ticket</a>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="well">
+            <h3>Phone Verification Needed</h3>
+            <p>Please verify your phone number to gain access to the exchange.</p>
+            <ul>
+              {% for phone_number in user.ladder_profile.phone_numbers.is_verifiable %}
+                <li>{{ phone_number }} - <a href="{% url 'verify_phone_number' pk=phone_number.pk %}">Verify</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
       </div>
       <div class="span4">
         <div class="well">
@@ -74,7 +89,7 @@
               {% endif %}
             {% endfor %}
           </dl>
-          <a href="{% url 'create_phone_number' %}">Add a phone number</a>
+          <a href="{% url 'create_phone_number' %}">Add another phone number</a>
         </div>
       </div>
     </div>

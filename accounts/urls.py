@@ -9,8 +9,9 @@ urlpatterns = patterns(
 
 urlpatterns += patterns(
     'exchange.views',
-    url(r'^add-phone-number/$', 'create_phone_number', name='create_phone_number'),
-    url(r'^verify-phone-number/(?P<pk>\d+)/$', 'verify_phone_number', name='verify_phone_number'),
-    url(r'^delete-phone-number/(?P<pk>\d+)/$', 'delete_phone_number', name='delete_phone_number'),
-    url(r'^set-primary-phone-number/(?P<pk>\d+)/$', 'delete_phone_number', name='delete_phone_number'),
+    url(r'^phone-number/add/$', 'create_phone_number', name='create_phone_number'),
+    url(r'^phone-number/(?P<pk>\d+)/verify/$', 'verify_phone_number', name='verify_phone_number'),
+    url(r'^phone-number/(?P<pk>\d+)/delete/$', 'delete_phone_number', name='delete_phone_number'),
+    url(r'^phone-number/(?P<pk>\d+)/send-confirmation-code/$', 'send_confirmation_code', name='send_confirmation_code'),
+    url(r'^phone-number/(?P<pk>\d+)/set-as-primary/$', 'set_primary_phone_number', name='set_primary_phone_number'),
 )
