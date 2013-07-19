@@ -398,11 +398,9 @@ class TestPhoneNumberInteractions(TestCase):
 
     def test_sending_sms(self):
         phone_number = self.lp.phone_numbers.create(phone_number=self.TWILIO_VALID_NUMBER)
-        self.assertEqual(phone_number.attempts, 0)
         self.assertTrue(phone_number.can_send)
         phone_number.send_sms()
 
-        self.assertEqual(phone_number.attempts, 1)
         self.assertFalse(phone_number.can_send)
 
         with patch_now(timezone.now() + datetime.timedelta(seconds=settings.TWILIO_RESEND_MINUTES * 60 + 1)):
