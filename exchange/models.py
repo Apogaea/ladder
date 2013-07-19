@@ -109,6 +109,20 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
             )
         ).exists()
 
+    def get_status_display(self):
+        if self.is_terminated:
+            return u'Terminated'
+        elif self.is_cancelled:
+            return u'Cancelled'
+        elif self.is_fulfilled:
+            return u'Fulfilled'
+        elif self.is_reserved:
+            return u'Reserved'
+        elif self.is_active:
+            return u'Active'
+        else:
+            assert False, 'this should not be possible'
+
 
 class TicketRequest(BaseMatchModel):
     user = models.ForeignKey(User, related_name='ticket_requests')
@@ -131,20 +145,6 @@ class TicketOffer(BaseMatchModel):
 
     def get_absolute_url(self):
         return reverse('exchange.views.offer_detail', kwargs={'pk': self.pk})
-
-    def get_status_display(self):
-        if self.is_terminated:
-            return u'Terminated'
-        elif self.is_cancelled:
-            return u'Cancelled'
-        elif self.is_fulfilled:
-            return u'Fulfilled'
-        elif self.is_reserved:
-            return u'Reserved'
-        elif self.is_active:
-            return u'Open'
-        else:
-            return "Unknown"
 
 
 class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
