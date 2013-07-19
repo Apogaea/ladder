@@ -283,7 +283,7 @@ request_create = RequestTicketView.as_view()
 
 
 class RequestTicketUpdateView(UpdateView):
-    template_name = 'exchange/request_edit.html'
+    template_name = 'exchange/request_update.html'
     model = TicketRequest
     context_object_name = 'ticket_request'
 
@@ -291,7 +291,7 @@ class RequestTicketUpdateView(UpdateView):
         return self.request.user.ticket_requests.is_active()
 
 
-request_edit = RequestTicketUpdateView.as_view()
+request_update = RequestTicketUpdateView.as_view()
 
 
 class RequestCancelView(UpdateView):

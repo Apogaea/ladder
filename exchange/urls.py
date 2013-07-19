@@ -16,5 +16,5 @@ urlpatterns = patterns(
     url(r'^request/create/$', 'request_create', name='request_create'),
     url(r'^request/(?P<pk>\d+)/$', 'request_detail', name='request_detail'),
     url(r'^request/(?P<pk>\d+)/cancel/$', 'request_cancel', name='request_cancel'),
-    url(r'^request/(?P<pk>\d+)/edit-request/$', 'request_edit', name='request_edit'),
+    url(r'^request/(?P<pk>\d+)/edit-request/$', 'request_update', name='request_update'),
 )
