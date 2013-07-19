@@ -488,7 +488,7 @@ class TestPhoneNumberInteractions(TestCase):
         self.assertFalse(True, 'No test for this')
 
 
-class TestExchangeOfferViews(TestCase):
+class TestExchangeRequestAndOfferViews(TestCase):
     def setUp(self):
         self.user = User.objects.create(is_active=True, **get_user_kwargs())
         self.lp = self.user.ladder_profile
@@ -549,6 +549,42 @@ class TestExchangeOfferViews(TestCase):
         self.assertTrue(ticket_request.is_active)
 
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_request_creation_view(self):
+        response = self.client.get(reverse('request_create'))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFalse(self.user.ticket_requests.exists())
+
+        response = self.client.post(reverse('request_create'), {'message': 'A nice heartfelt message'})
+        self.assertEqual(response.status_code, 302)
+
+        self.assertTrue(self.user.ticket_requests.exists())
+
+        ticket_request = self.user.ticket_requests.get()
+
+        self.assertTrue(ticket_request.is_active)
+
+    def test_automatic_request_matching(self):
+        ticket_offer = self.other_user.ticket_offers.create(is_automatch=True)
+
+        self.assertFalse(self.user.ticket_requests.exists())
+        self.assertFalse(TicketMatch.objects.exists())
+
+        response = self.client.post(reverse('request_create'), {'message': 'A nice heartfelt message'})
+        self.assertEqual(response.status_code, 302)
+
+        ticket_request = self.user.ticket_requests.get()
+
+        self.assertTrue(self.user.ticket_requests.exists())
+        self.assertTrue(TicketMatch.objects.exists())
+        ticket_match = TicketMatch.objects.get()
+        self.assertIn(
+            reverse('match_confirm', kwargs={'pk': ticket_match.pk}),
+            response._headers.get('location', (None, []))[1],
+        )
+        self.assertTrue(ticket_request.is_reserved)
+        self.assertTrue(ticket_offer.is_reserved)
 
     def test_offer_confirmation(self):
         ticket_offer = self.other_user.ticket_offers.create()

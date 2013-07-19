@@ -241,11 +241,12 @@ class RequestTicketView(LoginRequiredMixin, CreateView):
         # the same time.  The same offer may be matched with two requests.
         try:
             ticket_offer = TicketOffer.objects.is_active().filter(is_automatch=True).order_by('created_at')[0]
-            TicketMatch.objects.create(
+            ticket_match = TicketMatch.objects.create(
                 ticket_offer=ticket_offer,
                 ticket_request=ticket_request,
             )
             messages.success(self.request, "Your request has been matched with a ticket.")
+            return redirect(reverse('match_confirm', kwargs={'pk': ticket_match.pk}))
         except IndexError:
             messages.success(self.request, "Your request has been created.  You will be notified as soon as we find a ticket for you.")
         return redirect(ticket_request.get_absolute_url())
