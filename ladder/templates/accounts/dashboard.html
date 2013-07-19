@@ -3,7 +3,8 @@
 
 {% block content %}
   {% if phone_number_form %}
-    <div class="well">
+    <div class="hero-unit">
+      <h1>Phone Verification</h1>
       <p>To begin using the Apogaea Ladder program, you will need to add and
       verify a phone number.</p>
       <form class="form-inline" method="post" action="{% url 'create_phone_number' %}">
@@ -13,7 +14,8 @@
           {{ phone_number_form.phone_number }}
           <span class="add-on">XXX-XXX-XXXX</span>
           <span class="help-inline">{{ phone_number_form.phone_number.errors }}</span>
-          <button type="submit" class="btn">Submit and Verify</button>
+          <span class="help-block">Standard SMS rates will apply.</span>
+          <button type="submit" class="btn-success">Submit and Verify</button>
         </fieldset>
       </form>
     </div>
@@ -22,23 +24,76 @@
       <div class="span8">
         {% if user.ladder_profile.is_verified %}
           {% if user.ladder_profile.can_offer_ticket %}
-            <div class="well">
-              <h3>I have a ticket to offer</h3>
+            <div class="hero-unit">
+              <h2>I have a ticket to offer</h2>
               <p>If you have a ticket that you would like to offer to someone,
               begin that process here.</p>
-              <a href="{% url 'offer_create' %}" class="btn btn-info btn-large">Offer a Ticket</a>
+              <p><a href="{% url 'offer_create' %}" class="btn btn-info btn-large">Offer a Ticket</a></p>
             </div>
           {% endif %}
+
           {% if user.ticket_offers.exists %}
+            <table class="table-striped">
+              <tr>
+                <th>#</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Links</th>
+              </tr>
+              {% for ticket_offer in user.ticket_offers.all %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ ticket_offer.created_at|date }}</td>
+                  <td>{{ ticket_offer.get_status_display }}</td>
+                  <td>
+                    <ul class="inline">
+                      <li><a href="{% url 'offer_detail' pk=ticket_offer.pk %}">Detail</a></li>
+                      {% if ticket_offer.is_active %}
+                        <li> | <a href="{% url 'offer_cancel' pk=ticket_offer.pk %}">Cancel</a></li>
+                        {% if ticket_offer.is_automatch %}
+                          <li> | <a href="{% url 'offer_select_recipient' pk=ticket_offer.pk %}">Select Recipient</a></li>
+                        {% endif %}
+                      {% endif %}
+                    </ul>
+                  </td>
+                </tr>
+              {% endfor %}
+            </table>
           {% endif %}
 
           {% if user.ladder_profile.can_request_ticket %}
-            <div class="well">
-              <h3>I need a ticket</h3>
+            <div class="here-unit">
+              <h2>I need a ticket</h2>
               <p>If you are in need of a ticket, create your ticket request
               here.</p>
-              <a href="{% url 'request_create' %}" class="btn btn-info btn-large">Request a Ticket</a>
+              <p><a href="{% url 'request_create' %}" class="btn btn-info btn-large">Request a Ticket</a></p>
             </div>
+          {% endif %}
+          {% if user.ticket_requests.exists %}
+            <table class="table-striped">
+              <tr>
+                <th>#</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Links</th>
+              </tr>
+              {% for ticket_request in user.ticket_requests.all %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ ticket_request.created_at|date }}</td>
+                  <td>{{ ticket_request.get_status_display }}</td>
+                  <td>
+                    <ul class="inline">
+                      <li><a href="{% url 'request_detail' pk=ticket_request.pk %}">Detail</a></li>
+                      {% if ticket_request.is_active %}
+                        <li> | <a href="{% url 'request_update' pk=ticket_request.pk %}">Edit</a></li>
+                        <li> | <a href="{% url 'request_cancel' pk=ticket_request.pk %}">Cancel</a></li>
+                      {% endif %}
+                    </ul>
+                  </td>
+                </tr>
+              {% endfor %}
+            </table>
           {% endif %}
         {% else %}
           <div class="well">
@@ -89,7 +144,7 @@
               {% endif %}
             {% endfor %}
           </dl>
-          <a href="{% url 'create_phone_number' %}">Add another phone number</a>
+          <p><a href="{% url 'create_phone_number' %}">Add another phone number</a></p>
         </div>
       </div>
     </div>

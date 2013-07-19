@@ -3,9 +3,25 @@
 
 {% block content %}
   <div class="page-heading">
-    <h2>Ticket Listing 
+    <h2>Ticket Offer 
       <small>Status: <span class="label">{{ ticket_offer.get_status_display }}</span>
     </h2>
-    {# TODO #}
+    <div class="row">
+      <div class="span4">
+        {% if ticket_request.is_active %}
+          <ul class="nav nav-list">
+            <li class="nav-header">Manage Offer</li>
+            <li> | <a href="{% url 'offer_cancel' pk=ticket_offer.pk %}">Cancel</a></li>
+            {% if not ticket_offer.is_automatch %}
+              <li> | <a href="#">Automatch</a></li> {# TODO #}
+            {% endif %}
+          </ul>
+        {% endif %}
+        <dl class="dl-horizontal">
+          <dt>Created</dt>
+          <dd>{{ ticket_offer.created_at|date }}</dd>
+        </dl>
+      </div>
+    </div>
   </div>
 {% endblock %}

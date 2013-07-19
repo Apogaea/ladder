@@ -13,7 +13,7 @@
           {% if not phone_number.attempts == 0 %}
             <br />
             <br />
-            <p class="text-warning">{{ phone_number.attempts_remaining }} attempts remaining.</p>
+            <p class="text-warning"><span class="badge badge-warning">{{ phone_number.attempts_remaining }}</span> attempts remaining.</p>
           {% endif %}
         </form>
       </div>
