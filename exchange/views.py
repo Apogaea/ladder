@@ -1,3 +1,5 @@
+import json
+
 from django.views.generic import (
     DetailView, CreateView, UpdateView, FormView, DeleteView, View,
 )
@@ -290,6 +292,13 @@ class RequestTicketUpdateView(UpdateView):
 
     def get_queryset(self):
         return self.request.user.ticket_requests.is_active()
+
+    def get_context_data(self, **kwargs):
+        kwargs = super(RequestTicketUpdateView, self).get_context_data(**kwargs)
+        form = kwargs['form']
+        message = form.data.get('message', self.get_object().message)
+        kwargs['message_as_json'] = json.dumps(message)
+        return kwargs
 
 request_update = RequestTicketUpdateView.as_view()
 

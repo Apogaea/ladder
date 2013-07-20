@@ -16,9 +16,10 @@
         <div ng-app>
           {{ form.message }}
           {{ form.message.errors }}
-          {# TODO: Angular and django aren't getting along well here.  Figure it out. #}
           <div ng-show="message">
-            <blockquote class="pull-right">
+            {# Angular can be funny in how it initializes forms, so I just dump the current value into json.#}
+            <h4>Preview</h4>
+            <blockquote class="pull-right" ng-init="message={{ message_as_json }}">
               <p>{% ng 'message' %}</p>
               <small><cite title="Source Title">{{ user.display_name }}</cite></small>
             </blockquote>
