@@ -172,6 +172,7 @@ INSTALLED_APPS = (
 
     # Toolbox
     'debug_toolbar',
+    'fusionbox.core',
     'compressor',
     'fusionbox',
     'south',

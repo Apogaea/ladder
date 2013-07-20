@@ -148,7 +148,7 @@ delete_phone_number = DeletePhoneNumberView.as_view()
 
 
 class CreateOfferView(LoginRequiredMixin, CreateView):
-    template_name = 'exchange/offer_form.html'
+    template_name = 'exchange/offer_create.html'
     model = TicketOffer
     form_class = TicketOfferForm
 
@@ -192,6 +192,26 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
 offer_detail = OfferDetailView.as_view()
 
 
+class OfferMakeAutomatchView(LoginRequiredMixin, UpdateView):
+    template_name = 'exchange/offer_make_automatch.html'
+    model = TicketOffer
+    form_class = NoFieldsTicketOfferForm
+    context_object_name = 'ticket_offer'
+
+    def get_success_url(self):
+        return reverse('offer_detail', kwargs={'pk': self.object.pk})
+
+    def get_queryset(self):
+        return self.request.user.ticket_offers.is_active().filter(is_automatch=False)
+
+    def form_valid(self, form):
+        form.instance.is_automatch = True
+        messages.success(self.request, 'Your ticket offer has been switched to Automatic Matching and will be matched with the next ticket request in line.')
+        return super(OfferMakeAutomatchView, self).form_valid(form)
+
+offer_make_automatch = OfferMakeAutomatchView.as_view()
+
+
 class OfferCancelView(LoginRequiredMixin, UpdateView):
     template_name = 'exchange/offer_cancel.html'
     model = TicketOffer
@@ -220,7 +240,7 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
 
     def get_ticket_offer(self):
         return get_object_or_404(
-            self.request.user.ticket_offers.is_active(),
+            self.request.user.ticket_offers.is_active().filter(is_automatch=False),
             pk=self.kwargs['pk'],
         )
 
@@ -235,6 +255,7 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         kwargs = super(OfferSelectRecipientView, self).get_context_data(**kwargs)
         kwargs['ticket_offer'] = self.get_ticket_offer()
+        kwargs['ticket_request_choices'] = self.get_ticket_request_queryset()
         return kwargs
 
     def form_valid(self, form):

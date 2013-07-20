@@ -7,6 +7,7 @@ urlpatterns = patterns(
     url(r'^offer/(?P<pk>\d+)/$', 'offer_detail', name='offer_detail'),
     url(r'^offer/(?P<pk>\d+)/cancel/$', 'offer_cancel', name='offer_cancel'),
     url(r'^offer/(?P<pk>\d+)/select-recipient/$', 'offer_select_recipient', name='offer_select_recipient'),
+    url(r'^offer/(?P<pk>\d+)/make-automatch/$', 'offer_make_automatch', name='offer_make_automatch'),
 
     # Match
     url(r'^match/(?P<pk>\d+)/$', 'match_detail', name='match_detail'),
