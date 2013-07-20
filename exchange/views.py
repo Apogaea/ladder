@@ -253,7 +253,7 @@ offer_select_recipient = OfferSelectRecipientView.as_view()
 
 
 class RequestTicketView(LoginRequiredMixin, CreateView):
-    template_name = 'exchange/request_create.html'
+    template_name = 'exchange/request_form.html'
     model = TicketRequest
     form_class = TicketRequestForm
 
