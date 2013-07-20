@@ -306,7 +306,7 @@ request_update = RequestTicketUpdateView.as_view()
 class RequestCancelView(UpdateView):
     template_name = 'exchange/request_cancel.html'
     model = TicketRequest
-    from_class = NoFieldsTicketRequestForm
+    form_class = NoFieldsTicketRequestForm
     context_object_name = 'ticket_request'
     success_url = reverse_lazy('dashboard')
 
