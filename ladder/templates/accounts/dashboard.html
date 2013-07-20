@@ -83,7 +83,7 @@
           <table class="table table-striped table-bordered">
             <thead>
               <tr>
-                <th>#</th>
+                <th>Reference #</th>
                 <th>Created</th>
                 <th>Status</th>
                 <th>Links</th>
@@ -92,7 +92,7 @@
             <tbody>
               {% for ticket_offer in user.ticket_offers.all %}
                 <tr>
-                  <td>{{ forloop.counter }}</td>
+                  <td>{{ ticket_offer.pk }}</td>
                   <td>{{ ticket_offer.created_at|date }}</td>
                   <td>{{ ticket_offer.get_status_display }}</td>
                   <td>
@@ -117,7 +117,7 @@
           <table class="table table-striped table-bordered">
             <thead>
               <tr>
-                <th>#</th>
+                <th>Reference #</th>
                 <th>Created</th>
                 <th>Status</th>
                 <th>Links</th>
@@ -126,15 +126,14 @@
             <tbody>
               {% for ticket_request in user.ticket_requests.all %}
                 <tr>
-                  <td>{{ forloop.counter }}</td>
+                  <td>{{ ticket_request.pk }}</td>
                   <td>{{ ticket_request.created_at|date }}</td>
                   <td>{{ ticket_request.get_status_display }}</td>
                   <td>
-                    <ul class="inline">
-                      <li><a href="{% url 'request_detail' pk=ticket_request.pk %}">Detail</a></li>
+                      <a href="{% url 'request_detail' pk=ticket_request.pk %}">Detail</a>
                       {% if ticket_request.is_active %}
-                        <li> | <a href="{% url 'request_update' pk=ticket_request.pk %}">Edit</a></li>
-                        <li> | <a href="{% url 'request_cancel' pk=ticket_request.pk %}">Cancel</a></li>
+                        | <a href="{% url 'request_update' pk=ticket_request.pk %}">Edit</a>
+                        | <a href="{% url 'request_cancel' pk=ticket_request.pk %}">Cancel</a>
                       {% endif %}
                     </ul>
                   </td>
