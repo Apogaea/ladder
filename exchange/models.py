@@ -217,6 +217,14 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
     def expires_at(self):
         return self.created_at + datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
 
+    def get_status_display(self):
+        if self.is_accepted:
+            return 'Completed'
+        elif self.is_awaiting_confirmation:
+            return 'Awaiting Confirmation'
+        elif self.is_expired:
+            return 'Expired'
+
     def get_absolute_url(self):
         return reverse('exchange.views.match_detail', kwargs={'pk': self.pk})
 

@@ -1,20 +1,29 @@
 {% extends "base.html" %}
-{% load url from future %}
+{% load djangular_tags %}
 
 {% block content %}
-  <div class="well">
-    <h2>Create a Ticket Request</h2>
-    <p>Enter your account verification code</p>
-    <form class="" method="post">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      <fieldset class="control-group {{ form.verification_code.css_classes }}">
-        {{ form.verification_code.label_tag }}
-        {{ form.verification_code }}
-        <span class="help-inline">{{ form.verification_code.errors }}</span>
-      </fieldset>
-      <button type="submit" class="btn btn-success">Verify</button>
-      <a class="btn" href="{% url 'dashboard' %}">Cancel</a>
-    </form>
+  <div class="row">
+    <div class="span6 offset3">
+      <form method="post" class="well">
+        <h2>Create a Ticket Request</h2>
+        <p>Please inclued a brief personal message to accompany your ticket request.</p>
+        {% csrf_token %}
+        <div ng-app>
+          <textarea name="{{ form.message.html_name }}" id="{{ form.message.auto_id }}" ng-model="message" rows="6"></textarea>
+          {{ form.message.errors }}
+          <div ng-show="message">
+            <blockquote class="pull-right">
+              <p>{% ng 'message' %}</p>
+              <small><cite title="Source Title">{{ user.display_name }}</cite></small>
+            </blockquote>
+            <br /><br />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-success">Request a Ticket</button>
+          <a class="btn" href="{% url 'dashboard' %}">Cancel</a>
+        </div>
+      </form>
+    </div>
   </div>
 {% endblock %}

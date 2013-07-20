@@ -181,6 +181,7 @@ INSTALLED_APPS = (
     'authtools',
 
     # Project Apps
+    'djangular',
     'accounts',
     'exchange',
     'ladder',

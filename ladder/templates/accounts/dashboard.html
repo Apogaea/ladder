@@ -21,92 +21,6 @@
     </div>
   {% else %}
     <div class="row show-grid">
-      <div class="span8">
-        {% if user.ladder_profile.is_verified %}
-          {% if user.ladder_profile.can_offer_ticket %}
-            <div class="hero-unit">
-              <h2>I have a ticket to offer</h2>
-              <p>If you have a ticket that you would like to offer to someone,
-              begin that process here.</p>
-              <p><a href="{% url 'offer_create' %}" class="btn btn-info btn-large">Offer a Ticket</a></p>
-            </div>
-          {% endif %}
-
-          {% if user.ticket_offers.exists %}
-            <table class="table-striped">
-              <tr>
-                <th>#</th>
-                <th>Created</th>
-                <th>Status</th>
-                <th>Links</th>
-              </tr>
-              {% for ticket_offer in user.ticket_offers.all %}
-                <tr>
-                  <td>{{ forloop.counter }}</td>
-                  <td>{{ ticket_offer.created_at|date }}</td>
-                  <td>{{ ticket_offer.get_status_display }}</td>
-                  <td>
-                    <ul class="inline">
-                      <li><a href="{% url 'offer_detail' pk=ticket_offer.pk %}">Detail</a></li>
-                      {% if ticket_offer.is_active %}
-                        <li> | <a href="{% url 'offer_cancel' pk=ticket_offer.pk %}">Cancel</a></li>
-                        {% if ticket_offer.is_automatch %}
-                          <li> | <a href="{% url 'offer_select_recipient' pk=ticket_offer.pk %}">Select Recipient</a></li>
-                        {% endif %}
-                      {% endif %}
-                    </ul>
-                  </td>
-                </tr>
-              {% endfor %}
-            </table>
-          {% endif %}
-
-          {% if user.ladder_profile.can_request_ticket %}
-            <div class="here-unit">
-              <h2>I need a ticket</h2>
-              <p>If you are in need of a ticket, create your ticket request
-              here.</p>
-              <p><a href="{% url 'request_create' %}" class="btn btn-info btn-large">Request a Ticket</a></p>
-            </div>
-          {% endif %}
-          {% if user.ticket_requests.exists %}
-            <table class="table-striped">
-              <tr>
-                <th>#</th>
-                <th>Created</th>
-                <th>Status</th>
-                <th>Links</th>
-              </tr>
-              {% for ticket_request in user.ticket_requests.all %}
-                <tr>
-                  <td>{{ forloop.counter }}</td>
-                  <td>{{ ticket_request.created_at|date }}</td>
-                  <td>{{ ticket_request.get_status_display }}</td>
-                  <td>
-                    <ul class="inline">
-                      <li><a href="{% url 'request_detail' pk=ticket_request.pk %}">Detail</a></li>
-                      {% if ticket_request.is_active %}
-                        <li> | <a href="{% url 'request_update' pk=ticket_request.pk %}">Edit</a></li>
-                        <li> | <a href="{% url 'request_cancel' pk=ticket_request.pk %}">Cancel</a></li>
-                      {% endif %}
-                    </ul>
-                  </td>
-                </tr>
-              {% endfor %}
-            </table>
-          {% endif %}
-        {% else %}
-          <div class="well">
-            <h3>Phone Verification Needed</h3>
-            <p>Please verify your phone number to gain access to the exchange.</p>
-            <ul>
-              {% for phone_number in user.ladder_profile.phone_numbers.is_verifiable %}
-                <li>{{ phone_number }} - <a href="{% url 'verify_phone_number' pk=phone_number.pk %}">Verify</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% endif %}
-      </div>
       <div class="span4">
         <div class="well">
           <h3>
@@ -145,7 +59,102 @@
             {% endfor %}
           </dl>
           <p><a href="{% url 'create_phone_number' %}">Add another phone number</a></p>
-        </div>
+        </div><!-- Account Information -->
+        {% if user.ladder_profile.can_offer_ticket %}
+          <div class="hero-unit">
+            <h2>I have a ticket to offer</h2>
+            <p>If you have a ticket that you would like to offer to someone,
+            begin that process here.</p>
+            <p><a href="{% url 'offer_create' %}" class="btn btn-primary btn-large">Offer a Ticket</a></p>
+          </div>
+        {% endif %}
+        {% if user.ladder_profile.can_request_ticket %}
+          <div class="hero-unit">
+            <h2>I need a ticket</h2>
+            <p>If you are in need of a ticket, create your ticket request
+            here.</p>
+            <p><a href="{% url 'request_create' %}" class="btn btn-primary btn-large">Request a Ticket</a></p>
+          </div>
+        {% endif %}
+      </div>
+      <div class="span8">
+        {% if user.ladder_profile.is_verified %}
+          <h2>Offer History</h2>
+          <table class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Links</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ticket_offer in user.ticket_offers.all %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ ticket_offer.created_at|date }}</td>
+                  <td>{{ ticket_offer.get_status_display }}</td>
+                  <td>
+                      <a href="{% url 'offer_detail' pk=ticket_offer.pk %}">Detail</a>
+                      {% if ticket_offer.is_active %}
+                        | <a href="{% url 'offer_cancel' pk=ticket_offer.pk %}">Cancel</a>
+                        {% if ticket_offer.is_automatch %}
+                          | <a href="{% url 'offer_select_recipient' pk=ticket_offer.pk %}">Select Recipient</a>
+                        {% endif %}
+                      {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+              <tr><td>-</td><td colspan="3">No Offer History</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>Request History</h2>
+          <table class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Links</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ticket_request in user.ticket_requests.all %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ ticket_request.created_at|date }}</td>
+                  <td>{{ ticket_request.get_status_display }}</td>
+                  <td>
+                    <ul class="inline">
+                      <li><a href="{% url 'request_detail' pk=ticket_request.pk %}">Detail</a></li>
+                      {% if ticket_request.is_active %}
+                        <li> | <a href="{% url 'request_update' pk=ticket_request.pk %}">Edit</a></li>
+                        <li> | <a href="{% url 'request_cancel' pk=ticket_request.pk %}">Cancel</a></li>
+                      {% endif %}
+                    </ul>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td>-</td><td colspan="3">No Request History</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="well">
+            <h3>Phone Verification Needed</h3>
+            <p>Please verify your phone number to gain access to the exchange.</p>
+            <ul>
+              {% for phone_number in user.ladder_profile.phone_numbers.is_verifiable %}
+                <li>{{ phone_number }} - <a href="{% url 'verify_phone_number' pk=phone_number.pk %}">Verify</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
       </div>
     </div>
   {% endif %}
