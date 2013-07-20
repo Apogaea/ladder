@@ -146,7 +146,7 @@ delete_phone_number = DeletePhoneNumberView.as_view()
 
 
 class CreateOfferView(LoginRequiredMixin, CreateView):
-    template_name = 'exchange/offer_create.html'
+    template_name = 'exchange/offer_form.html'
     model = TicketOffer
     form_class = TicketOfferForm
 
@@ -283,13 +283,13 @@ request_create = RequestTicketView.as_view()
 
 
 class RequestTicketUpdateView(UpdateView):
-    template_name = 'exchange/request_update.html'
+    template_name = 'exchange/request_form.html'
     model = TicketRequest
     context_object_name = 'ticket_request'
+    form_class = TicketRequestForm
 
     def get_queryset(self):
         return self.request.user.ticket_requests.is_active()
-
 
 request_update = RequestTicketUpdateView.as_view()
 
