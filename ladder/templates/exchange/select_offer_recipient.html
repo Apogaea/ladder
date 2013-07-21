@@ -3,6 +3,9 @@
 
 {% block content %}
   <h2>Select A Recipient for your ticket</h2>
+  {% if ticket_request_choices %}
+    <p class="lead">You may select from the following ticket requests.</p>
+  {% endif %}
   <div class="row">
     {% for ticket_request in ticket_request_choices %}
       <div class="span4">
@@ -12,7 +15,7 @@
             <p>{{ ticket_request.message }}</p>
             <small><cite title="Source Title">{{ ticket_request.user.display_name }}</cite></small>
           </blockquote>
-          <button class="btn btn-large btn-block btn-primary" type="submit">Give Ticket</button>
+          <button class="btn btn-large btn-block btn-primary" name="ticket_request" value="{{ ticket_request.pk }}" type="submit">Give Ticket</button>
         </form>
       </div>
     {% empty %}

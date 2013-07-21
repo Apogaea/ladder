@@ -269,7 +269,7 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
             ticket_offer=ticket_offer,
         )
         messages.success(self.request, 'The ticket requester has been contacted.  Once they accept your ticket, we will put both of you in touch with each other')
-        return redirect(ticket_request.get_absolute_url())
+        return redirect(ticket_offer.get_absolute_url())
 
 offer_select_recipient = OfferSelectRecipientView.as_view()
 

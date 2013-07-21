@@ -24,6 +24,21 @@
         </div>
       </div>
       <div class="span8">
+        <div class="well">
+          {% if ticket_offer.is_fulfilled %}
+            <p class="lead">This ticket offer has been matched with a recipient and closed..</p>
+          {% elif ticket_offer.is_reserved %}
+            <p class="lead">This ticket offer has been matched and is awaiting confirmation from the recipient.</p>
+          {% elif ticket_offer.is_active %}
+            {% if ticket_offer.is_automatch %}
+              <p class="lead">This offer is currently active and will be matched with the next ticket request that enters the exchange.</p>
+            {% else %}
+              <p class="lead">This offer is currently active and waiting for you to <a href="{% url 'offer_select_recipient' pk=ticket_offer.pk %}">select a recipient</a>.</p>
+            {% endif %}
+          {% elif ticket_offer.is_cancelled %}
+          {% elif ticket_offer.is_terminated %}
+          {% endif %}
+        </div>
         <h2>History</h2>
         <table class="table table-striped table-bordered">
           <thead>
