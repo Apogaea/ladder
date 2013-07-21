@@ -245,7 +245,8 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
         )
 
     def get_ticket_request_queryset(self):
-        return TicketRequest.objects.is_active().order_by('created_at')[:3]
+        front_of_line = TicketRequest.objects.is_active().order_by('created_at')[:3].values_list('pk', flat=True)
+        return TicketRequest.objects.is_active().filter(pk__in=front_of_line)
 
     def get_form(self, form_class):
         form = super(OfferSelectRecipientView, self).get_form(form_class)
