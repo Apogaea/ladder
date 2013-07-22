@@ -30,6 +30,7 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
 
     class Meta:
         abstract = True
+        ordering = ('-created_at',)
 
     class QuerySet(QuerySet):
         def is_fulfilled(self):
@@ -129,7 +130,7 @@ class TicketRequest(BaseMatchModel):
     message = models.TextField(max_length=1000)
 
     class Meta:
-        ordering = ('created_at',)
+        ordering = ('-created_at',)
 
     def get_absolute_url(self):
         return reverse('exchange.views.request_detail', kwargs={'pk': self.pk})
@@ -141,7 +142,7 @@ class TicketOffer(BaseMatchModel):
     is_automatch = models.BooleanField(blank=True, default=True)
 
     class Meta:
-        ordering = ('created_at',)
+        ordering = ('-created_at',)
 
     def get_absolute_url(self):
         return reverse('exchange.views.offer_detail', kwargs={'pk': self.pk})
