@@ -3,28 +3,32 @@
 
 {% block content %}
   {% if phone_number_form %}
-    <div class="hero-unit">
-      <h1>Phone Verification</h1>
-      <p>To begin using the Apogaea Ladder program, you will need to add and
-      verify a phone number.</p>
-      <form class="form-inline" method="post" action="{% url 'create_phone_number' %}">
-        {% csrf_token %}
-        <fieldset class="control-group {{ phone_number_form.phone_number.css_classes }}">
-          {{ phone_number_form.phone_number.label_tag }}
-          {{ phone_number_form.phone_number }}
-          <span class="add-on">XXX-XXX-XXXX</span>
-          <span class="help-inline">{{ phone_number_form.phone_number.errors }}</span>
-          <span class="help-block">Standard SMS rates will apply.</span>
-          <button type="submit" class="btn-success">Submit and Verify</button>
-        </fieldset>
-      </form>
+    <div class="row">
+      <div class="span12">
+        <div class="hero-unit">
+          <h1>Phone Verification</h1>
+          <p>To begin using the Apogaea Ladder program, you will need to add and
+          verify a phone number.</p>
+          <form class="form-inline" method="post" action="{% url 'create_phone_number' %}">
+            {% csrf_token %}
+            <fieldset class="control-group {{ phone_number_form.phone_number.css_classes }}">
+              {{ phone_number_form.phone_number.label_tag }}
+              {{ phone_number_form.phone_number }}
+              <span class="add-on">XXX-XXX-XXXX</span>
+              <span class="help-inline">{{ phone_number_form.phone_number.errors }}</span>
+              <span class="help-block">Standard SMS rates will apply.</span>
+              <button type="submit" class="btn-success">Submit and Verify</button>
+            </fieldset>
+          </form>
+        </div>
+      </div>
     </div>
   {% else %}
-    <div class="row show-grid">
+    <div class="row">
       <div class="span4">
         <div class="well">
           <h3>
-            Account Information
+            Account
             {% if not user.ladder_profile.is_verified %}
               <small class="badge badge-warning">Not Verified</small>
             {% else %}
@@ -33,7 +37,7 @@
           </h3>
           <a href="{% url 'account_edit' %}">Edit</a>
           <dl class="dl-horizontal">
-            <dt>Display Name:</dt>
+            <dt>Name:</dt>
             <dd>{{ user }}</dd>
             {% if user.ladder_profile.verified_phone_number %}
               {% with phone_number=user.ladder_profile.verified_phone_number %}
@@ -79,7 +83,7 @@
       </div>
       <div class="span8">
         {% if user.ladder_profile.is_verified %}
-          <h2>Offer History</h2>
+          <h2>Offers <small>Your history of ticket offers</h2>
           <table class="table table-striped table-bordered">
             <thead>
               <tr>
@@ -113,7 +117,7 @@
 
           <hr />
 
-          <h2>Request History</h2>
+          <h2>Requests <small>Your history of ticket requests</small></h2>
           <table class="table table-striped table-bordered">
             <thead>
               <tr>
