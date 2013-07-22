@@ -1,5 +1,7 @@
 # What is Ladder
 
+[![Build Status](https://travis-ci.org/Apogaea/ladder.png)](https://travis-ci.org/Apogaea/ladder)
+
 Ladder is an open source platform for exchanging tickets written in the Django
 Web Framework.
 
