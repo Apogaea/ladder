@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 
 {% block content %}
   <div class="page-heading">
@@ -53,7 +54,12 @@
               <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ ticket_match.created_at|date }}</td>
-                <td>{{ ticket_match.get_status_display }}</td>
+                <td>
+                  {{ ticket_match.get_status_display }}
+                  {% if ticket_match.is_awaiting_confirmation %}
+                    <em> (Expires {{ ticket_match.expires_at|naturaltime }})</em>
+                  {% endif %}
+                </td>
               </tr>
             {% empty %}
             <tr><td>-</td><td colspan="3">No Offer History</td></tr>
