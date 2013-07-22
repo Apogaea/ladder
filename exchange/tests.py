@@ -469,21 +469,21 @@ class TestPhoneNumberInteractions(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(self.lp.phone_numbers.exists())
 
-    @unittest.expectedFailure
-    def test_sms_to_invalid_number(self):
-        self.assertFalse(True, 'No test for this')
+    #@unittest.expectedFailure
+    #def test_sms_to_invalid_number(self):
+    #    self.assertFalse(True, 'No test for this')
 
-    @unittest.expectedFailure
-    def test_international_number_invalid(self):
-        self.assertFalse(True, 'No test for this')
+    #@unittest.expectedFailure
+    #def test_international_number_invalid(self):
+    #    self.assertFalse(True, 'No test for this')
 
-    @unittest.expectedFailure
-    def test_sms_to_non_sms_number(self):
-        self.assertFalse(True, 'No test for this')
+    #@unittest.expectedFailure
+    #def test_sms_to_non_sms_number(self):
+    #    self.assertFalse(True, 'No test for this')
 
-    @unittest.expectedFailure
-    def test_sms_to_blacklist_number(self):
-        self.assertFalse(True, 'No test for this')
+    #@unittest.expectedFailure
+    #def test_sms_to_blacklist_number(self):
+    #    self.assertFalse(True, 'No test for this')
 
 
 class TestExchangeRequestAndOfferViews(TestCase):
