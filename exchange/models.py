@@ -253,6 +253,8 @@ class LadderProfile(behaviors.QuerySetManagerModel):
             return False
         elif self.user.ticket_requests.is_reserved().exists():
             return False
+        elif self.user.ticket_offers.is_active().count() + self.user.ticket_offers.is_reserved().count() > 4:
+            return False
         return True
 
     @property
