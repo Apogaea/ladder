@@ -1,3 +1,5 @@
+import json
+
 from django.views.generic import (
     DetailView, CreateView, UpdateView, FormView, DeleteView, View,
 )
@@ -190,6 +192,26 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
 offer_detail = OfferDetailView.as_view()
 
 
+class OfferMakeAutomatchView(LoginRequiredMixin, UpdateView):
+    template_name = 'exchange/offer_make_automatch.html'
+    model = TicketOffer
+    form_class = NoFieldsTicketOfferForm
+    context_object_name = 'ticket_offer'
+
+    def get_success_url(self):
+        return reverse('offer_detail', kwargs={'pk': self.object.pk})
+
+    def get_queryset(self):
+        return self.request.user.ticket_offers.is_active().filter(is_automatch=False)
+
+    def form_valid(self, form):
+        form.instance.is_automatch = True
+        messages.success(self.request, 'Your ticket offer has been switched to Automatic Matching and will be matched with the next ticket request in line.')
+        return super(OfferMakeAutomatchView, self).form_valid(form)
+
+offer_make_automatch = OfferMakeAutomatchView.as_view()
+
+
 class OfferCancelView(LoginRequiredMixin, UpdateView):
     template_name = 'exchange/offer_cancel.html'
     model = TicketOffer
@@ -218,12 +240,13 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
 
     def get_ticket_offer(self):
         return get_object_or_404(
-            self.request.user.ticket_offers.is_active(),
+            self.request.user.ticket_offers.is_active().filter(is_automatch=False),
             pk=self.kwargs['pk'],
         )
 
     def get_ticket_request_queryset(self):
-        return TicketRequest.objects.is_active().order_by('created_at')[:3]
+        front_of_line = TicketRequest.objects.is_active().order_by('created_at')[:3].values_list('pk', flat=True)
+        return TicketRequest.objects.is_active().filter(pk__in=front_of_line)
 
     def get_form(self, form_class):
         form = super(OfferSelectRecipientView, self).get_form(form_class)
@@ -233,6 +256,7 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         kwargs = super(OfferSelectRecipientView, self).get_context_data(**kwargs)
         kwargs['ticket_offer'] = self.get_ticket_offer()
+        kwargs['ticket_request_choices'] = self.get_ticket_request_queryset()
         return kwargs
 
     def form_valid(self, form):
@@ -240,18 +264,19 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
         ticket_request = form.cleaned_data['ticket_request']
         # Race Condition.  If two people select the same recipient at the same
         # time, two offers may be sent to to the requester.
-        TicketMatch.objects.create(
+        ticket_match = TicketMatch.objects.create(
             ticket_request=ticket_request,
             ticket_offer=ticket_offer,
         )
         messages.success(self.request, 'The ticket requester has been contacted.  Once they accept your ticket, we will put both of you in touch with each other')
-        return redirect(ticket_request.get_absolute_url())
+        send_match_confirmation_email(ticket_match)
+        return redirect(ticket_offer.get_absolute_url())
 
 offer_select_recipient = OfferSelectRecipientView.as_view()
 
 
 class RequestTicketView(LoginRequiredMixin, CreateView):
-    template_name = 'exchange/request_create.html'
+    template_name = 'exchange/request_form.html'
     model = TicketRequest
     form_class = TicketRequestForm
 
@@ -283,13 +308,20 @@ request_create = RequestTicketView.as_view()
 
 
 class RequestTicketUpdateView(UpdateView):
-    template_name = 'exchange/request_update.html'
+    template_name = 'exchange/request_form.html'
     model = TicketRequest
     context_object_name = 'ticket_request'
+    form_class = TicketRequestForm
 
     def get_queryset(self):
         return self.request.user.ticket_requests.is_active()
 
+    def get_context_data(self, **kwargs):
+        kwargs = super(RequestTicketUpdateView, self).get_context_data(**kwargs)
+        form = kwargs['form']
+        message = form.data.get('message', self.get_object().message)
+        kwargs['message_as_json'] = json.dumps(message)
+        return kwargs
 
 request_update = RequestTicketUpdateView.as_view()
 
@@ -297,7 +329,7 @@ request_update = RequestTicketUpdateView.as_view()
 class RequestCancelView(UpdateView):
     template_name = 'exchange/request_cancel.html'
     model = TicketRequest
-    from_class = NoFieldsTicketRequestForm
+    form_class = NoFieldsTicketRequestForm
     context_object_name = 'ticket_request'
     success_url = reverse_lazy('dashboard')
 

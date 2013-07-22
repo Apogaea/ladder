@@ -30,6 +30,7 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
 
     class Meta:
         abstract = True
+        ordering = ('-created_at',)
 
     class QuerySet(QuerySet):
         def is_fulfilled(self):
@@ -129,7 +130,7 @@ class TicketRequest(BaseMatchModel):
     message = models.TextField(max_length=1000)
 
     class Meta:
-        ordering = ('created_at',)
+        ordering = ('-created_at',)
 
     def get_absolute_url(self):
         return reverse('exchange.views.request_detail', kwargs={'pk': self.pk})
@@ -141,7 +142,7 @@ class TicketOffer(BaseMatchModel):
     is_automatch = models.BooleanField(blank=True, default=True)
 
     class Meta:
-        ordering = ('created_at',)
+        ordering = ('-created_at',)
 
     def get_absolute_url(self):
         return reverse('exchange.views.offer_detail', kwargs={'pk': self.pk})
@@ -217,6 +218,14 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
     def expires_at(self):
         return self.created_at + datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
 
+    def get_status_display(self):
+        if self.is_accepted:
+            return 'Completed'
+        elif self.is_awaiting_confirmation:
+            return 'Awaiting Confirmation'
+        elif self.is_expired:
+            return 'Expired'
+
     def get_absolute_url(self):
         return reverse('exchange.views.match_detail', kwargs={'pk': self.pk})
 
@@ -243,6 +252,8 @@ class LadderProfile(behaviors.QuerySetManagerModel):
         elif self.user.ticket_requests.is_active().exists():
             return False
         elif self.user.ticket_requests.is_reserved().exists():
+            return False
+        elif self.user.ticket_offers.is_active().count() + self.user.ticket_offers.is_reserved().count() > 4:
             return False
         return True
 

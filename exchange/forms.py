@@ -24,6 +24,9 @@ class TicketRequestForm(BaseModelForm):
     class Meta:
         model = TicketRequest
         fields = ('message',)
+        widgets = {
+            'message': forms.Textarea(attrs={'ng-model': 'message'}),
+        }
 
 
 class SelectTicketRequestForm(BaseForm):

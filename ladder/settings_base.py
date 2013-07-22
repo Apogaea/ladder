@@ -169,9 +169,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django.contrib.humanize',
 
     # Toolbox
     'debug_toolbar',
+    'fusionbox.core',
     'compressor',
     'fusionbox',
     'south',
@@ -181,6 +183,7 @@ INSTALLED_APPS = (
     'authtools',
 
     # Project Apps
+    'djangular',
     'accounts',
     'exchange',
     'ladder',
