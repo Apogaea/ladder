@@ -264,11 +264,12 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
         ticket_request = form.cleaned_data['ticket_request']
         # Race Condition.  If two people select the same recipient at the same
         # time, two offers may be sent to to the requester.
-        TicketMatch.objects.create(
+        ticket_match = TicketMatch.objects.create(
             ticket_request=ticket_request,
             ticket_offer=ticket_offer,
         )
         messages.success(self.request, 'The ticket requester has been contacted.  Once they accept your ticket, we will put both of you in touch with each other')
+        send_match_confirmation_email(ticket_match)
         return redirect(ticket_offer.get_absolute_url())
 
 offer_select_recipient = OfferSelectRecipientView.as_view()
