@@ -1,0 +1,10 @@
+language: python
+python:
+  - "2.7"
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=ladder.settings_travis
+    - secure: "UkdzZa48PgBJ3Up5HSK1VaKY1lynq+jgcOul5dZZBC4NLUcqW/zn5PM26UmWWSiETG/Zsry7mjmx6g/vLXzKr5zvg+m1CkM9juUAxHxQR8ObrHbaxnjWv+q7CujbGkgFJ/JpXg2wo/A6H18mo0ttafYSPy5L89uPV6cy4IjbZd8="
+    - secure: "NtEPpWG9WQ048AbSqMpJQztOhJJFjpjnv7dk8mciXr3VlVbcYoGfijhZbyRxtxbpeOsOY/NkzNm+Wf7XLzKx9NATyKf1U8wxFlzU6yPC0knC42Mpe6dZ89HYW/uK0A8m8sIFzSGNaOdP8DnSq0Vjr78eJHNibf2NLH3iUJBM+NU="
+install: pip install -r requirements.txt
+script: "python manage.py test ladder"
