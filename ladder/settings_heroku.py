@@ -1,5 +1,7 @@
 from settings_base import *  # NOQA
 
+from ladder.settings_aws import *  # NOQA
+
 DEBUG = False
 
 # Parse database configuration from $DATABASE_URL
@@ -13,12 +15,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 ALLOWED_HOSTS = ['*']
 
 import os
-# Amazon S3 Stuff
-# These values should be set as environment variables for Heroku.
-AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
-AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
-AWS_STORAGE_BUCKET_NAME = 'apo-ladder'
-
 
 # S3 Storage Stuff
 DEFAULT_FILE_STORAGE = 's3_folder_storage.s3.DefaultStorage'
@@ -29,7 +25,7 @@ STATIC_S3_PATH = "static"
 
 # Django Compressor
 COMPRESS_ENABLED = True
-COMPRESS_URL = '//s3.amazonaws.com/{0}/'.format(AWS_STORAGE_BUCKET_NAME)
+COMPRESS_URL = STATIC_URL
 COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_STORAGE = STATICFILES_STORAGE
 
