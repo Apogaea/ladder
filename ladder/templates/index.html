@@ -6,6 +6,9 @@
       <div class="hero-unit">
         <h1>Apogaea Ticket Exchange</h1>
         <p class="lead">Facilitating the face value exchange of tickets for the Apogaea community</p>
+        {% if not user.is_authenticated %}
+          <p class="lead"><a href="{% url 'register' %}">Register</a> to get started</a></p>
+        {% endif %}
       </div>
     </div>
   </div>
