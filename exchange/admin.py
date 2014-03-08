@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from exchange.models import (
-    TicketRequest, TicketOffer, TicketMatch, LadderProfile,
+    TicketRequest, TicketOffer, TicketMatch, LadderProfile, PhoneNumber,
 )
 
 
