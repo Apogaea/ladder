@@ -22,10 +22,10 @@ urlpatterns += patterns(
     'authtools.views',
     url(r'^login/$', 'login', name='login'),
     url(r'^logout/$', 'logout_then_login', name='logout'),
-    url(r'^reset/$', 'password_reset'),
-    url(r'^reset-done/$', 'password_reset_done'),
-    url(r'^reset-confirm/(?P<uidb36>\w+)/(?P<token>[-a-zA-Z0-9]+)/$', 'password_reset_confirm_and_login'),
-    url(r'^reset-complete/$', 'password_reset_complete'),
+    url(r'^password-reset/$', 'password_reset', name='password-reset'),
+    url(r'^password-reset-done/$', 'password_reset_done'),
+    url(r'^password-reset-confirm/(?P<uidb36>\w+)/(?P<token>[-a-zA-Z0-9]+)/$', 'password_reset_confirm_and_login'),
+    url(r'^password-reset-complete/$', 'password_reset_complete'),
 )
 urlpatterns += patterns(
     'accounts.views',
