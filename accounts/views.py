@@ -1,32 +1,28 @@
-from django.views.generic import FormView, CreateView, TemplateView, UpdateView
-from django.contrib import auth
+import logging
+
+from django.views.generic import FormView, TemplateView, UpdateView, CreateView
+from django.core import signing
 from django.contrib import messages
-from django.utils.http import base36_to_int
-from django.contrib.auth.forms import SetPasswordForm
-from django.core.urlresolvers import reverse_lazy
+from django.contrib.auth import authenticate, login as auth_login
 from django.shortcuts import redirect
-from django.core.urlresolvers import reverse
-from django.contrib.auth.tokens import default_token_generator as token_generator
+from django.core.urlresolvers import reverse, reverse_lazy
+
+from betterforms.forms import BetterForm
 
 from authtools.views import LoginRequiredMixin
 
-from exchange.forms import PhoneNumberForm
-
-from accounts.forms import UserChangeForm, UserCreationForm
+from accounts.forms import UserChangeForm, InitiateRegistrationForm, UserCreationForm
+from accounts.utils import (
+    unsign_registration_token, send_phone_number_verification_sms,
+)
 from accounts.models import User
 from accounts.emails import send_registration_verification_email
+
+logger = logging.getLogger(__name__)
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/dashboard.html'
-
-    def get_context_data(self, **kwargs):
-        kwargs = super(DashboardView, self).get_context_data(**kwargs)
-        if not self.request.user.ladder_profile.phone_numbers.exists():
-            kwargs['phone_number_form'] = PhoneNumberForm()
-        return kwargs
-
-dashboard = DashboardView.as_view()
 
 
 class EditAccountView(LoginRequiredMixin, UpdateView):
@@ -37,81 +33,109 @@ class EditAccountView(LoginRequiredMixin, UpdateView):
     def get_object(self):
         return self.request.user
 
+    def get_initial(self):
+        initial = super(EditAccountView, self).get_initial()
+        return initial
+
     def form_valid(self, form):
         messages.success(self.request, "Your profile was successfully updated")
         return super(EditAccountView, self).form_valid(form)
 
-account_edit = EditAccountView.as_view()
 
-
-class RegisterView(CreateView):
+class RegisterView(FormView):
     template_name = 'accounts/register.html'
-    model = User
-    form_class = UserCreationForm
+    form_class = InitiateRegistrationForm
     success_url = reverse_lazy('register_success')
 
     def form_valid(self, form):
-        self.object = user = form.save()
-        send_registration_verification_email(user)
-        return redirect(self.get_success_url())
+        email = form.cleaned_data['email']
+        phone_number = form.cleaned_data['phone_number']
+        send_registration_verification_email(email, phone_number)
+        logger.info("REGISTRATION INITIATED: %s - %s", email, phone_number)
+        return super(RegisterView, self).form_valid(form)
 
-register = RegisterView.as_view()
 
-
-class RegistrationSuccessView(TemplateView):
+class RegisterSuccessView(TemplateView):
     template_name = 'accounts/register_success.html'
 
-register_success = RegistrationSuccessView.as_view()
 
-
-class VerifyEmailView(FormView):
-    """
-    Base view for clients and fitters to confirm their relationship to a
-    business.  Checks that the token in the URL corresponds correctly to the
-    relationship, and presents the user with an accept/reject form.
-    """
-    form_class = SetPasswordForm
-    template_name = 'accounts/verify_email_confirm.html'
-
-    def get_success_url(self, **kwargs):
-        # TODO: redirect to enter phone number view.
-        return reverse('dashboard')
-
-    def get_form_kwargs(self):
-        kwargs = super(VerifyEmailView, self).get_form_kwargs()
-        kwargs['user'] = self.get_token_user()
-        return kwargs
-
-    def get_token_user(self):
-        uid = base36_to_int(self.kwargs['uidb36'])
-        return User._default_manager.get(pk=uid)
-
-    def check_token(self):
-        user = self.get_token_user()
-        token = self.kwargs.get('token')
-        if not token or not user:
-            return False
-        return token_generator.check_token(user, token)
+class VerifyTokenMixin(object):
+    def dispatch(self, *args, **kwargs):
+        # Ensure token is valid.
+        try:
+            self.email, self.phone_number = unsign_registration_token(
+                self.kwargs['token'],
+            )
+        except signing.BadSignature:
+            return self.render_to_response({})
+        # Ensure user does not already exist.
+        try:
+            User.objects.get(email__iexact=self.email)
+            return self.render_to_response({'email_already_registered': True})
+        except User.DoesNotExist:
+            pass
+        # Ensure phone_number is not taken.
+        try:
+            User.objects.get(_profile__phone_number=self.phone_number)
+            return self.render_to_response({'phone_number_already_registered': True})
+        except User.DoesNotExist:
+            pass
+        return super(VerifyTokenMixin, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        kwargs = super(VerifyEmailView, self).get_context_data(**kwargs)
+        kwargs = super(VerifyTokenMixin, self).get_context_data(**kwargs)
         kwargs.update({
-            'valid_token': self.check_token(),
-            'token': self.kwargs.get('token', ''),
+            'token_valid': True,
+            'token': self.kwargs['token'],
+            'email': self.email,
+            'phone_number': self.phone_number,
         })
         return kwargs
 
-    def form_valid(self, form):
-        if not self.check_token():
-            return self.form_invalid(form)
-        form.user.is_active = True
-        user = form.save()
-        user = auth.authenticate(
-            username=user.email,
-            password=form.cleaned_data['new_password1'],
-        )
-        auth.login(self.request, user)
-        messages.success(self.request, 'Your account is now active.')
-        return super(VerifyEmailView, self).form_valid(form)
 
-verify_email = VerifyEmailView.as_view()
+class RegisterConfirmView(VerifyTokenMixin, FormView):
+    form_class = BetterForm
+    template_name = 'accounts/register_confirm.html'
+
+    def get_success_url(self, **kwargs):
+        return reverse('register_verify_phone_number', kwargs=self.kwargs)
+
+    def form_valid(self, form):
+        send_phone_number_verification_sms(self.phone_number)
+        return super(RegisterConfirmView, self).form_valid(form)
+
+
+class RegisterVerifyPhoneNumberView(VerifyTokenMixin, CreateView):
+    model = User
+    form_class = UserCreationForm
+    template_name = 'accounts/register_verify_phone_number.html'
+    success_url = reverse_lazy('dashboard')
+
+    def get_form_kwargs(self):
+        kwargs = super(RegisterVerifyPhoneNumberView, self).get_form_kwargs()
+        kwargs['phone_number'] = self.phone_number
+        return kwargs
+
+    def form_valid(self, form):
+        # TODO: sms code verification
+        form.instance.email = self.email
+        form.instance.is_active = True
+        self.object = user = form.save()
+
+        profile = user.profile
+        profile.phone_number = self.phone_number
+        profile.save()
+
+        user = authenticate(
+            username=user.email,
+            password=form.cleaned_data['password1'],
+        )
+        if not user:
+            form.add_error(None, 'An error has occured.')
+            return self.form_invalid(form)
+
+        auth_login(self.request, user)
+
+        logger.info("REGISTRATION COMPLETED: user:%s".format(user.pk))
+
+        return redirect(self.success_url)

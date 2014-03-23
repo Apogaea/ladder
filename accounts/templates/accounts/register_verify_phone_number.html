@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="row">
+    <div class="span4 offset4">
+      {% if token_valid %}
+        <form action="{% url 'register_verify_phone_number' token=token %}" method="post" class="well">
+            <p>
+                Please submit your preferred display name along with the code that
+                was texted to you.
+            </p>
+            <dl>
+              <dt>Email:</dt>
+              <dd>{{ email }}</dd>
+              <dt>Phone Number:</dt>
+              <dd>{{ phone_number }}</dd>
+            </dl>
+            {% include 'form_as_fieldsets.html' %}
+            <button type="submit">Register</button>
+        </form>
+        <form action="{% url 'register_confirm' token=token %}" method="post" class="well">
+            {% csrf_token %}
+            <button type="submit">Re-Send Code</button>
+        </form>
+      {% else %}
+        {% if email_already_registered %}
+        <p>
+            An account with the email address <code>{{ email }}</code> has
+            already been registered.  You can <a href="{% url 'login' %}">login</a>
+            or <a href="{% url 'password-reset' %}">reset your password</a>.
+        </p>
+        {% elif phone_number_already_registered %}
+        <p>
+            An account with the phone number <code>{{ phone_number }}</code>
+            already exists.  Please register with a different phone number.
+        </p>
+        {% else %}
+        <p>
+            It appears you are using an expired or invalid registration
+            confirmation link.  Would you like to try 
+            <a href="{% url 'register' %}">registering</a> again?
+        </p>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

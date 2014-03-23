@@ -1,6 +1,6 @@
 from ladder.emails import LadderEmail
 
-from accounts.emails import BuildAbsoluteURIMixin
+from emailtools.cbe.mixins import BuildAbsoluteURIMixin
 
 
 class MatchConfirmationEmail(BuildAbsoluteURIMixin, LadderEmail):

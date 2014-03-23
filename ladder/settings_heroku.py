@@ -1,57 +1,44 @@
-from settings_base import *  # NOQA
+import os
+from settings import *  # NOQA
+
+import herokuify
+
+from herokuify.common import *  # NOQA
+from herokuify.aws import *  # NOQA
+from herokuify.mail.sendgrid import *  # NOQA
 
 from ladder.settings_aws import *  # NOQA
 
-DEBUG = False
-
-# Parse database configuration from $DATABASE_URL
-import dj_database_url
-DATABASES['default'] = dj_database_url.config()
+# Cache setup
+CACHES = herokuify.get_cache_config()
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Allow all host headers
-ALLOWED_HOSTS = ['*']
+# SSL
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
-import os
+# used cached template loader
+TEMPLATE_LOADERS = (
+    ('django.template.loaders.cached.Loader', (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )),
+)
 
-# S3 Storage Stuff
-DEFAULT_FILE_STORAGE = 's3_folder_storage.s3.DefaultStorage'
-DEFAULT_S3_PATH = "media"
+DATABASES = herokuify.get_db_config()
+CACHES = herokuify.get_cache_config()
 
-STATICFILES_STORAGE = 's3_folder_storage.s3.StaticStorage'
-STATIC_S3_PATH = "static"
+DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
+TEMPLATE_DEBUG = DEBUG
 
-# Django Compressor
-COMPRESS_ENABLED = True
-COMPRESS_URL = STATIC_URL
-COMPRESS_ROOT = STATIC_ROOT
-COMPRESS_STORAGE = STATICFILES_STORAGE
+# Set your DSN value
+RAVEN_CONFIG = {
+    'dsn': os.environ['SENTRY_DSN'],
+}
 
-MEDIA_ROOT = "/{0}/".format(DEFAULT_S3_PATH)
-MEDIA_URL = '//s3.amazonaws.com/{0}/media/'.format(AWS_STORAGE_BUCKET_NAME)
-
-STATIC_ROOT = '/{0}/'.format(STATIC_S3_PATH)
-STATIC_URL = COMPRESS_URL
-
-ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
-
-# Twilio credentials
-TWILIO_ACCOUNT_SID = os.environ["TWILIO_ACCOUNT_SID"]
-TWILIO_AUTH_TOKEN = os.environ["TWILIO_AUTH_TOKEN"]
-TWILIO_PHONE_NUMBER = '+12404282876'
-
-if DEBUG is False:
-    # Sanity check to be sure that we aren't running production without a
-    # secure secret key.
-    assert not SECRET_KEY == 'not-really-a-very-good-secret-key-now-is-it-so-set-a-better-one'
-
-# Sendgrid Email settings
-DEFAULT_FROM_EMAIL = 'app16920803@heroku.com'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST_USER = os.environ['SENDGRID_USERNAME']
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_PASSWORD = os.environ['SENDGRID_PASSWORD']
+MIDDLEWARE_CLASSES = (
+    'sslify.middleware.SSLifyMiddleware',
+) + MIDDLEWARE_CLASSES

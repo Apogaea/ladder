@@ -3,71 +3,68 @@ import datetime
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_save
-from django.db.models.query import QuerySet
 from django.utils import timezone
 from django.conf import settings
-from django_localflavor_us import models as us_models
-from django.utils.functional import cached_property, SimpleLazyObject
+from localflavor.us import models as us_models
+from django.utils.functional import cached_property
 from django.core.urlresolvers import reverse
-from django.utils import crypto
 
-from fusionbox import behaviors
-
-from twilio.rest import TwilioRestClient
+from ladder.models import TimestampableModel
 
 from accounts.models import User
-
-twilio_client = SimpleLazyObject(lambda: TwilioRestClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN))
 
 
 def default_match_expiration():
     return timezone.now() + datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
 
 
-class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
+class MatchQuerySet(models.QuerySet):
+    def is_fulfilled(self):
+        return self.filter(
+            matches__accepted_at__isnull=False,
+            matches__is_terminated=False,
+        )
+
+    def is_reserved(self):
+        return self.exclude(
+            matches__accepted_at__isnull=False,
+            matches__is_terminated=False,
+        ).filter(
+            matches__accepted_at__isnull=True,
+            matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            matches__is_terminated=False,
+            matches__ticket_request__is_cancelled=False,
+            matches__ticket_request__is_terminated=False,
+            matches__ticket_offer__is_cancelled=False,
+            matches__ticket_offer__is_terminated=False,
+        )
+
+    def is_active(self):
+        return self.exclude(
+            Q(is_cancelled=True) | Q(is_terminated=True)
+        ).exclude(
+            matches__accepted_at__isnull=False,
+            matches__is_terminated=False,
+        ).exclude(
+            matches__accepted_at__isnull=True,
+            matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            matches__is_terminated=False,
+            matches__ticket_request__is_cancelled=False,
+            matches__ticket_request__is_terminated=False,
+            matches__ticket_offer__is_cancelled=False,
+            matches__ticket_offer__is_terminated=False,
+        )
+
+
+class BaseMatchModel(TimestampableModel):
     is_cancelled = models.BooleanField(blank=True, default=False)
     is_terminated = models.BooleanField(blank=True, default=False)
+
+    objects = MatchQuerySet.as_manager()
 
     class Meta:
         abstract = True
         ordering = ('-created_at',)
-
-    class QuerySet(QuerySet):
-        def is_fulfilled(self):
-            return self.filter(
-                matches__accepted_at__isnull=False,
-                matches__is_terminated=False,
-            )
-
-        def is_reserved(self):
-            return self.exclude(
-                matches__accepted_at__isnull=False,
-                matches__is_terminated=False,
-            ).filter(
-                matches__accepted_at__isnull=True,
-                matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
-                matches__is_terminated=False,
-                matches__ticket_request__is_cancelled=False,
-                matches__ticket_request__is_terminated=False,
-                matches__ticket_offer__is_cancelled=False,
-                matches__ticket_offer__is_terminated=False,
-            )
-
-        def is_active(self):
-            return self.exclude(
-                Q(is_cancelled=True) | Q(is_terminated=True)
-            ).exclude(
-                matches__accepted_at__isnull=True,
-                matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
-                matches__is_terminated=False,
-                matches__ticket_request__is_cancelled=False,
-                matches__ticket_request__is_terminated=False,
-                matches__ticket_offer__is_cancelled=False,
-                matches__ticket_offer__is_terminated=False,
-            ).exclude(
-                matches__accepted_at__isnull=False,
-                matches__is_terminated=False,
-            )
 
     @cached_property
     def is_fulfilled(self):
@@ -91,25 +88,6 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
             created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
         ).exists()
 
-    @cached_property
-    def is_active(self):
-        if self.is_cancelled or self.is_terminated:
-            return False
-        return not self.matches.filter(
-            Q(
-                accepted_at__isnull=False,
-                is_terminated=False,
-            ) | Q(
-                accepted_at__isnull=True,
-                is_terminated=False,
-                created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
-                ticket_request__is_cancelled=False,
-                ticket_request__is_terminated=False,
-                ticket_offer__is_cancelled=False,
-                ticket_offer__is_terminated=False,
-            )
-        ).exists()
-
     def get_status_display(self):
         if self.is_terminated:
             return u'Terminated'
@@ -124,16 +102,46 @@ class BaseMatchModel(behaviors.Timestampable, behaviors.QuerySetManagerModel):
         else:
             assert False, 'this should not be possible'
 
+    def get_pending_match(self):
+        return self.matches.is_awaiting_confirmation().first()
+
+
+class TicketRequestQuerySet(MatchQuerySet):
+    def is_active(self):
+        return super(TicketRequestQuerySet, self).is_active().exclude(
+            matches__accepted_at__isnull=True,
+            matches__created_at__lt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            matches__is_terminated=False,
+            matches__ticket_request__is_cancelled=False,
+            matches__ticket_request__is_terminated=False,
+            matches__ticket_offer__is_cancelled=False,
+            matches__ticket_offer__is_terminated=False,
+        )
+
 
 class TicketRequest(BaseMatchModel):
     user = models.ForeignKey(User, related_name='ticket_requests')
     message = models.TextField(max_length=1000)
 
+    objects = TicketRequestQuerySet.as_manager()
+
     class Meta:
         ordering = ('-created_at',)
 
     def get_absolute_url(self):
-        return reverse('exchange.views.request_detail', kwargs={'pk': self.pk})
+        return reverse('request_detail', kwargs={'pk': self.pk})
+
+    @cached_property
+    def is_active(self):
+        if self.is_cancelled or self.is_terminated:
+            return False
+        elif self.matches.is_awaiting_confirmation().exists():
+            return False
+        elif self.matches.is_accepted().exists():
+            return False
+        elif self.matches.is_expired().exists():
+            return False
+        return True
 
 
 class TicketOffer(BaseMatchModel):
@@ -145,46 +153,58 @@ class TicketOffer(BaseMatchModel):
         ordering = ('-created_at',)
 
     def get_absolute_url(self):
-        return reverse('exchange.views.offer_detail', kwargs={'pk': self.pk})
+        return reverse('offer_detail', kwargs={'pk': self.pk})
+
+    @cached_property
+    def is_active(self):
+        if self.is_cancelled or self.is_terminated:
+            return False
+        elif self.matches.is_awaiting_confirmation().exists():
+            return False
+        elif self.matches.is_accepted().exists():
+            return False
+        return True
 
 
-class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
+class TicketMatchQuerySet(models.QuerySet):
+    def is_accepted(self):
+        return self.filter(
+            accepted_at__isnull=False,
+            is_terminated=False
+        )
+
+    def is_awaiting_confirmation(self):
+        return self.filter(
+            accepted_at__isnull=True,
+            is_terminated=False,
+            created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            ticket_request__is_cancelled=False,
+            ticket_request__is_terminated=False,
+            ticket_offer__is_cancelled=False,
+            ticket_offer__is_terminated=False,
+        )
+
+    def is_expired(self):
+        return self.filter(
+            accepted_at__isnull=True,
+            is_terminated=False,
+            created_at__lte=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            ticket_request__is_cancelled=False,
+            ticket_request__is_terminated=False,
+            ticket_offer__is_cancelled=False,
+            ticket_offer__is_terminated=False,
+        )
+
+
+class TicketMatch(TimestampableModel):
     ticket_request = models.ForeignKey('TicketRequest', related_name='matches')
     ticket_offer = models.ForeignKey('TicketOffer', related_name='matches')
 
     accepted_at = models.DateTimeField(null=True)
 
     is_terminated = models.BooleanField(default=False, blank=True)
-    # TODO:  I don't believe this flag is necessary, so confirm and then refactor it out.
 
-    class QuerySet(QuerySet):
-        def is_accepted(self):
-            return self.filter(
-                accepted_at__isnull=False,
-                is_terminated=False
-            )
-
-        def is_awaiting_confirmation(self):
-            return self.filter(
-                accepted_at__isnull=True,
-                is_terminated=False,
-                created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
-                ticket_request__is_cancelled=False,
-                ticket_request__is_terminated=False,
-                ticket_offer__is_cancelled=False,
-                ticket_offer__is_terminated=False,
-            )
-
-        def is_expired(self):
-            return self.filter(
-                accepted_at__isnull=True,
-                is_terminated=False,
-                created_at__lte=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
-                ticket_request__is_cancelled=False,
-                ticket_request__is_terminated=False,
-                ticket_offer__is_cancelled=False,
-                ticket_offer__is_terminated=False,
-            )
+    objects = TicketMatchQuerySet.as_manager()
 
     @cached_property
     def is_accepted(self):
@@ -227,29 +247,21 @@ class TicketMatch(behaviors.Timestampable, behaviors.QuerySetManagerModel):
             return 'Expired'
 
     def get_absolute_url(self):
-        return reverse('exchange.views.match_detail', kwargs={'pk': self.pk})
+        return reverse('match_detail', kwargs={'pk': self.pk})
 
 
-class LadderProfile(behaviors.QuerySetManagerModel):
-    user = models.OneToOneField('accounts.User', related_name='ladder_profile')
-    verified_phone_number = models.ForeignKey('exchange.PhoneNumber', null=True, editable=False)
+class LadderProfile(models.Model):
+    user = models.OneToOneField('accounts.User', related_name='_profile')
+    phone_number = us_models.PhoneNumberField("Phone Number", max_length=255,
+                                              help_text=u"US Phone Number (XXX-XXX-XXXX)",
+                                              unique=True)
 
-    class QuerySet(QuerySet):
-        def is_verified(self):
-            return self.filter(verified_phone_number__isnull=False)
-
-    @cached_property
-    def is_verified(self):
-        return not self.verified_phone_number is None
-
-    #|
-    #|  Permission Shortcuts
-    #|
+    #
+    #  Permission Shortcuts
+    #
     @property
     def can_offer_ticket(self):
-        if not self.is_verified:
-            return False
-        elif self.user.ticket_requests.is_active().exists():
+        if self.user.ticket_requests.is_active().exists():
             return False
         elif self.user.ticket_requests.is_reserved().exists():
             return False
@@ -259,9 +271,7 @@ class LadderProfile(behaviors.QuerySetManagerModel):
 
     @property
     def can_request_ticket(self):
-        if not self.is_verified:
-            return False
-        elif self.user.ticket_requests.is_active().exists():
+        if self.user.ticket_requests.is_active().exists():
             return False
         elif self.user.ticket_requests.is_reserved().exists():
             return False
@@ -279,99 +289,3 @@ def create_ladder_profile(sender, instance, created, raw, **kwargs):
 # Connect to the post_save signal of our `User` model to create a blank
 # LadderProfile.
 post_save.connect(create_ladder_profile, sender=User)
-
-
-def get_a_verification_code():
-    """
-    Uses `get_random_string` from `django.utils.crypto` to generate a
-    random string of characters which are then converted to a 6-digit
-    numeric code padded with zeros.
-    """
-    random_string = crypto.get_random_string(50, 'abcdefghijklmnopqrstuvwxyz0123456789')
-    code = hash(random_string) % 1000000
-    return '{0:06d}'.format(code)
-
-
-class PhoneNumber(behaviors.QuerySetManagerModel, behaviors.Timestampable):
-    profile = models.ForeignKey('LadderProfile', related_name='phone_numbers')
-    phone_number = us_models.PhoneNumberField("Phone Number", max_length=255,
-                                              help_text=u"US Phone Number (XXX-XXX-XXXX)")
-    verified_at = models.DateTimeField(null=True, editable=False)
-    confirmation_code = models.CharField(max_length=255, blank=True,
-                                         editable=False,
-                                         default=get_a_verification_code)
-
-    attempts = models.PositiveIntegerField(default=0, blank=True)
-    last_sent_at = models.DateTimeField(blank=True, null=True, editable=False)
-
-    class Meta:
-        ordering = ('-last_sent_at',)
-        get_latest_by = 'created_at'
-
-    class QuerySet(QuerySet):
-        def is_verified(self):
-            return self.filter(verified_at__isnull=False)
-
-        def is_verifiable(self):
-            return self.filter(
-                Q(
-                    last_sent_at__gt=timezone.now() - datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES),
-                ) | Q(
-                    last_sent_at__isnull=True
-                ),
-                verified_at__isnull=True,
-                attempts__lt=settings.TWILIO_CODE_MAX_ATTEMPTS,
-            )
-
-    def __unicode__(self):
-        return self.phone_number
-
-    @property
-    def is_verified(self):
-        return self.verified_at is not None
-
-    @property
-    def is_primary(self):
-        return self.profile.verified_phone_number_id == self.pk
-
-    @property
-    def is_deletable(self):
-        return not self.is_primary
-
-    @property
-    def is_verifiable(self):
-        if self.is_verified:
-            return False
-        if self.attempts >= settings.TWILIO_CODE_MAX_ATTEMPTS:
-            return False
-        return True
-
-    @property
-    def attempts_remaining(self):
-        return max(0, settings.TWILIO_CODE_MAX_ATTEMPTS - self.attempts)
-
-    @property
-    def expires_at(self):
-        return self.created_at + datetime.timedelta(minutes=settings.TWILIO_CODE_EXPIRE_MINUTES)
-
-    def send_sms(self):
-        resp = twilio_client.sms.messages.create(
-            to=self.phone_number,
-            from_=settings.TWILIO_PHONE_NUMBER,
-            body='Apogaea Ladder Verification Code: "{0} {1}"'.format(
-                self.confirmation_code[:3], self.confirmation_code[3:]
-            ),
-        )
-        self.last_sent_at = timezone.now()
-        self.save()
-        return resp
-
-    @property
-    def can_send(self):
-        if not self.is_verifiable:
-            return False
-        if self.last_sent_at:
-            resend_time = self.last_sent_at + datetime.timedelta(minutes=settings.TWILIO_RESEND_MINUTES)
-            return timezone.now() > resend_time
-        else:
-            return True

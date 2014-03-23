@@ -3,8 +3,10 @@ python:
   - "2.7"
 env:
   global:
-    - DJANGO_SETTINGS_MODULE=ladder.settings_travis
-    - secure: "UkdzZa48PgBJ3Up5HSK1VaKY1lynq+jgcOul5dZZBC4NLUcqW/zn5PM26UmWWSiETG/Zsry7mjmx6g/vLXzKr5zvg+m1CkM9juUAxHxQR8ObrHbaxnjWv+q7CujbGkgFJ/JpXg2wo/A6H18mo0ttafYSPy5L89uPV6cy4IjbZd8="
-    - secure: "NtEPpWG9WQ048AbSqMpJQztOhJJFjpjnv7dk8mciXr3VlVbcYoGfijhZbyRxtxbpeOsOY/NkzNm+Wf7XLzKx9NATyKf1U8wxFlzU6yPC0knC42Mpe6dZ89HYW/uK0A8m8sIFzSGNaOdP8DnSq0Vjr78eJHNibf2NLH3iUJBM+NU="
+    - DJANGO_SETTINGS_MODULE=ladder.settings
+    - DATABASE_URL='sqlite:///sqlite_database'
+    - secure: "bsJ0aTQVId4zdxUC0Cn5LCodvrveG61IfFEqJtCvcTXEg0+X3Gqya/Zsjyg/VMEgtGhhLSSVsE/+1CE4Cdum1RoxZif/tSMhomSjAL+GTIECiBV1YnKjdEkaTkICmhMtoGGZCPY/cVGPlw8oP1xTiUnPpiAwhrMsqWaCbvoPiDU="
+    - secure: "KbuJN97KTNn2ufcIGR4dUnYgsy2jOgT8sBu29nM2MokZnHAelFjcW7Zso6Vdsko3YHqy8tSsNjqb+/0gml2VIStFLkT7762im+DWL2e2wT5yBuGHZ3FvpZVRVnoCYALH/cGFrAWvrNid/CjcoOi50M7NlKOdD1vD/Ym+WFt6yiY="
+    - TWILIO_PHONE_NUMBER='+15005550006'
 install: pip install -r requirements.txt
-script: "python manage.py test ladder"
+script: "python manage.py test"

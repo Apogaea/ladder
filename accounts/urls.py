@@ -1,17 +1,20 @@
 from django.conf.urls import patterns, url
 
-urlpatterns = patterns(
-    'accounts.views',
-    url(r'^$', 'dashboard', name='dashboard'),
-    url(r'^edit/$', 'account_edit', name='account_edit'),
-    url(r'^verify-email/(?P<uidb36>\w+)/(?P<token>[-a-zA-Z0-9]+)/$', 'verify_email'),
-)
+from accounts import views
 
-urlpatterns += patterns(
-    'exchange.views',
-    url(r'^phone-number/add/$', 'create_phone_number', name='create_phone_number'),
-    url(r'^phone-number/(?P<pk>\d+)/verify/$', 'verify_phone_number', name='verify_phone_number'),
-    url(r'^phone-number/(?P<pk>\d+)/delete/$', 'delete_phone_number', name='delete_phone_number'),
-    url(r'^phone-number/(?P<pk>\d+)/send-confirmation-code/$', 'send_confirmation_code', name='send_confirmation_code'),
-    url(r'^phone-number/(?P<pk>\d+)/set-as-primary/$', 'set_primary_phone_number', name='set_primary_phone_number'),
+urlpatterns = patterns('',  # NOQA
+    url(r'^$', views.DashboardView.as_view(), name='dashboard'),
+    url(r'^edit/$', views.EditAccountView.as_view(), name='account_edit'),
+    url(r'^register/$', views.RegisterView.as_view(), name='register'),
+    url(r'^register/success/$', views.RegisterSuccessView.as_view(), name='register_success'),
+    url(
+        r'^register/(?P<token>[-a-zA-Z0-9_:]+)/$',
+        views.RegisterConfirmView.as_view(),
+        name='register_confirm',
+    ),
+    url(
+        r'^register/(?P<token>[-a-zA-Z0-9_:]+)/verify/$',
+        views.RegisterVerifyPhoneNumberView.as_view(),
+        name='register_verify_phone_number',
+    ),
 )
