@@ -25,5 +25,14 @@ class UserFactory(factory.DjangoModelFactory):
         return user
 
 
+class SuperUserFactory(UserFactory):
+    is_superuser = True
+    is_staff = True
+
+
 class UserWithProfileFactory(UserFactory):
-    profile = factory.RelatedFactory('exchange.tests.factories.LadderProfileFactory', 'user')
+    _profile = factory.RelatedFactory('exchange.tests.factories.LadderProfileFactory', 'user')
+
+
+class SuperUserWithProfileFactory(SuperUserFactory):
+    _profile = factory.RelatedFactory('exchange.tests.factories.LadderProfileFactory', 'user')

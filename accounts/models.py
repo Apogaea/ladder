@@ -26,3 +26,7 @@ class User(TimestampableModel, AbstractEmailUser):
         except ObjectDoesNotExist:
             from exchange.models import LadderProfile
             return LadderProfile.objects.get_or_create(user=self)[0]
+
+    @property
+    def is_admin(self):
+        return self.is_staff or self.is_superuser

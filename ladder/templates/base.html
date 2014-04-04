@@ -27,6 +27,9 @@
       <ul class="nav">
         {% if user.is_authenticated %}
           <li><a href="{% url 'dashboard' %}">Exchange</a></li>
+          {% if user.is_admin %}
+            <li><a href="{% url 'admin:index' %}">Admin</a></li>
+          {% endif %}
         {% endif %}
       </ul>
       <ul class="nav pull-right">

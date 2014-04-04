@@ -3,7 +3,7 @@
 {% block content %}
   <div class="row">
     <div class="span6 offset3">
-      <form method="post" class="well">
+      <form method="post" class="well" action="{% url 'offer_cancel' pk=ticket_offer.pk %}">
         {{ form.errors }}
         <h2>Cancel Ticket Offer</h2>
         <p>This will cancel your ticket offer.  This action cannot be undone.</p>

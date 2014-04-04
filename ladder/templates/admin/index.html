@@ -1,0 +1,16 @@
+{% extends "two_column.html" %}
+
+{% block left_sidebar %}
+  <div class="well">
+    <ul class="nav nav-list">
+      <li class="nav-header">Admin</li>
+      <li><a href="{% url 'admin:index' %}">Index</a></li>
+      <li class="nav-header">Users</li>
+      <li><a href="{% url 'admin:user_list' %}">Users</a></li>
+      <li class="nav-header">Tickets</li>
+      <li><a href="{% url 'admin:offer_list' %}">Offers</a></li>
+      <li><a href="{% url 'admin:request_list' %}">Requests</a></li>
+      <li><a href="{% url 'admin:match_list' %}">Matches</a></li>
+    </ul>
+  </div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'admin/index.html' %}
+{% load ladder_tags %}
+
+{% block right_main %}
+  <div class="well">
+    <div class="page-header">
+      <h1>
+        Ticket Request #{{ ticket_request.pk }}
+      </h1>
+    </div>
+    <div>
+      <dl class="dl-horizontal">
+        <dt>Id:</dt>
+        <dd>{{ ticket_request.pk }}</dd>
+        <dt>User:</dt>
+        <dd>
+          <a href="{% url 'admin:user_change' pk=ticket_request.user.pk %}">{{ ticket_request.user }}</a>
+        </dd>
+        <dt>Created:</dt>
+        <dd>{{ ticket_request.created_at }}</dd>
+        <dt>Status:</dt>
+        <dd>{{ ticket_request.get_status_display }}</dd>
+        <dt>Cancelled:</dt>
+        <dd>{{ ticket_request.is_cancelled|yesno|title }}</dd>
+        <dt>Terminated:</dt>
+        <dd>{{ ticket_request.is_terminated|yesno|title }}</dd>
+      </dl>
+    </div>
+    <form method="post" action="{% url 'admin:request_toggle_terminate' pk=ticket_request.pk %}">
+      {% csrf_token %}
+      {% if ticket_request.is_terminated %}
+        <button type="submit" class="btn btn-warning">Reverse Termination</button>
+      {% else %}
+        <button type="submit" class="btn btn-danger">Terminate Ticket Request</button>
+      {% endif %}
+    </form>
+  </div>
+
+{% endblock %}

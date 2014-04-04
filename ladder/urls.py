@@ -37,6 +37,9 @@ urlpatterns += patterns(
 
     # Exchange Urls
     url(r'^exchange/', include('exchange.urls')),
+
+    # Admin Urls
+    url(r'^admin/', include('ladder.admin.urls', namespace='admin')),
 )
 
 if settings.DEBUG:

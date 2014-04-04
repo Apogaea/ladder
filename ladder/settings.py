@@ -88,6 +88,17 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.contrib.messages.context_processors.messages',
+    'django.core.context_processors.request',
+)
+
 ROOT_URLCONF = 'ladder.urls'
 
 # Twilio
@@ -96,12 +107,8 @@ TWILIO_ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
 TWILIO_AUTH_TOKEN = os.environ['TWILIO_AUTH_TOKEN']
 TWILIO_PHONE_NUMBER = os.environ['TWILIO_PHONE_NUMBER']
 
-TWILIO_CODE_MAX_ATTEMPTS = 10
-TWILIO_CODE_EXPIRE_MINUTES = 60 * 24
-TWILIO_RESEND_MINUTES = 60
-
-# Activation Code
-ACTIVATION_CODE_LENGTH = 6
+# Global Pagination
+PAGINATE_BY = 10
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/account/'

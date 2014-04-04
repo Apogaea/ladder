@@ -105,6 +105,9 @@ class BaseMatchModel(TimestampableModel):
     def get_pending_match(self):
         return self.matches.is_awaiting_confirmation().first()
 
+    def get_accepted_match(self):
+        return self.matches.is_accepted().first()
+
 
 class TicketRequestQuerySet(MatchQuerySet):
     def is_active(self):
@@ -239,7 +242,17 @@ class TicketMatch(TimestampableModel):
         return self.created_at + datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
 
     def get_status_display(self):
-        if self.is_accepted:
+        if self.is_terminated:
+            return 'Terminated'
+        elif self.ticket_request.is_terminated:
+            return 'Ticket Request Terminated'
+        elif self.ticket_request.is_cancelled:
+            return 'Ticket Request Cancelled'
+        elif self.ticket_offer.is_terminated:
+            return 'Ticket Offer Terminated'
+        elif self.ticket_offer.is_cancelled:
+            return 'Ticket Offer Cancelled'
+        elif self.is_accepted:
             return 'Completed'
         elif self.is_awaiting_confirmation:
             return 'Awaiting Confirmation'

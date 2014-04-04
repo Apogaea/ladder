@@ -1,0 +1,39 @@
+{% extends 'admin/index.html' %}
+{% load ladder_tags %}
+
+{% block right_main %}
+  <div class="well">
+    <div class="page-header">
+      <h1>
+        Ticket Offer #{{ ticket_offer.pk }}
+      </h1>
+    </div>
+    <div>
+      <dl class="dl-horizontal">
+        <dt>Id:</dt>
+        <dd>{{ ticket_offer.pk }}</dd>
+        <dt>User:</dt>
+        <dd>
+          <a href="{% url 'admin:user_change' pk=ticket_offer.user.pk %}">{{ ticket_offer.user }}</a>
+        </dd>
+        <dt>Created:</dt>
+        <dd>{{ ticket_offer.created_at }}</dd>
+        <dt>Status:</dt>
+        <dd>{{ ticket_offer.get_status_display }}</dd>
+        <dt>Cancelled:</dt>
+        <dd>{{ ticket_offer.is_cancelled|yesno|title }}</dd>
+        <dt>Terminated:</dt>
+        <dd>{{ ticket_offer.is_terminated|yesno|title }}</dd>
+      </dl>
+    </div>
+    <form method="post" action="{% url 'admin:offer_toggle_terminate' pk=ticket_offer.pk %}">
+      {% csrf_token %}
+      {% if ticket_offer.is_terminated %}
+        <button type="submit" class="btn btn-warning">Reverse Termination</button>
+      {% else %}
+        <button type="submit" class="btn btn-danger">Terminate Ticket Offer</button>
+      {% endif %}
+    </form>
+  </div>
+
+{% endblock %}
