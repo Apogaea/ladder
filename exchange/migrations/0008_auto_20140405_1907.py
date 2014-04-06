@@ -7,8 +7,8 @@ def delete_users_with_bad_phone_numbers(apps, schema_editor):
     # version than this migration expects. We use the historical version.
 
     User = apps.get_model("accounts", "User")
-    User.objects.filter(_profile__isnull=True).delete()
-    User.objects.filter(_profile__phone_number='').delete()
+    User.objects.filter(ladderprofile__isnull=True).delete()
+    User.objects.filter(ladderprofile__phone_number='').delete()
 
 
 class Migration(migrations.Migration):
