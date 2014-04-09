@@ -1,0 +1,173 @@
+{% extends "two_column.html" %}
+
+{% block left_sidebar %}
+  <div class="well">
+    <ul class="nav nav-list">
+      <li class="nav-header">Guiding Principles</li>
+      <li><a href="#first">First Come - First Serve</a></li>
+      <li><a href="#personal">Keeping it Personal</a></li>
+      <li><a href="#face">Face Value</a></li>
+      <li class="nav-header">How it works</li>
+      <li><a href="#register">Registration</a></li>
+      <li><a href="#request">Request a ticket</a></li>
+      <li><a href="#accept">Accepting a match</a></li>
+      <li><a href="#offer">Offer a ticket</a></li>
+    </ul>
+  </div>
+{% endblock %}
+
+{% block right_main %}
+  <div class="well">
+    <h3 id="principles">Guiding Principles</h3>
+    <p>
+      <strong>Ladder</strong> is like STEP, except that it was created
+      specifically for the Apogaea community by the Apogaea community.
+      <strong>Ladder</strong> was created with the following principles
+    </p>
+    <ul>
+      <li>
+        Matching tickets with people needing tickets should be done on a
+        first-come first-serve basis.
+      </li>
+      <li>
+        The matching process should still feel personal.
+      </li>
+      <li>
+        Tickets must <strong>always</strong> be exchanged for face value.
+      </li>
+    </ul>
+
+    <h4 id="first">First-come First-serve</h4>
+    <p>
+      When a ticket request arrives in the exchange it is placed in line,
+      based on the date and time it was created.
+    </p>
+
+    <h4 id="personal">Keeping it Personal</h4>
+    <p>
+      If you have a ticket, we offer two methods for you to get your ticket
+      to someone who needs it.  
+    </p>
+      
+    <ul>
+      <li>If you choose to <strong>automatch</strong> your ticket, then
+      your ticket will be matched with the first person in line.  This is
+      the easiest and fairest way to distribute tickets.  It is also, a
+      bit impersonal.</li>
+      <li>If you choose to <strong>manually</strong> match your ticket,
+      then you will be presented with a short selection of people from
+      the front of the line from whome you may select the recipient of
+      your ticket</li>
+    </ul>
+
+    <p>
+      With these two options, we hope to have create a ticket exchange that
+      is both fair, and allows for people to personally choose who gets their
+      ticket.
+    </p>
+
+    <h4 id="face">Face Value</h4>
+    <p>
+      This is something that we cannot at this time directly control,
+      though our hope is that a centralized exchange should help facilitate
+      keeping tickets in the hands of the people who respect our community's
+      choice to not engage in ticket scalping.
+    </p>
+
+    <h3 id="how">How It Works</h3>
+
+    <p>
+      Ladder is a simple system for matching people in need of a ticket to
+      people who have an extra ticket, or no longer need their ticket.
+    </p>
+
+    <h4 id="register">Registration</h4>
+
+    <p>
+      Registration requires a unique email address and phone number capable
+      of receiving SMS messages.  When you first register, you will be sent a
+      special link allowing you to complete your registration.  This is the
+      first step in verifying you have access to the given email address.
+    </p>
+    
+    <p>
+      By visiting the provided link, you can then send a confirmation code to
+      your provided phone number, allowing us to verify that you have access
+      to that phone number.
+    </p>
+
+    <p>
+      The reason for requiring this level of verification is to help
+      prevent abuse, as well as ensuring that we are able to connect people
+      who need tickets with the people who have them.
+    </p>
+
+    <h4 id="request">Requesting a Ticket</h4>
+
+    <p>
+      Need a ticket?  You've come to the right place!  Once you've 
+      <a href="{% url 'register' %}">registered</a> an account with the exchange, you can 
+      <a href="{% url 'request_create' %}">initiate a ticket request</a>.
+    </p>
+
+    <p>
+      The exchange will ask you to type out a short message to go along
+      with your ticket request.  In the event that someone decides to
+      manually choose the recipient of their ticket, this message will be
+      displayed to them.
+    </p>
+
+    <p>
+      Once you have initiated your request, all you need to do is wait.
+      Your place in line is secured, and when a ticket becomes available
+      you will be notified by email.
+    </p>
+
+    <h4 id="accept">Accepting a Ticket</h4>
+
+    <p>
+      When a match has been found, you will recieve an email asking you to
+      accept the ticket.  From the time the match is found, you will have
+      <strong>48 hours</strong> to accept.  Upon accepting, both you and
+      the person offering the ticket will be sent an email with each
+      other's contact information.  At this point, it is up to you and the
+      ticket holder to negotiate the transfer of the ticket.
+    </p>
+
+    <p>
+      If you fail to accept with the 48 hour window, you will lose your
+      place in line and the ticket offered to you will be given to someone
+      else.
+    </p>
+
+
+    <h4 id="offer">Offering a Ticket</h4>
+
+    <p>
+      Have an extra ticket?  You've come to the right place!  Once you've 
+      <a href="{% url 'register' %}">registered</a> an account with the exchange, you can 
+      <a href="{% url 'offer_create' %}">offer a ticket</a> on the exchange.
+    </p>
+
+    <p>
+      Upon offering a ticket, you will be asked to choose whether you would
+      like your ticket to be automatically matched with the first person in
+      line, or whether you would like to manually select the recipient.  We
+      <em>strongly</em> recommend you choose <strong>automatch</strong>.
+    </p>
+
+    <p>
+      Once you have either chosen the recipient, or been matched, all you
+      need to do is wait.  We will send the recipient a message informing
+      them they need to accept your ticket within 48 hours. Once they have
+      accepted, both you and the recipient will receive an email with each
+      other's contact information.  At this point, it is up to you and the
+      ticket holder to negotiate the transfer of the ticket.
+    </p>
+
+    <p>
+      In the event that the recipient fails to respond within 48 hours,
+      your ticket will be offered to the next person in line.
+    </p>
+  </div>
+{% endblock %}

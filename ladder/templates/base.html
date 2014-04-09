@@ -32,14 +32,16 @@
       <ul class="nav">
         {% if user.is_authenticated %}
           <li><a href="{% url 'dashboard' %}">Exchange</a></li>
-          {% if user.is_admin %}
-            <li><a href="{% url 'admin:index' %}">Admin</a></li>
-          {% endif %}
+          <li><a href="{% url 'about' %}">About</a></li>
+          <li><a href="{% url 'faq' %}">FAQ</a></li>
         {% endif %}
       </ul>
       <ul class="nav pull-right">
         {% if user.is_authenticated %}
           <li><a href="{% url 'logout' %}">Logout</a></li>
+          {% if user.is_admin %}
+            <li><a href="{% url 'admin:index' %}">Admin</a></li>
+          {% endif %}
         {% else %}
           <li><a href="{% url 'login' %}">Login</a></li>
           <li><a href="{% url 'register' %}">Register</a></li>

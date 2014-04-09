@@ -2,6 +2,8 @@ from django.conf.urls import patterns, include, url
 from django.conf import settings
 from django.views.generic import TemplateView
 
+from ladder import views
+
 
 urlpatterns = patterns(
     '',
@@ -13,7 +15,9 @@ urlpatterns = patterns(
     ),
 
     # Site Urls
-    url(r'^$', 'ladder.views.index', name='site_index'),
+    url(r'^$', views.SiteIndexView.as_view(), name='site_index'),
+    url(r'^about/$', views.AboutView.as_view(), name='about'),
+    url(r'^faq/$', views.FAQView.as_view(), name='faq'),
 )
 
 # Auth Urls

@@ -4,4 +4,10 @@ from django.views.generic.base import TemplateView
 class SiteIndexView(TemplateView):
     template_name = 'index.html'
 
-index = SiteIndexView.as_view()
+
+class AboutView(TemplateView):
+    template_name = 'about.html'
+
+
+class FAQView(TemplateView):
+    template_name = 'faq.html'
