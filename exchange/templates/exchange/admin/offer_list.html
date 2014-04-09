@@ -21,13 +21,9 @@
           <td>
             <a href="{% url 'admin:offer_detail' pk=ticket_offer.pk %}">{{ ticket_offer.pk }}</a>
           </td>
-          <td>
-            <a href="{% url 'admin:user_detail' pk=ticket_offer.user.pk %}">{{ ticket_offer.user }}</a>
-          </td>
+          <td>{{ ticket_offer.user }}</td>
           <td><span class="badge">{{ ticket_offer.is_automatch|yesno:'Automatch,Manual' }}</td>
-          <td>
-            {{ ticket_offer.get_status_display }}
-          </td>
+          <td>{{ ticket_offer.get_status_display }}</td>
           <td>
             <a href="{% url 'admin:offer_detail' pk=ticket_offer.pk %}">Details</a>
             {% if ticket_offer.is_fulfilled %}

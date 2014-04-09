@@ -20,12 +20,8 @@
           <td>
             <a href="{% url 'admin:request_detail' pk=ticket_request.pk %}">{{ ticket_request.pk }}</a>
           </td>
-          <td>
-            <a href="{% url 'admin:user_detail' pk=ticket_request.user.pk %}">{{ ticket_request.user }}</a>
-          </td>
-          <td>
-            {{ ticket_request.get_status_display }}
-          </td>
+          <td>{{ ticket_request.user }}</td>
+          <td>{{ ticket_request.get_status_display }}</td>
           <td>
             <a href="{% url 'admin:request_detail' pk=ticket_request.pk %}">Details</a>
             {% if ticket_request.is_fulfilled %}

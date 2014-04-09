@@ -12,6 +12,9 @@
         <th>Email</th>
         <th>Display Name</th>
         <th>Phone Number</th>
+        <th>Date Joined</th>
+        <th>Num Requests</th>
+        <th>Num Offers</th>
       </tr>
     </thead>
     <tbody>
@@ -23,6 +26,9 @@
             {% if ladder_user.is_admin %} <span class="badge badge-info">Admin</span>{% endif %}</td>
           <td>{{ ladder_user.display_name }}</td>
           <td>{{ ladder_user.profile.phone_number }}</td>
+          <td>{{ ladder_user.date_joined }}</td>
+          <td>{{ ladder_user.ticket_requests.count }}</td>
+          <td>{{ ladder_user.ticket_offers.count }}</td>
         </tr>
       {% empty %}
       <tr><td>-</td><td colspan="4">No Users</td></tr>

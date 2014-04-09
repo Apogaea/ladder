@@ -253,7 +253,7 @@ class TicketMatch(TimestampableModel):
         elif self.ticket_offer.is_cancelled:
             return 'Ticket Offer Cancelled'
         elif self.is_accepted:
-            return 'Completed'
+            return 'Accepted'
         elif self.is_awaiting_confirmation:
             return 'Awaiting Confirmation'
         elif self.is_expired:

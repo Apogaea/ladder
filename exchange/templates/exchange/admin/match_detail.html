@@ -13,13 +13,9 @@
         <dt>Id:</dt>
         <dd>{{ ticket_match.pk }}</dd>
         <dt>Offering User:</dt>
-        <dd>
-          <a href="{% url 'admin:user_change' pk=ticket_match.ticket_offer.user.pk %}">{{ ticket_match.ticket_offer.user }}</a>
-        </dd>
+        <dd>{{ ticket_match.ticket_offer.user }}</dd>
         <dt>Requesting User:</dt>
-        <dd>
-          <a href="{% url 'admin:user_change' pk=ticket_match.ticket_request.user.pk %}">{{ ticket_match.ticket_request.user }}</a>
-        </dd>
+        <dd>{{ ticket_match.ticket_request.user }}</dd>
         <dt>Created:</dt>
         <dd>{{ ticket_match.created_at }}</dd>
         <dt>Status:</dt>
