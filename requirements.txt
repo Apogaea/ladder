@@ -17,3 +17,4 @@ pylibmc==1.4.1
 django-authtools==1.0.0
 django-secure==1.0.1
 django-cache-url==0.8.0
+django-s3-folder-storage==0.2

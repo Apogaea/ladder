@@ -77,7 +77,33 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
 )
+
+# Django Pipeline Settings
+PIPELINE_DISABLE_WRAPPER = excavator.env_bool(
+    'DJANGO_PIPELINE_DISABLE_WRAPPER', default=True,
+)
+PIPELINE_ENABLED = excavator.env_bool('DJANGO_PIPELINE_ENABLED', default=not DEBUG)
+PIPELINE_CSS = {
+    'base': {
+        'source_filenames': (
+            "css/bootstrap.css",
+        ),
+        'output_filename': 'base.css',
+    },
+}
+
+PIPELINE_JS = {
+    'base': {
+        'source_filenames': (
+            "js/checkout.js",
+        ),
+        'output_filename': 'base.js',
+    },
+}
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 
 # Production installs need to have this environment variable set
 SECRET_KEY = excavator.env_string('DJANGO_SECRET_KEY', required=True)
@@ -125,7 +151,7 @@ DEFAULT_ACCEPT_TIME = 2 * ONE_DAY_IN_SECONDS
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'ladder.wsgi.application'
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -134,19 +160,26 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
-    # Toolbox
-    'compressor',
-    'django_extensions',
-    'storages',
-    'authtools',
-    'raven.contrib.django.raven_compat',
-
     # Main App
     'ladder',
+
     # Project Apps
     'accounts',
     'exchange',
-)
+
+    # 3rd Party
+    'pipeline',
+    'storages',
+    'authtools',
+    'raven.contrib.django.raven_compat',
+    's3_folder_storage',
+]
+
+if DEBUG:
+    INSTALLED_APPS += [
+        'django_extensions',
+        'debug_toolbar',
+    ]
 
 SESSION_COOKIE_HTTPONLY = True
 
@@ -169,6 +202,9 @@ EMAIL_USE_SSL = excavator.env_bool('EMAIL_USE_SSL')
 AWS_ACCESS_KEY_ID = excavator.env_string('AWS_ACCESS_KEY_ID', required==True)
 AWS_SECRET_ACCESS_KEY = excavator.env_string'AWS_SECRET_ACCESS_KEY', required==True)
 AWS_STORAGE_BUCKET_NAME = excavator.env_string'AWS_STORAGE_BUCKET_NAME', required==True)
+
+DEFAULT_S3_PATH = "media"
+STATIC_S3_PATH = "static"
 
 # TODO: is this stuff needed?
 AWS_REDUCED_REDUNDANCY = True
@@ -200,3 +236,48 @@ TEMPLATE_LOADERS = (
 RAVEN_CONFIG = {
     'dsn': excavator.env_string('SENTRY_DSN', default=None)
 }
+
+# django-rest-framework configuration.
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.DjangoModelPermissions',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ),
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    # -- Global Pagination --
+    # Default to 10
+    'PAGINATE_BY': 10,
+    # Allow client to override, using `?page_size=xxx`.
+    'PAGINATE_BY_PARAM': 'page_size',
+    # Maximum limit allowed when using `?page_size=xxx`.
+    'MAX_PAGINATE_BY': 100,
+}
+
+# =============
+# Debug Toolbar
+# =============
+
+# Implicit setup can often lead to problems with circular imports, so we
+# explicitly wire up the toolbar
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'template_timings_panel.panels.TemplateTimings.TemplateTimings',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+]
