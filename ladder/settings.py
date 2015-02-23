@@ -65,11 +65,11 @@ STATICFILES_STORAGE = excavator.env_string(
 )
 
 # User-uploaded files
-MEDIA_ROOT = excavator.env_string('DJANGO_MEDIA_ROOT')
+MEDIA_ROOT = excavator.env_string('DJANGO_MEDIA_ROOT', required=True)
 MEDIA_URL = excavator.env_string('DJANGO_MEDIA_URL', default='/media/')
 
 # Static files
-STATIC_ROOT = excavator.env_string('DJNGO_STATIC_ROOT')
+STATIC_ROOT = excavator.env_string('DJANGO_STATIC_ROOT', required=True)
 STATIC_URL = excavator.env_string('DJANGO_STATIC_URL', default='/static/')
 
 # Additional locations of static files
@@ -96,6 +96,8 @@ PIPELINE_CSS = {
     'base': {
         'source_filenames': (
             "css/bootstrap.css",
+            "css/bootstrap-responsive.css",
+            "css/ladder.css",
         ),
         'output_filename': 'base.css',
     },
@@ -104,7 +106,10 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'base': {
         'source_filenames': (
-            "js/checkout.js",
+            "js/jquery-2.1.0.js",
+            "js/underscore-1.6.0.js",
+            "js/bootstrap.js",
+            "js/ladder.js",
         ),
         'output_filename': 'base.js',
     },
@@ -237,12 +242,18 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # used cached template loader
 # TODO: bad for dev.
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
+if DEBUG:
+    TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
-    )),
-)
+    )
+else:
+    TEMPLATE_LOADERS = (
+        ('django.template.loaders.cached.Loader', (
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        )),
+    )
 
 # Sentry error reporting.
 RAVEN_CONFIG = {
@@ -293,3 +304,7 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
+
+
+# This is required to silence `1_6.W001` system check.
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'

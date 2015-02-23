@@ -24,7 +24,7 @@ class User(TimestampableModel, AbstractEmailUser):
         try:
             return self._profile
         except ObjectDoesNotExist:
-            from exchange.models import LadderProfile
+            from ladder.apps.exchange.models import LadderProfile
             return LadderProfile.objects.get_or_create(user=self)[0]
 
     @property

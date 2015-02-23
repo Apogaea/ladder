@@ -9,9 +9,22 @@ from django_webtest import (
 @pytest.fixture()  # NOQA
 def factories(db):
     import factory
-    #from tests.accounts.factories import (  # NOQA
-    #    UserFactory,
-    #)
+
+    from tests.accounts.factories import (  # NOQA
+        UserFactory,
+        SuperUserFactory,
+        SuperUserWithProfileFactory,
+        UserWithProfileFactory,
+    )
+
+    from tests.exchange.factories import (  # NOQA
+        LadderProfileFactory,
+        TicketRequestFactory,
+        TicketOfferFactory,
+        TicketMatchFactory,
+        AcceptedTicketMatchFactory,
+        ExpiredTicketMatchFactory,
+    )
 
     def is_factory(obj):
         if not isinstance(obj, type):
@@ -95,7 +108,7 @@ def admin_user(User):
         return User.objects.create_superuser(
             display_name='admin',
             email='admin@example.com',
-            password='password',
+            password='secret',
         )
 
 
@@ -109,5 +122,12 @@ def user(User):
         return User.objects.create_user(
             display_name='Test User',
             email='test@example.com',
-            password='password',
+            password='secret',
         )
+
+
+@pytest.fixture()
+def user_client(user, client):
+    assert client.login(username=user.email, password='secret')
+    client.user = user
+    return client

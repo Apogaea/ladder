@@ -2,13 +2,11 @@ from django.db.models.signals import post_save
 
 import factory
 
-from accounts.models import User
-from exchange.models import create_ladder_profile
+from ladder.apps.accounts.models import User
+from ladder.apps.exchange.receivers import create_ladder_profile
 
 
 class UserFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = User
-
     is_active = True
     email = factory.Sequence(lambda i: 'test-{0}@example.com'.format(i))
 
@@ -24,6 +22,9 @@ class UserFactory(factory.DjangoModelFactory):
         post_save.connect(create_ladder_profile, User)
         return user
 
+    class Meta:
+        model = User
+
 
 class SuperUserFactory(UserFactory):
     is_superuser = True
@@ -31,8 +32,8 @@ class SuperUserFactory(UserFactory):
 
 
 class UserWithProfileFactory(UserFactory):
-    _profile = factory.RelatedFactory('exchange.tests.factories.LadderProfileFactory', 'user')
+    _profile = factory.RelatedFactory('tests.exchange.factories.LadderProfileFactory', 'user')
 
 
 class SuperUserWithProfileFactory(SuperUserFactory):
-    _profile = factory.RelatedFactory('exchange.tests.factories.LadderProfileFactory', 'user')
+    _profile = factory.RelatedFactory('tests.exchange.factories.LadderProfileFactory', 'user')
