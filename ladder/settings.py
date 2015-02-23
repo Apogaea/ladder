@@ -1,6 +1,9 @@
 # Django settings for ladder project.
 import os
 import excavator
+import django_cache_url
+import dj_database_url
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -12,12 +15,10 @@ DEFAULT_FROM_EMAIL = 'ladder@apogaea.com'
 
 MANAGERS = ADMINS
 
-import herokuify
-
 DEBUG = TEMPATE_DEBUG = excavator.env_bool('DJANGO_DEBUG', default=False)
 
 # Allowed Hosts
-ALLOWED_HOSTS = excavator.env_list('DJANGO_ALLOWED_HOSTS', required=True)
+ALLOWED_HOSTS = excavator.env_list('DJANGO_ALLOWED_HOSTS', required=not DEBUG)
 
 
 # Database setup
@@ -54,8 +55,14 @@ USE_L10N = True
 USE_TZ = True
 
 # File Storage
-DEFAULT_FILE_STORAGE = excavator.env_string('DJANGO_DEFAULT_FILE_STORAGE', required=True)
-STATICFILES_STORAGE = excavator.env_string('DJANGO_STATICFILES_STORAGE', required=True)
+DEFAULT_FILE_STORAGE = excavator.env_string(
+    'DJANGO_DEFAULT_FILE_STORAGE',
+    default='django.core.files.storage.FileSystemStorage',
+)
+STATICFILES_STORAGE = excavator.env_string(
+    'DJANGO_STATICFILES_STORAGE',
+    default='django.contrib.staticfiles.storage.StaticFilesStorage',
+)
 
 # User-uploaded files
 MEDIA_ROOT = excavator.env_string('DJANGO_MEDIA_ROOT')
@@ -161,11 +168,11 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     # Main App
-    'ladder',
+    'ladder.core',
 
     # Project Apps
-    'accounts',
-    'exchange',
+    'ladder.apps.accounts',
+    'ladder.apps.exchange',
 
     # 3rd Party
     'pipeline',
@@ -199,9 +206,9 @@ EMAIL_USE_SSL = excavator.env_bool('EMAIL_USE_SSL')
 
 
 # AWS Config
-AWS_ACCESS_KEY_ID = excavator.env_string('AWS_ACCESS_KEY_ID', required==True)
-AWS_SECRET_ACCESS_KEY = excavator.env_string'AWS_SECRET_ACCESS_KEY', required==True)
-AWS_STORAGE_BUCKET_NAME = excavator.env_string'AWS_STORAGE_BUCKET_NAME', required==True)
+AWS_ACCESS_KEY_ID = excavator.env_string('AWS_ACCESS_KEY_ID', default=None)
+AWS_SECRET_ACCESS_KEY = excavator.env_string('AWS_SECRET_ACCESS_KEY', default=None)
+AWS_STORAGE_BUCKET_NAME = excavator.env_string('AWS_STORAGE_BUCKET_NAME', default=None)
 
 DEFAULT_S3_PATH = "media"
 STATIC_S3_PATH = "static"
@@ -218,7 +225,9 @@ AWS_HEADERS = {
 }
 
 # Cache setup
-CACHES = herokuify.get_cache_config()
+CACHES = {
+    'default': django_cache_url.config(),
+}
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

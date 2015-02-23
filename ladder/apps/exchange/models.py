@@ -2,16 +2,14 @@ import datetime
 
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import post_save
 from django.utils import timezone
 from django.conf import settings
-from localflavor.us import models as us_models
 from django.utils.functional import cached_property
 from django.core.urlresolvers import reverse
 
-from ladder.models import TimestampableModel
+from localflavor.us import models as us_models
 
-from accounts.models import User
+from ladder.core.abstract_models import TimestampableModel
 
 
 def default_match_expiration():
@@ -123,7 +121,7 @@ class TicketRequestQuerySet(MatchQuerySet):
 
 
 class TicketRequest(BaseMatchModel):
-    user = models.ForeignKey(User, related_name='ticket_requests')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='ticket_requests')
     message = models.TextField(max_length=1000)
 
     objects = TicketRequestQuerySet.as_manager()
@@ -148,7 +146,7 @@ class TicketRequest(BaseMatchModel):
 
 
 class TicketOffer(BaseMatchModel):
-    user = models.ForeignKey(User, related_name='ticket_offers')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='ticket_offers')
 
     is_automatch = models.BooleanField(blank=True, default=True)
 
@@ -264,7 +262,7 @@ class TicketMatch(TimestampableModel):
 
 
 class LadderProfile(models.Model):
-    user = models.OneToOneField('accounts.User', related_name='_profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='_profile')
     phone_number = us_models.PhoneNumberField("Phone Number", max_length=255,
                                               help_text=u"US Phone Number (XXX-XXX-XXXX)",
                                               unique=True)
@@ -293,12 +291,3 @@ class LadderProfile(models.Model):
         elif self.user.ticket_offers.is_reserved().exists():
             return False
         return True
-
-
-def create_ladder_profile(sender, instance, created, raw, **kwargs):
-    if created and not raw:
-        LadderProfile.objects.get_or_create(user=instance)
-
-# Connect to the post_save signal of our `User` model to create a blank
-# LadderProfile.
-post_save.connect(create_ladder_profile, sender=User)

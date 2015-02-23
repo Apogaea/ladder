@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from authtools.models import AbstractEmailUser
 
-from ladder.models import TimestampableModel
+from ladder.core.abstract_models import TimestampableModel
 
 
 class User(TimestampableModel, AbstractEmailUser):
