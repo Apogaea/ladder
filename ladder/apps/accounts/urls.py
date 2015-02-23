@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from accounts import views
+from ladder.apps.accounts import views
 
 urlpatterns = patterns('',  # NOQA
     url(r'^$', views.DashboardView.as_view(), name='dashboard'),

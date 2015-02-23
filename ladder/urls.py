@@ -1,8 +1,9 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from django.views.generic import TemplateView
+from django.conf.urls.static import static
 
-from ladder import views
+from ladder.core import views
 
 
 urlpatterns = patterns(
@@ -44,18 +45,19 @@ urlpatterns += patterns(
 urlpatterns += patterns(
     '',
     # Accounts Urls
-    url(r'^account/', include('accounts.urls')),
+    url(r'^account/', include('ladder.apps.accounts.urls')),
 
     # Exchange Urls
-    url(r'^exchange/', include('exchange.urls')),
+    url(r'^exchange/', include('ladder.apps.exchange.urls')),
 
     # Admin Urls
-    url(r'^admin/', include('ladder.admin.urls', namespace='admin')),
+    url(r'^admin/', include('ladder.core.admin.urls', namespace='admin')),
 )
 
 if settings.DEBUG:
-    urlpatterns += patterns(
-        '',
-        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-        url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
+    import debug_toolbar
+    urlpatterns += patterns('',  # NOQA
+        url(r'^__debug__/', include(debug_toolbar.urls)),
     )
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

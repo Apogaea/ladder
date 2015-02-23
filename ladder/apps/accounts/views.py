@@ -11,12 +11,12 @@ from betterforms.forms import BetterForm
 
 from authtools.views import LoginRequiredMixin
 
-from accounts.forms import UserChangeForm, InitiateRegistrationForm, UserCreationForm
-from accounts.utils import (
+from ladder.apps.accounts.forms import UserChangeForm, InitiateRegistrationForm, UserCreationForm
+from ladder.apps.accounts.utils import (
     unsign_registration_token, send_phone_number_verification_sms,
 )
-from accounts.models import User
-from accounts.emails import send_registration_verification_email
+from ladder.apps.accounts.models import User
+from ladder.apps.accounts.emails import send_registration_verification_email
 
 logger = logging.getLogger(__name__)
 

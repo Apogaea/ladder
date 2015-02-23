@@ -7,7 +7,7 @@ from localflavor.us.forms import USPhoneNumberField
 
 from betterforms.forms import BetterForm, BetterModelForm
 
-from accounts.utils import generate_phone_number_code
+from ladder.apps.accounts.utils import generate_phone_number_code
 
 
 class InitiateRegistrationForm(BetterForm):

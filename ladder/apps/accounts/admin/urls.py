@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from accounts.admin import views
+from ladder.apps.accounts.admin import views
 
 urlpatterns = patterns('',  # NOQA
     url(r'^users/$', views.AdminUserListView.as_view(), name='user_list'),

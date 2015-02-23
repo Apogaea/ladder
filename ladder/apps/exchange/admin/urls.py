@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 
-from exchange.admin import views
+from ladder.apps.exchange.admin import views
+
 
 urlpatterns = patterns('',  # NOQA
     # Ticket Offers

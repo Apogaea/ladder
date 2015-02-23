@@ -11,15 +11,15 @@ from django.core.urlresolvers import reverse, reverse_lazy
 
 from authtools.views import LoginRequiredMixin
 
-from exchange.models import (
+from ladder.apps.exchange.models import (
     TicketOffer, TicketRequest, TicketMatch
 )
-from exchange.forms import (
+from ladder.apps.exchange.forms import (
     TicketOfferForm, TicketRequestForm, NoFieldsTicketOfferForm,
     SelectTicketRequestForm, NoFieldsTicketRequestForm,
     NoFieldsTicketMatchForm,
 )
-from exchange.emails import (
+from ladder.apps.exchange.emails import (
     send_match_confirmation_email, send_request_fulfilled_email,
     send_offer_accepted_email,
 )

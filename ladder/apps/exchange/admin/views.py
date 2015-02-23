@@ -5,11 +5,17 @@ from django.core.urlresolvers import reverse
 
 from betterforms.views import BrowseView
 
-from ladder.decorators import AdminRequiredMixin
+from ladder.core.decorators import AdminRequiredMixin
 
-from exchange.models import TicketOffer, TicketRequest, TicketMatch
-from exchange.admin.forms import (
-    OfferChangeListForm, RequestChangeListForm, MatchChangeListForm,
+from ladder.apps.exchange.models import (
+    TicketOffer,
+    TicketRequest,
+    TicketMatch,
+)
+from ladder.apps.exchange.admin.forms import (
+    OfferChangeListForm,
+    RequestChangeListForm,
+    MatchChangeListForm,
 )
 
 

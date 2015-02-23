@@ -1,8 +1,11 @@
 from django import forms
 
-from betterforms.forms import BetterModelForm, BetterForm
+from betterforms.forms import (
+    BetterModelForm,
+    BetterForm,
+)
 
-from exchange.models import (
+from ladder.apps.exchange.models import (
     TicketOffer, TicketRequest, TicketMatch,
 )
 

@@ -7,9 +7,12 @@ User = get_user_model()
 
 from betterforms.views import BrowseView
 
-from ladder.decorators import AdminRequiredMixin
+from ladder.core.decorators import AdminRequiredMixin
 
-from accounts.admin.forms import UserChangeListForm, UserChangeForm
+from ladder.apps.accounts.admin.forms import (
+    UserChangeListForm,
+    UserChangeForm,
+)
 
 
 class AdminUserListView(AdminRequiredMixin, BrowseView):

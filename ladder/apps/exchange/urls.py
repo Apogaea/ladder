@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 
-from exchange import views
+from ladder.apps.exchange import views
+
 
 urlpatterns = patterns(
     'exchange.views',

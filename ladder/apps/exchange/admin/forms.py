@@ -1,6 +1,10 @@
 from betterforms.changelist import SearchForm
 
-from exchange.models import TicketOffer, TicketRequest, TicketMatch
+from ladder.apps.exchange.models import (
+    TicketOffer,
+    TicketRequest,
+    TicketMatch,
+)
 
 
 class OfferChangeListForm(SearchForm):

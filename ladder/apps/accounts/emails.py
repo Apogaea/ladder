@@ -1,8 +1,8 @@
 from emailtools import mixins
 
-from accounts.utils import reverse_registration_url
+from ladder.apps.accounts.utils import reverse_registration_url
 
-from ladder.emails import LadderEmail
+from ladder.core.emails import LadderEmail
 
 
 class RegistrationVerificationEmail(mixins.BuildAbsoluteURIMixin, LadderEmail):

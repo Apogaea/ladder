@@ -8,7 +8,7 @@ User = get_user_model()
 
 from authtools.views import LoginView
 
-from ladder.decorators import AdminRequiredMixin
+from ladder.core.decorators import AdminRequiredMixin
 
 
 class AdminIndexView(AdminRequiredMixin, TemplateView):
