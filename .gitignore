@@ -61,10 +61,10 @@ target/
 *.sqlite3
 
 # Static Files
-marketplace/public/**
+ladder/public/**
 !.gitkeep
-!marketplace/public/static
-!marketplace/public/media
+!ladder/public/static
+!ladder/public/media
 
 # Environmental Configuration
 .env
@@ -72,4 +72,3 @@ marketplace/public/**
 # Whoosh
 **/whoosh_index
 static_assets/static/**
-marketplace/version.txt

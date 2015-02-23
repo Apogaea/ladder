@@ -76,3 +76,18 @@ and/or email, and given 48 hours to confirm the match.
 
 This app relies heavily on Twilio to interact with users via SMS and phone
 calls.
+
+
+## Update TODO:
+
+- configure `pipeline`
+- configure `django-secure`
+- consolodate settings modules.
+- django 1.7 updates.
+- pytest-ify tests.
+- fix static asset locations.
+- fix in-page js for create listing.
+- update travis to use tox.
+- flake8 things.
+- remove herokuify.
+- update wsgi app for 1.7
