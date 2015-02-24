@@ -3,8 +3,6 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
-User = get_user_model()
-
 from betterforms.views import BrowseView
 
 from ladder.core.decorators import AdminRequiredMixin
@@ -13,6 +11,8 @@ from ladder.apps.accounts.admin.forms import (
     UserChangeListForm,
     UserChangeForm,
 )
+
+User = get_user_model()
 
 
 class AdminUserListView(AdminRequiredMixin, BrowseView):

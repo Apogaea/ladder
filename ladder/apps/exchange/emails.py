@@ -14,7 +14,9 @@ class MatchConfirmationEmail(BuildAbsoluteURIMixin, LadderEmail):
         kwargs = super(MatchConfirmationEmail, self).get_context_data(**kwargs)
         ticket_match = self.args[0]
         kwargs.update({
-            'confirm_url': self.reverse_absolute_uri('match-confirm', kwargs={'pk': ticket_match.pk}),
+            'confirm_url': self.reverse_absolute_uri(
+                'match-confirm', kwargs={'pk': ticket_match.pk},
+            ),
             'ticket_match': ticket_match,
             'ticket_request': ticket_match.ticket_request,
             'ticket_offer': ticket_match.ticket_offer,

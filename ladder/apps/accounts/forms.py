@@ -1,13 +1,14 @@
 from django import forms
+from django.utils import timezone
 from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 from localflavor.us.forms import USPhoneNumberField
 
 from betterforms.forms import BetterForm, BetterModelForm
 
 from ladder.apps.accounts.utils import generate_phone_number_code
+
+User = get_user_model()
 
 
 class InitiateRegistrationForm(BetterForm):
@@ -81,4 +82,5 @@ class UserCreationForm(BetterModelForm):
 
     def save(self, commit=True):
         self.instance.set_password(self.cleaned_data["password1"])
+        self.instance.last_login = timezone.now()
         return super(UserCreationForm, self).save(commit)

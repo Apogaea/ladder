@@ -51,9 +51,16 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
                 )
                 # Send an email to the ticket requester with a confirmation link.
                 send_match_confirmation_email(match)
-                messages.success(self.request, "Your ticket offer has been matched with a ticket request.")
+                messages.success(
+                    self.request, "Your ticket offer has been matched with a ticket request.",
+                )
             except IndexError:
-                messages.success(self.request, "Your ticket offer has been created and will be automatically matched to the next ticket request that enters the system")
+                messages.success(
+                    self.request,
+                    "Your ticket offer has been created and will be "
+                    "automatically matched to the next ticket request that "
+                    "enters the system",
+                )
             return redirect(self.get_success_url())
         return redirect(reverse('offer-select-recipient', kwargs={'pk': ticket_offer.pk}))
 
@@ -83,7 +90,11 @@ class OfferToggleAutomatchView(LoginRequiredMixin, UpdateView):
         form.instance.is_automatch = not form.instance.is_automatch
         self.object = form.save()
         if form.instance.is_automatch:
-            messages.success(self.request, 'Your ticket offer has been switched to Automatic Matching and will be matched with the next ticket request in line.')
+            messages.success(
+                self.request,
+                'Your ticket offer has been switched to Automatic Matching and '
+                'will be matched with the next ticket request in line.',
+            )
             return super(OfferToggleAutomatchView, self).form_valid(form)
         else:
             return redirect(reverse(
@@ -123,7 +134,9 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
         )
 
     def get_ticket_request_queryset(self):
-        front_of_line = TicketRequest.objects.is_active().order_by('created_at')[:3].values_list('pk', flat=True)
+        front_of_line = TicketRequest.objects.is_active().order_by(
+            'created_at',
+        )[:3].values_list('pk', flat=True)
         return TicketRequest.objects.is_active().filter(pk__in=front_of_line)
 
     def get_form(self, form_class):
@@ -146,7 +159,11 @@ class OfferSelectRecipientView(LoginRequiredMixin, FormView):
             ticket_request=ticket_request,
             ticket_offer=ticket_offer,
         )
-        messages.success(self.request, 'The ticket requester has been contacted.  Once they accept your ticket, we will put both of you in touch with each other')
+        messages.success(
+            self.request,
+            'The ticket requester has been contacted.  Once they accept your '
+            'ticket, we will put both of you in touch with each other',
+        )
         send_match_confirmation_email(ticket_match)
         return redirect(ticket_offer.get_absolute_url())
 
@@ -169,7 +186,9 @@ class RequestCreateView(LoginRequiredMixin, CreateView):
         # Possible race condition here.  Two requests are created at almost
         # the same time.  The same offer may be matched with two requests.
         try:
-            ticket_offer = TicketOffer.objects.is_active().filter(is_automatch=True).order_by('created_at')[0]
+            ticket_offer = TicketOffer.objects.is_active().filter(
+                is_automatch=True,
+            ).order_by('created_at')[0]
             ticket_match = TicketMatch.objects.create(
                 ticket_offer=ticket_offer,
                 ticket_request=ticket_request,
@@ -177,7 +196,11 @@ class RequestCreateView(LoginRequiredMixin, CreateView):
             messages.success(self.request, "Your request has been matched with a ticket.")
             return redirect(reverse('match-confirm', kwargs={'pk': ticket_match.pk}))
         except IndexError:
-            messages.success(self.request, "Your request has been created.  You will be notified as soon as we find a ticket for you.")
+            messages.success(
+                self.request,
+                "Your request has been created.  You will be notified as soon "
+                "as we find a ticket for you.",
+            )
         return redirect(ticket_request.get_absolute_url())
 
 

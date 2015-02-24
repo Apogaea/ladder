@@ -24,12 +24,13 @@ class MatchQuerySet(models.QuerySet):
         )
 
     def is_reserved(self):
+        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
         return self.exclude(
             matches__accepted_at__isnull=False,
             matches__is_terminated=False,
         ).filter(
             matches__accepted_at__isnull=True,
-            matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            matches__created_at__gt=cutoff,
             matches__is_terminated=False,
             matches__ticket_request__is_cancelled=False,
             matches__ticket_request__is_terminated=False,
@@ -38,6 +39,7 @@ class MatchQuerySet(models.QuerySet):
         )
 
     def is_active(self):
+        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
         return self.exclude(
             Q(is_cancelled=True) | Q(is_terminated=True)
         ).exclude(
@@ -45,7 +47,7 @@ class MatchQuerySet(models.QuerySet):
             matches__is_terminated=False,
         ).exclude(
             matches__accepted_at__isnull=True,
-            matches__created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            matches__created_at__gt=cutoff,
             matches__is_terminated=False,
             matches__ticket_request__is_cancelled=False,
             matches__ticket_request__is_terminated=False,
@@ -73,6 +75,7 @@ class BaseMatchModel(TimestampableModel):
 
     @cached_property
     def is_reserved(self):
+        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
         return self.matches.exclude(
             accepted_at__isnull=False,
             is_terminated=False,
@@ -83,7 +86,7 @@ class BaseMatchModel(TimestampableModel):
             ticket_offer__is_terminated=False,
             accepted_at__isnull=True,
             is_terminated=False,
-            created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            created_at__gt=cutoff,
         ).exists()
 
     def get_status_display(self):
@@ -109,9 +112,10 @@ class BaseMatchModel(TimestampableModel):
 
 class TicketRequestQuerySet(MatchQuerySet):
     def is_active(self):
+        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
         return super(TicketRequestQuerySet, self).is_active().exclude(
             matches__accepted_at__isnull=True,
-            matches__created_at__lt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            matches__created_at__lt=cutoff,
             matches__is_terminated=False,
             matches__ticket_request__is_cancelled=False,
             matches__ticket_request__is_terminated=False,
@@ -175,10 +179,11 @@ class TicketMatchQuerySet(models.QuerySet):
         )
 
     def is_awaiting_confirmation(self):
+        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
         return self.filter(
             accepted_at__isnull=True,
             is_terminated=False,
-            created_at__gt=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            created_at__gt=cutoff,
             ticket_request__is_cancelled=False,
             ticket_request__is_terminated=False,
             ticket_offer__is_cancelled=False,
@@ -186,10 +191,11 @@ class TicketMatchQuerySet(models.QuerySet):
         )
 
     def is_expired(self):
+        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
         return self.filter(
             accepted_at__isnull=True,
             is_terminated=False,
-            created_at__lte=timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            created_at__lte=cutoff,
             ticket_request__is_cancelled=False,
             ticket_request__is_terminated=False,
             ticket_offer__is_cancelled=False,
@@ -213,10 +219,11 @@ class TicketMatch(TimestampableModel):
 
     @cached_property
     def is_awaiting_confirmation(self):
+        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
         return all((
             self.accepted_at is None,
             self.is_terminated is False,
-            self.created_at > timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            self.created_at > cutoff,
             self.ticket_request.is_cancelled is False,
             self.ticket_request.is_terminated is False,
             self.ticket_offer.is_cancelled is False,
@@ -225,10 +232,11 @@ class TicketMatch(TimestampableModel):
 
     @cached_property
     def is_expired(self):
+        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
         return all((
             self.accepted_at is None,
             self.is_terminated is False,
-            self.created_at < timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME),
+            self.created_at < cutoff,
             self.ticket_request.is_cancelled is False,
             self.ticket_request.is_terminated is False,
             self.ticket_offer.is_cancelled is False,
@@ -272,11 +280,13 @@ class LadderProfile(models.Model):
     #
     @property
     def can_offer_ticket(self):
+        active_offer_count = self.user.ticket_offers.is_active().count()
+        reserved_offer_count = self.user.ticket_offers.is_reserved().count()
         if self.user.ticket_requests.is_active().exists():
             return False
         elif self.user.ticket_requests.is_reserved().exists():
             return False
-        elif self.user.ticket_offers.is_active().count() + self.user.ticket_offers.is_reserved().count() > 4:
+        elif active_offer_count + reserved_offer_count > 4:
             return False
         return True
 

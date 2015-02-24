@@ -52,7 +52,7 @@ def test_token_unsigning():
     assert unsigned_phone == phone
 
 
-def test_registration_link_reversing():
+def test_registration_link_reversing(frozen_now):
     email = 'test@example.com'
     phone = '555-444-3333'
     token = generate_registration_token(email, phone)

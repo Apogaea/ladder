@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db.models.signals import post_save
 
 import factory
@@ -11,6 +12,8 @@ class UserFactory(factory.DjangoModelFactory):
     email = factory.Sequence(lambda i: 'test-{0}@example.com'.format(i))
 
     password = factory.PostGenerationMethodCall('set_password', 'secret')
+
+    last_login = factory.LazyAttribute(lambda u: timezone.now())
 
     @classmethod
     def _generate(cls, create, attrs):

@@ -36,7 +36,7 @@ urlpatterns += patterns(
         name='password_reset_done',  # authtools uses underscore view names.
     ),
     url(
-        r'^password-reset-confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        r'^password-reset-confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',  # NOQA
         'password_reset_confirm_and_login',
         name='password-reset-confirm-and-login',
     ),
