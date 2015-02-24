@@ -20,10 +20,24 @@ class UserChangeForm(BetterModelForm):
         "duplicate_phone_number": "A user with that phone number address already exists",
     }
     phone_number = USPhoneNumberField()
+    max_allowed_matches = forms.IntegerField(
+        help_text=(
+            "This determines the total number of ticket matches that this user "
+            "is authorized to complete.  The default `2` should be sufficient "
+            "for most users, while limiting a malicious user's ability to effect "
+            "the exchange."
+        ),
+    )
 
     class Meta:
         model = User
-        fields = ('email', 'display_name', 'is_active', 'is_superuser')
+        fields = (
+            'email',
+            'display_name',
+            'is_active',
+            'is_superuser',
+            'max_allowed_matches',
+        )
 
     def clean_email(self):
         User = get_user_model()

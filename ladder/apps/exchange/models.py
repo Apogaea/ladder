@@ -283,20 +283,29 @@ class LadderProfile(models.Model):
                                               help_text=u"US Phone Number (XXX-XXX-XXXX)",
                                               unique=True)
 
+    max_allowed_matches = models.PositiveIntegerField(blank=True, default=2)
+
     #
     #  Permission Shortcuts
     #
     @property
     def can_offer_ticket(self):
-        active_offer_count = self.user.ticket_offers.is_active().count()
-        reserved_offer_count = self.user.ticket_offers.is_reserved().count()
         if self.user.ticket_requests.is_active().exists():
             return False
         elif self.user.ticket_requests.is_reserved().exists():
             return False
-        elif active_offer_count + reserved_offer_count > 4:
+        elif self.has_reached_max_allowed_matches:
             return False
         return True
+
+    @property
+    def has_reached_max_allowed_matches(self):
+        active_offer_count = self.user.ticket_offers.is_active().count()
+        reserved_offer_count = self.user.ticket_offers.is_reserved().count()
+        fulfilled_offer_count = self.user.ticket_offers.is_fulfilled().count()
+
+        total_matches = active_offer_count + reserved_offer_count + fulfilled_offer_count
+        return total_matches >= self.max_allowed_matches
 
     @property
     def can_request_ticket(self):
