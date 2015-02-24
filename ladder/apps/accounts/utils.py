@@ -58,7 +58,9 @@ def generate_phone_number_code(phone_number):
 
 
 def send_phone_number_verification_sms(phone_number):
-    message = 'Apogaea Ladder Verification Code: "{0}"'.format(
-        generate_phone_number_code(phone_number),
+    code = generate_phone_number_code(phone_number)
+    message = 'Apogaea Ladder Verification Code: {0} {1}'.format(
+        code[:3], code[3:],
     )
+    logger.info(message)
     return send_twilio_sms(phone_number, message)

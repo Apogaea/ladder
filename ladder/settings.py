@@ -188,6 +188,7 @@ INSTALLED_APPS = [
     'authtools',
     'raven.contrib.django.raven_compat',
     's3_folder_storage',
+    'bootstrap3',
 ]
 
 if DEBUG:
