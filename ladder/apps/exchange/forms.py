@@ -2,7 +2,6 @@ from django import forms
 
 from betterforms.forms import (
     BetterModelForm,
-    BetterForm,
 )
 
 from ladder.apps.exchange.models import (
@@ -46,13 +45,6 @@ class TicketRequestForm(BetterModelForm):
         widgets = {
             'message': forms.Textarea(attrs={'ng-model': 'message'}),
         }
-
-
-class SelectTicketRequestForm(BetterForm):
-    """
-    Form for presenting a user with a choice of ticket requests to fulfill.
-    """
-    ticket_request = forms.ModelChoiceField(queryset=TicketRequest.objects.none())
 
 
 class NoFieldsTicketOfferForm(BetterModelForm):

@@ -1,26 +1,36 @@
 import json
 
 from django.views.generic import (
-    DetailView, CreateView, UpdateView, FormView,
+    DetailView,
+    CreateView,
+    UpdateView,
 )
 from django.contrib import messages
 from django.db.models import Q
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 from django.utils import timezone
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import (
+    reverse,
+    reverse_lazy,
+)
 
 from authtools.views import LoginRequiredMixin
 
 from ladder.apps.exchange.models import (
-    TicketOffer, TicketRequest, TicketMatch
+    TicketOffer,
+    TicketRequest,
+    TicketMatch
 )
 from ladder.apps.exchange.forms import (
-    TicketOfferForm, TicketRequestForm, NoFieldsTicketOfferForm,
-    SelectTicketRequestForm, NoFieldsTicketRequestForm,
+    TicketOfferForm,
+    TicketRequestForm,
+    NoFieldsTicketOfferForm,
+    NoFieldsTicketRequestForm,
     NoFieldsTicketMatchForm,
 )
 from ladder.apps.exchange.emails import (
-    send_match_confirmation_email, send_request_fulfilled_email,
+    send_match_confirmation_email,
+    send_request_fulfilled_email,
     send_offer_accepted_email,
 )
 
