@@ -79,7 +79,9 @@ def test_registration_confirm_phone_number(client, mocker):
 
     message = send_twilio_sms.call_args[0][1]
 
-    assert generate_phone_number_code(phone_number) in message
+    code = generate_phone_number_code(phone_number)
+    formatted_code = "{0} {1}".format(code[:3], code[3:])
+    assert formatted_code in message
 
 
 @pytest.mark.django_db
@@ -100,8 +102,7 @@ def test_registration_complete(User, client):
     response = client.post(url, {
         'sms_code': code,
         'display_name': 'test-display_name',
-        'password1': 'secret',
-        'password2': 'secret',
+        'password': 'secret',
     })
 
     assert response.get('location', '').endswith(target_url)

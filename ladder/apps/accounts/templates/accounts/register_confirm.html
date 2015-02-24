@@ -2,41 +2,67 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-4 col-md-offset-4">
+    <div class="col-md-6 col-md-offset-3">
         {% if token_valid %}
-        <form action="{% url 'register-confirm' token=token %}" method="post" class="well">
-            <p>
-            To complete your registration, we will text you a code to verify your ownership
-            of the submitted phone number.
-            </p>
-            <dl>
-                <dt>Email:</dt>
-                <dd>{{ email }}</dd>
-                <dt>Phone Number:</dt>
-                <dd>{{ phone_number }}</dd>
-            </dl>
-            {% csrf_token %}
-            <button type="submit">Send SMS Verification Code</button>
-        </form>
+            <form action="{% url 'register-confirm' token=token %}" method="post" class="well">
+                <h2>2. Confirm phone number</h2>
+                <p>
+                  <ul>
+                      <li class="text-success">
+                          <span class="glyphicon glyphicon-check"></span>
+                          &nbsp;- 1. Submit Email and Phone Number
+                      </li>
+                      <li class="text-success">
+                          <span class="glyphicon glyphicon-check"></span>
+                          &nbsp;- 2. Confirm email address
+                      </li>
+                      <li class="text-info">
+                          <span class="glyphicon glyphicon-log-in"></span>
+                          &nbsp;- 3. Confirm phone number.
+                      </li>
+                      <li class="text-muted">
+                          <span class="glyphicon glyphicon-unchecked"></span>
+                          &nbsp;- 4. Create account.
+                      </li>
+                  </ul>
+                </p>
+                <p>
+                    To complete your registration, we will text you a code to
+                    verify your ownership of the submitted phone number.
+                </p>
+                <dl class="dl-horizontal">
+                    <dt>Email:</dt>
+                    <dd>{{ email }}</dd>
+                    <dt>Phone Number:</dt>
+                    <dd>{{ phone_number }}</dd>
+                </dl>
+                <p class="text-muted">
+                    If the email address or phone number above is not yours,
+                    please kindly restart the 
+                    <a href="{% url "register" %}">registration process</a>.
+                </p>
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">Send SMS Verification Code</button>
+            </form>
         {% else %}
-        {% if email_already_registered %}
-        <p>
-        An account with the email address <code>{{ email }}</code> has
-        already been registered.  You can <a href="{% url 'login' %}">login</a>
-        or <a href="{% url 'password-reset' %}">reset your password</a>.
-        </p>
-        {% elif phone_number_already_registered %}
-        <p>
-        An account with the phone number <code>{{ phone_number }}</code>
-        already exists.  Please register with a different phone number.
-        </p>
-        {% else %}
-        <p>
-        It appears you are using an expired or invalid registration
-        confirmation link.  Would you like to try 
-        <a href="{% url 'register' %}">registering</a> again?
-        </p>
-        {% endif %}
+            {% if email_already_registered %}
+                <p>
+                An account with the email address <code>{{ email }}</code> has
+                already been registered.  You can <a href="{% url 'login' %}">login</a>
+                or <a href="{% url 'password-reset' %}">reset your password</a>.
+                </p>
+            {% elif phone_number_already_registered %}
+                <p>
+                An account with the phone number <code>{{ phone_number }}</code>
+                already exists.  Please register with a different phone number.
+                </p>
+            {% else %}
+                <p>
+                It appears you are using an expired or invalid registration
+                confirmation link.  Would you like to try 
+                <a href="{% url 'register' %}">registering</a> again?
+                </p>
+            {% endif %}
         {% endif %}
     </div>
 </div>

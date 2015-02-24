@@ -17,7 +17,9 @@ class InitiateRegistrationForm(BetterForm):
         "duplicate_phone_number": "A user with that phone number address already exists",
     }
     email = forms.EmailField()
-    phone_number = USPhoneNumberField()
+    phone_number = USPhoneNumberField(
+        help_text="Must be able to receive SMS messages.  Normal rates apply.",
+    )
 
     def clean_email(self):
         User = get_user_model()
@@ -49,15 +51,12 @@ class UserChangeForm(BetterModelForm):
 
 class UserCreationForm(BetterModelForm):
     error_messages = {
-        'password_mismatch': "The two password fields didn't match.",
         'duplicate_username': "A user with that %(username)s already exists.",
     }
-    sms_code = forms.CharField(label="SMS Code")
-    password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
-    password2 = forms.CharField(label="Password confirmation",
-                                widget=forms.PasswordInput,
-                                help_text="Enter the same password as above,"
-                                          " for verification.")
+    sms_code = forms.CharField(
+        label="SMS Code", help_text="The six digit code that was sent to you via SMS",
+    )
+    password = forms.CharField(label="Password", widget=forms.PasswordInput)
 
     def __init__(self, *args, **kwargs):
         self.phone_number = kwargs.pop('phone_number')
@@ -65,22 +64,14 @@ class UserCreationForm(BetterModelForm):
 
     def clean_sms_code(self):
         code = self.cleaned_data['sms_code']
-        if not code == generate_phone_number_code(self.phone_number):
+        if not code or not code == generate_phone_number_code(self.phone_number):
             raise forms.ValidationError('Incorrect Code')
-
-    def clean(self):
-        super(UserCreationForm, self).clean()
-        # Check that the two password entries match
-        password1 = self.cleaned_data.get("password1")
-        password2 = self.cleaned_data.get("password2")
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError(self.error_messages['password_mismatch'])
 
     class Meta:
         model = User
         fields = ('display_name',)
 
     def save(self, commit=True):
-        self.instance.set_password(self.cleaned_data["password1"])
+        self.instance.set_password(self.cleaned_data["password"])
         self.instance.last_login = timezone.now()
         return super(UserCreationForm, self).save(commit)

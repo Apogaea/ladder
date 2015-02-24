@@ -128,7 +128,7 @@ class RegisterVerifyPhoneNumberView(VerifyTokenMixin, CreateView):
 
         user = authenticate(
             username=user.email,
-            password=form.cleaned_data['password1'],
+            password=form.cleaned_data['password'],
         )
         if not user:
             form.add_error(None, 'An error has occured.')

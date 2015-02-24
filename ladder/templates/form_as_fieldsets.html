@@ -1,9 +1,10 @@
+{% load bootstrap3 %}
+
 {% csrf_token %}
-{{ form.non_field_errors }}
+
+{% bootstrap_form_errors form %}
 {% for field in form %}
   <fieldset class="control-group {{ field.css_classes }}">
-    {{ field.errors }}
-    {{ field.label_tag }}
-    {{ field }}
+      {% bootstrap_field field show_help=True %}
   </fieldset>
 {% endfor %}
