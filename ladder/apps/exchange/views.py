@@ -106,6 +106,12 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         return self.request.user.ticket_offers.all()
 
+    def get_context_data(self, **kwargs):
+        context = super(OfferDetailView, self).get_context_data(**kwargs)
+        context['pending_match'] = self.object.get_pending_match()
+        context['accepted_match'] = self.object.get_accepted_match()
+        return context
+
 
 class OfferCancelView(LoginRequiredMixin, UpdateView):
     template_name = 'exchange/offer_cancel.html'
@@ -199,6 +205,12 @@ class RequestDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return self.request.user.ticket_requests.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(RequestDetailView, self).get_context_data(**kwargs)
+        context['pending_match'] = self.object.get_pending_match()
+        context['accepted_match'] = self.object.get_accepted_match()
+        return context
 
 
 class MatchDetailView(LoginRequiredMixin, DetailView):
