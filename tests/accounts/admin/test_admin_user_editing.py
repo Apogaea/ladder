@@ -3,6 +3,15 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 
 
+def test_admin_user_detail_page(factories, admin_client):
+    user = factories.UserWithProfileFactory()
+
+    response = admin_client.get(reverse(
+        'admin:user-detail', kwargs={'pk': user.pk},
+    ))
+    assert response.status_code == status.HTTP_200_OK
+
+
 def test_updating_a_user_via_the_admin(models, admin_webtest_client, user):
     change_url = reverse('admin:user-change', kwargs={'pk': user.pk})
 
@@ -18,6 +27,9 @@ def test_updating_a_user_via_the_admin(models, admin_webtest_client, user):
 
     change_response = response.form.submit()
     assert change_response.status_code == status.HTTP_302_FOUND
+
+    expected_location = reverse('admin:user-detail', kwargs={'pk': user.pk})
+    assert change_response.location.endswith(expected_location)
 
     updated_user = models.User.objects.get(pk=user.pk)
 

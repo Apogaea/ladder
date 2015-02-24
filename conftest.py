@@ -109,32 +109,22 @@ def User(django_user_model):
 
 
 @pytest.fixture()
-def admin_user(User):
+def admin_user(factories, User):
     try:
         return User.objects.get(email='admin@example.com')
     except User.DoesNotExist:
-        from django.utils import timezone
-        return User.objects.create_superuser(
-            last_login=timezone.now(),
-            display_name='admin',
+        return factories.SuperUserWithProfileFactory(
             email='admin@example.com',
-            password='secret',
         )
 
 
 @pytest.fixture()
-def user(User):
+def user(factories, User):
     try:
-        return User.objects.get(
-            email='test@example.com',
-        )
+        return User.objects.get(email='test@example.com')
     except User.DoesNotExist:
-        from django.utils import timezone
-        return User.objects.create_user(
-            last_login=timezone.now(),
-            display_name='Test User',
+        return factories.UserWithProfileFactory(
             email='test@example.com',
-            password='secret',
         )
 
 

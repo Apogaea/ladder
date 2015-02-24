@@ -9,6 +9,7 @@ from ladder.apps.exchange.receivers import create_ladder_profile
 
 class UserFactory(factory.DjangoModelFactory):
     is_active = True
+    display_name = factory.Sequence(lambda i: 'test-user-{0}'.format(i))
     email = factory.Sequence(lambda i: 'test-{0}@example.com'.format(i))
 
     password = factory.PostGenerationMethodCall('set_password', 'secret')
@@ -27,6 +28,7 @@ class UserFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = User
+        django_get_or_create = ('email',)
 
 
 class SuperUserFactory(UserFactory):
