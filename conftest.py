@@ -8,7 +8,7 @@ from django_webtest import (
 
 
 @pytest.fixture()  # NOQA
-def factories(db):
+def factories(transactional_db):
     import factory
 
     from tests.accounts.factories import (  # NOQA
@@ -42,7 +42,7 @@ def factories(db):
 
 
 @pytest.fixture()  # NOQA
-def models(db):
+def models(transactional_db):
     from django.apps import apps
 
     dict_ = {M._meta.object_name: M for M in apps.get_models()}
@@ -77,7 +77,7 @@ class WebTest(BaseWebTest):
 
 
 @pytest.fixture()  # NOQA
-def webtest_client(db):
+def webtest_client(transactional_db):
     web_test = WebTest(methodName='__call__')
     web_test()
     return web_test.app
@@ -100,13 +100,12 @@ def admin_webtest_client(webtest_client, admin_user):
 
 
 @pytest.fixture()  # NOQA
-def User(db):
+def User(django_user_model):
     """
     A slightly more intuitively named
     `pytest_django.fixtures.django_user_model`
     """
-    from django.contrib.auth import get_user_model
-    return get_user_model()
+    return django_user_model
 
 
 @pytest.fixture()

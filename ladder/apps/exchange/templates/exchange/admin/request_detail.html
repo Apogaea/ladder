@@ -8,7 +8,7 @@
         Ticket Request #{{ ticket_request.pk }}
       </h1>
     </div>
-    <form method="post" action="{% url 'admin:request-toggle-terminate' pk=ticket_request.pk %}">
+    <form id="request-terminate" method="post" action="{% url 'admin:request-toggle-terminate' pk=ticket_request.pk %}">
       {% csrf_token %}
       {% if ticket_request.is_terminated %}
         <button type="submit" class="btn btn-warning">Reverse Termination</button>

@@ -75,6 +75,9 @@ class AdminRequestToggleTerminateView(AdminRequiredMixin, UpdateView):
         form.instance.is_terminated = not form.instance.is_terminated
         return super(AdminRequestToggleTerminateView, self).form_valid(form)
 
+    def get_success_url(self):
+        return reverse('admin:request-detail', kwargs={'pk': self.object.pk})
+
 
 #
 # Ticket Match Admin
