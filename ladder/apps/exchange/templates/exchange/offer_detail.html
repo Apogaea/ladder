@@ -13,11 +13,6 @@
             <li class="nav-header">Manage Offer</li>
               {% if ticket_offer.is_active %}
                   <li><a href="{% url 'offer-cancel' pk=ticket_offer.pk %}">Cancel</a></li>
-                  <li><a href="{% url 'offer-toggle-automatch' pk=ticket_offer.pk %}">Toggle Automatch</a></li>
-                  {% if ticket_offer.is_automatch %}
-                  {% else %}
-                    <li><a href="{% url 'offer-select-recipient' pk=ticket_offer.pk %}">Select a recipient</a></li>
-                  {% endif %}
               {% endif %}
             </ul>
           <dl class="dl-horizontal">
@@ -35,8 +30,6 @@
           {% elif ticket_offer.is_active %}
             {% if ticket_offer.is_automatch %}
               <p class="lead">This offer is currently active and will be matched with the next ticket request that enters the exchange.</p>
-            {% else %}
-              <p class="lead">This offer is currently active and waiting for you to <a href="{% url 'offer-select-recipient' pk=ticket_offer.pk %}">select a recipient</a>.</p>
             {% endif %}
           {% elif ticket_offer.is_cancelled %}
           {% elif ticket_offer.is_terminated %}

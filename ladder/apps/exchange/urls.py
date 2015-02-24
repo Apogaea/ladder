@@ -12,16 +12,6 @@ urlpatterns = patterns(
         r'^offer/(?P<pk>\d+)/cancel/$', views.OfferCancelView.as_view(),
         name='offer-cancel',
     ),
-    url(
-        r'^offer/(?P<pk>\d+)/select-recipient/$',
-        views.OfferSelectRecipientView.as_view(),
-        name='offer-select-recipient',
-    ),
-    url(
-        r'^offer/(?P<pk>\d+)/toggle-automatch/$',
-        views.OfferToggleAutomatchView.as_view(),
-        name='offer-toggle-automatch',
-    ),
 
     # Match
     url(

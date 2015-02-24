@@ -2,28 +2,40 @@
 {% load url from future %}
 
 {% block content %}
-  <form class="" method="post">
-    {% csrf_token %}
-    <div class="page-header">
-      <h1>Offer Your Ticket <small>How would you prefer your ticket be distributed?</small></h2>
-    </div>
     <div class="row">
-      <div class="col-md-6">
-        <div class="hero-unit">
-          <h2>You Choose</h2>
-          <p>Manually choose the recipient of your ticket.  You will be provided
-          with a set of applicants and allowed to choose which applicant recieves
-          your ticket.</p>
-          <button class="btn btn-large" type="submit" name="{{ form.is_automatch.html_name }}" value="False">Manually</button>
+        {% if ticket_request_choices %}
+            <h1>Choose who to give your ticket to</h1>
+            <p>You may choose one of the people listed below, or just opt to
+            give your ticket to the next person in line.</p>
+        {% else %}
+            <h1>Offer a ticket</h1>
+            <p>Proceed to give your ticket to the next person who requests a ticket.</p>
+        {% endif %}
+        {% for ticket_request in ticket_request_choices %}
+            <div class="col-md-6">
+                <form id="recipient-select-{{ forloop.counter }}" action="." method="post" class="jumbotron">
+                    {% csrf_token %}
+                    <blockquote class="pull-right">
+                        <p>{{ ticket_request.message }}</p>
+                        <small><cite title="Source Title">{{ ticket_request.user.display_name }}</cite></small>
+                    </blockquote>
+                    <input type="hidden" name="ticket_request" value="{{ ticket_request.pk }}">
+                    <button class="btn btn-large btn-block btn-success" type="submit">Go</button>
+                </form>
+            </div>
+        {% empty %}
+            <div class="col-md-9">
+                <p>There are no active ticket requests.<p>
+            </div>
+        {% endfor %}
+
+        <div class="col-md-6">
+            <form id="auto-match" action="." method="post" class="jumbotron">
+                {% csrf_token %}
+                <input type="hidden" name="is_automatch" value="1">
+                <p class="text-info">Just give my ticket to the first person in line.</p>
+                <button class="btn btn-large btn-block btn-info" type="submit">Go</button>
+            </form>
         </div>
-      </div>
-      <div class="col-md-6">
-        <div class="hero-unit">
-          <h2>Automatic</h2>
-          <p>Your ticket will be matched with an applicant automatically.</p>
-          <button class="btn btn-large" type="submit" name="{{ form.is_automatch.html_name }}" value="True">Automatic</button>
-        </div>
-      </div>
     </div>
-  </form>
 {% endblock %}
