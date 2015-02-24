@@ -11,10 +11,10 @@ def test_offer_confirmation(user_client, factories, models):
 
     assert len(mail.outbox) == 0
 
-    response = user_client.get(reverse('match_confirm', kwargs={'pk': ticket_match.pk}))
+    response = user_client.get(reverse('match-confirm', kwargs={'pk': ticket_match.pk}))
     assert response.status_code == status.HTTP_200_OK
 
-    response = user_client.post(reverse('match_confirm', kwargs={'pk': ticket_match.pk}))
+    response = user_client.post(reverse('match-confirm', kwargs={'pk': ticket_match.pk}))
     assert response.status_code == status.HTTP_302_FOUND
 
     ticket_offer = models.TicketOffer.objects.get(pk=ticket_match.ticket_offer.pk)

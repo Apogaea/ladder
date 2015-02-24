@@ -55,7 +55,7 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
             except IndexError:
                 messages.success(self.request, "Your ticket offer has been created and will be automatically matched to the next ticket request that enters the system")
             return redirect(self.get_success_url())
-        return redirect(reverse('offer_select_recipient', kwargs={'pk': ticket_offer.pk}))
+        return redirect(reverse('offer-select-recipient', kwargs={'pk': ticket_offer.pk}))
 
 
 class OfferDetailView(LoginRequiredMixin, DetailView):
@@ -74,7 +74,7 @@ class OfferToggleAutomatchView(LoginRequiredMixin, UpdateView):
     context_object_name = 'ticket_offer'
 
     def get_success_url(self):
-        return reverse('offer_detail', kwargs={'pk': self.object.pk})
+        return reverse('offer-detail', kwargs={'pk': self.object.pk})
 
     def get_queryset(self):
         return self.request.user.ticket_offers.is_active()
@@ -87,7 +87,7 @@ class OfferToggleAutomatchView(LoginRequiredMixin, UpdateView):
             return super(OfferToggleAutomatchView, self).form_valid(form)
         else:
             return redirect(reverse(
-                'offer_select_recipient',
+                'offer-select-recipient',
                 kwargs={'pk': form.instance.pk},
             ))
 
@@ -175,7 +175,7 @@ class RequestCreateView(LoginRequiredMixin, CreateView):
                 ticket_request=ticket_request,
             )
             messages.success(self.request, "Your request has been matched with a ticket.")
-            return redirect(reverse('match_confirm', kwargs={'pk': ticket_match.pk}))
+            return redirect(reverse('match-confirm', kwargs={'pk': ticket_match.pk}))
         except IndexError:
             messages.success(self.request, "Your request has been created.  You will be notified as soon as we find a ticket for you.")
         return redirect(ticket_request.get_absolute_url())

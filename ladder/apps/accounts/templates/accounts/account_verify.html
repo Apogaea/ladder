@@ -5,7 +5,7 @@
   <div class="well">
     <p>Enter your account verification code</p>
     {% if user.can_send_code %}
-      <a href="{% url 'account_send_code' %}" class="btn">Resend Code</a>
+      <a href="{% url 'account-send-code' %}" class="btn">Resend Code</a>
     {% endif %}
     <form class="form-inline" method="post">
       {% csrf_token %}

@@ -6,11 +6,11 @@
       <li class="nav-header">Admin</li>
       <li><a href="{% url 'admin:index' %}">Index</a></li>
       <li class="nav-header">Users</li>
-      <li><a href="{% url 'admin:user_list' %}">Users</a></li>
+      <li><a href="{% url 'admin:user-list' %}">Users</a></li>
       <li class="nav-header">Tickets</li>
-      <li><a href="{% url 'admin:offer_list' %}">Offers</a></li>
-      <li><a href="{% url 'admin:request_list' %}">Requests</a></li>
-      <li><a href="{% url 'admin:match_list' %}">Matches</a></li>
+      <li><a href="{% url 'admin:offer-list' %}">Offers</a></li>
+      <li><a href="{% url 'admin:request-list' %}">Requests</a></li>
+      <li><a href="{% url 'admin:match-list' %}">Matches</a></li>
     </ul>
   </div>
 {% endblock %}
@@ -31,7 +31,7 @@
         <tr>
           <td>{{ ladder_user.pk }}</td>
           <td>
-            <a href="{% url 'admin:user_detail' pk=ladder_user.pk %}">{{ ladder_user.email }}</a>
+            <a href="{% url 'admin:user-detail' pk=ladder_user.pk %}">{{ ladder_user.email }}</a>
             {% if ladder_user.is_admin %} <span class="badge badge-info">Admin</span>{% endif %}</td>
           <td>{{ ladder_user.display_name }}</td>
           <td>{{ ladder_user.date_joined }}</td>

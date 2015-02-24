@@ -6,45 +6,45 @@ from ladder.apps.exchange import views
 urlpatterns = patterns(
     'exchange.views',
     # Offers
-    url(r'^offer/create/$', views.OfferCreateView.as_view(), name='offer_create'),
-    url(r'^offer/(?P<pk>\d+)/$', views.OfferDetailView.as_view(), name='offer_detail'),
+    url(r'^offer/create/$', views.OfferCreateView.as_view(), name='offer-create'),
+    url(r'^offer/(?P<pk>\d+)/$', views.OfferDetailView.as_view(), name='offer-detail'),
     url(
         r'^offer/(?P<pk>\d+)/cancel/$', views.OfferCancelView.as_view(),
-        name='offer_cancel',
+        name='offer-cancel',
     ),
     url(
         r'^offer/(?P<pk>\d+)/select-recipient/$',
         views.OfferSelectRecipientView.as_view(),
-        name='offer_select_recipient',
+        name='offer-select-recipient',
     ),
     url(
         r'^offer/(?P<pk>\d+)/toggle-automatch/$',
         views.OfferToggleAutomatchView.as_view(),
-        name='offer_toggle_automatch',
+        name='offer-toggle-automatch',
     ),
 
     # Match
     url(
         r'^match/(?P<pk>\d+)/$', views.MatchDetailView.as_view(),
-        name='match_detail',
+        name='match-detail',
     ),
     url(
         r'^match/(?P<pk>\d+)/confirm/$',
-        views.ConfirmTicketOfferView.as_view(), name='match_confirm',
+        views.ConfirmTicketOfferView.as_view(), name='match-confirm',
     ),
 
     # Requests
-    url(r'^request/create/$', views.RequestCreateView.as_view(), name='request_create'),
+    url(r'^request/create/$', views.RequestCreateView.as_view(), name='request-create'),
     url(
         r'^request/(?P<pk>\d+)/$', views.RequestDetailView.as_view(),
-        name='request_detail',
+        name='request-detail',
     ),
     url(
         r'^request/(?P<pk>\d+)/cancel/$', views.RequestCancelView.as_view(),
-        name='request_cancel',
+        name='request-cancel',
     ),
     url(
         r'^request/(?P<pk>\d+)/edit-request/$',
-        views.RequestUpdateView.as_view(), name='request_update',
+        views.RequestUpdateView.as_view(), name='request-update',
     ),
 )

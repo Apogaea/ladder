@@ -45,7 +45,7 @@ class EditAccountView(LoginRequiredMixin, UpdateView):
 class RegisterView(FormView):
     template_name = 'accounts/register.html'
     form_class = InitiateRegistrationForm
-    success_url = reverse_lazy('register_success')
+    success_url = reverse_lazy('register-success')
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
@@ -98,7 +98,7 @@ class RegisterConfirmView(VerifyTokenMixin, FormView):
     template_name = 'accounts/register_confirm.html'
 
     def get_success_url(self, **kwargs):
-        return reverse('register_verify_phone_number', kwargs=self.kwargs)
+        return reverse('register-verify-phone-number', kwargs=self.kwargs)
 
     def form_valid(self, form):
         send_phone_number_verification_sms(self.phone_number)

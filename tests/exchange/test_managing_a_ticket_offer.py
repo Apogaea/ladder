@@ -6,7 +6,7 @@ from rest_framework import status
 def test_cancel_offer_page(factories, user_client):
     offer = factories.TicketOfferFactory(user=user_client.user)
 
-    url = reverse('offer_cancel', kwargs={'pk': offer.pk})
+    url = reverse('offer-cancel', kwargs={'pk': offer.pk})
 
     response = user_client.get(url)
 
@@ -16,7 +16,7 @@ def test_cancel_offer_page(factories, user_client):
 def test_canceling_an_offer(factories, models, user_client):
     offer = factories.TicketOfferFactory(user=user_client.user)
 
-    url = reverse('offer_cancel', kwargs={'pk': offer.pk})
+    url = reverse('offer-cancel', kwargs={'pk': offer.pk})
 
     response = user_client.post(url)
 
@@ -30,7 +30,7 @@ def test_canceling_an_offer(factories, models, user_client):
 def test_toggle_automatch_page(factories, models, user_client):
     offer = factories.TicketOfferFactory(user=user_client.user, is_automatch=False)
 
-    url = reverse('offer_toggle_automatch', kwargs={'pk': offer.pk})
+    url = reverse('offer-toggle-automatch', kwargs={'pk': offer.pk})
 
     response = user_client.get(url)
 
@@ -40,11 +40,11 @@ def test_toggle_automatch_page(factories, models, user_client):
 def test_turning_on_automatch(factories, models, user_client):
     offer = factories.TicketOfferFactory(user=user_client.user, is_automatch=False)
 
-    url = reverse('offer_toggle_automatch', kwargs={'pk': offer.pk})
+    url = reverse('offer-toggle-automatch', kwargs={'pk': offer.pk})
 
     response = user_client.post(url)
 
-    expected_location = reverse('offer_detail', kwargs={'pk': offer.pk})
+    expected_location = reverse('offer-detail', kwargs={'pk': offer.pk})
     assert response.get('location', '').endswith(expected_location)
 
     updated_offer = models.TicketOffer.objects.get(pk=offer.pk)
@@ -54,11 +54,11 @@ def test_turning_on_automatch(factories, models, user_client):
 def test_turning_off_automatch(factories, models, user_client):
     offer = factories.TicketOfferFactory(user=user_client.user, is_automatch=True)
 
-    url = reverse('offer_toggle_automatch', kwargs={'pk': offer.pk})
+    url = reverse('offer-toggle-automatch', kwargs={'pk': offer.pk})
 
     response = user_client.post(url)
 
-    expected_location = reverse('offer_select_recipient', kwargs={'pk': offer.pk})
+    expected_location = reverse('offer-select-recipient', kwargs={'pk': offer.pk})
     assert response.get('location', '').endswith(expected_location)
 
     updated_offer = models.TicketOffer.objects.get(pk=offer.pk)

@@ -25,7 +25,7 @@ def generate_registration_token(email, phone_number):
 
 def reverse_registration_url(email, phone_number):
     token = generate_registration_token(email, phone_number)
-    return reverse('register_confirm', kwargs={'token': token})
+    return reverse('register-confirm', kwargs={'token': token})
 
 
 def unsign_registration_token(token):

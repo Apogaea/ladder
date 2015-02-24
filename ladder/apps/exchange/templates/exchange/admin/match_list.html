@@ -20,20 +20,20 @@
       {% for ticket_match in page_obj.object_list %}
         <tr>
           <td>
-            <a href="{% url 'admin:match_detail' pk=ticket_match.pk %}">{{ ticket_match.pk }}</a>
+            <a href="{% url 'admin:match-detail' pk=ticket_match.pk %}">{{ ticket_match.pk }}</a>
           </td>
           <td>
-            <a href="{% url 'admin:user_detail' pk=ticket_match.ticket_offer.user.pk %}">{{ ticket_match.ticket_offer.user }}</a>
+            <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_offer.user.pk %}">{{ ticket_match.ticket_offer.user }}</a>
           </td>
           <td>
-            <a href="{% url 'admin:user_detail' pk=ticket_match.ticket_request.user.pk %}">{{ ticket_match.ticket_request.user }}</a>
+            <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_request.user.pk %}">{{ ticket_match.ticket_request.user }}</a>
           </td>
           <td><span class="badge">{{ ticket_match.ticket_offer.is_automatch|yesno:'Automatch,Manual' }}</td>
           <td>
             {{ ticket_match.get_status_display }}
           </td>
           <td>
-            <a href="{% url 'admin:match_detail' pk=ticket_match.pk %}">Details</a>
+            <a href="{% url 'admin:match-detail' pk=ticket_match.pk %}">Details</a>
           </td>
         </tr>
       {% empty %}

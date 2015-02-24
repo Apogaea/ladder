@@ -19,7 +19,7 @@
       </div>
     {% empty %}
       <div class="span4 offset4">
-        <form method="post" action="{% url 'offer_toggle_automatch' pk=ticket_offer.pk %}" class="hero-unit">
+        <form method="post" action="{% url 'offer-toggle-automatch' pk=ticket_offer.pk %}" class="hero-unit">
           <h2>No Ticket Requests..</h2>
           <p>It looks like there are no active ticket requests at this time.
           You can either come back later, or switch your offer to

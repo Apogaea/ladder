@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+
 {% block left_sidebar %}
   <div class="well">
     <ul class="nav nav-list">
@@ -22,12 +24,7 @@
       </dd>
       <dt>I forgot my password, how do I log in?</dt>
       <dd>
-        Head on over to the <a href="{% url 'password_reset' %}">forgot
-        password</a> page and do a password reset.
-      </dd>
-      <dt>I forgot my password, how do I log in?</dt>
-      <dd>
-        Head on over to the <a href="{% url 'password_reset' %}">forgot
+        Head on over to the <a href="{% url 'password-reset' %}">forgot
         password</a> page and do a password reset.
       </dd>
     </dl>

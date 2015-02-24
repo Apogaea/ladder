@@ -3,7 +3,7 @@
 {% block left_sidebar %}
   <div class="well">
     <h3>Account</h3>
-    <a href="{% url 'account_edit' %}">Edit</a>
+    <a href="{% url 'account-edit' %}">Edit</a>
     <dl class="dl-horizontal">
       <dt>Name:</dt>
       <dd>{{ user }}</dd>
@@ -16,7 +16,7 @@
       <h2>I have a ticket to offer</h2>
       <p>If you have a ticket that you would like to offer to someone,
       begin that process here.</p>
-      <p><a href="{% url 'offer_create' %}" class="btn btn-primary btn-large">Offer a Ticket</a></p>
+      <p><a href="{% url 'offer-create' %}" class="btn btn-primary btn-large">Offer a Ticket</a></p>
     </div>
   {% endif %}
   {% if user.profile.can_request_ticket %}
@@ -47,11 +47,11 @@
           <td>{{ ticket_offer.created_at|date }}</td>
           <td>{{ ticket_offer.get_status_display }}</td>
           <td>
-              <a href="{% url 'offer_detail' pk=ticket_offer.pk %}">Detail</a>
+              <a href="{% url 'offer-detail' pk=ticket_offer.pk %}">Detail</a>
               {% if ticket_offer.is_active %}
-                | <a href="{% url 'offer_cancel' pk=ticket_offer.pk %}">Cancel</a>
+                | <a href="{% url 'offer-cancel' pk=ticket_offer.pk %}">Cancel</a>
                 {% if ticket_offer.is_automatch %}
-                  | <a href="{% url 'offer_select_recipient' pk=ticket_offer.pk %}">Select Recipient</a>
+                  | <a href="{% url 'offer-select-recipient' pk=ticket_offer.pk %}">Select Recipient</a>
                 {% endif %}
               {% endif %}
           </td>
@@ -81,13 +81,13 @@
           <td>{{ ticket_request.created_at|date }}</td>
           <td>{{ ticket_request.get_status_display }}</td>
           <td>
-              <a href="{% url 'request_detail' pk=ticket_request.pk %}">Detail</a>
+              <a href="{% url 'request-detail' pk=ticket_request.pk %}">Detail</a>
               {% if ticket_request.is_active %}
-                | <a href="{% url 'request_update' pk=ticket_request.pk %}">Edit</a>
-                | <a href="{% url 'request_cancel' pk=ticket_request.pk %}">Cancel</a>
+                | <a href="{% url 'request-update' pk=ticket_request.pk %}">Edit</a>
+                | <a href="{% url 'request-cancel' pk=ticket_request.pk %}">Cancel</a>
               {% elif ticket_request.is_reserved %}
                 {% if ticket_request.get_pending_match %}
-                  | <a href="{% url 'match_confirm' pk=ticket_request.get_pending_match.pk %}">Accept/Reject</a>
+                  | <a href="{% url 'match-confirm' pk=ticket_request.get_pending_match.pk %}">Accept/Reject</a>
                 {% endif %}
               {% endif %}
             </ul>

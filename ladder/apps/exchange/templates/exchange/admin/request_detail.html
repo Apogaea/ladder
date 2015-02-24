@@ -8,7 +8,7 @@
         Ticket Request #{{ ticket_request.pk }}
       </h1>
     </div>
-    <form method="post" action="{% url 'admin:request_toggle_terminate' pk=ticket_request.pk %}">
+    <form method="post" action="{% url 'admin:request-toggle-terminate' pk=ticket_request.pk %}">
       {% csrf_token %}
       {% if ticket_request.is_terminated %}
         <button type="submit" class="btn btn-warning">Reverse Termination</button>
@@ -22,7 +22,7 @@
         <dd>{{ ticket_request.pk }}</dd>
         <dt>User:</dt>
         <dd>
-          <a href="{% url 'admin:user_detail' pk=ticket_request.user.pk %}">{{ ticket_request.user }}</a>
+          <a href="{% url 'admin:user-detail' pk=ticket_request.user.pk %}">{{ ticket_request.user }}</a>
         </dd>
         <dt>Created:</dt>
         <dd>{{ ticket_request.created_at }}</dd>
@@ -49,7 +49,7 @@
         {% for ticket_match in ticket_request.matches.all %}
           <tr>
             <td>
-              <a href="{% url 'admin:match_detail' pk=ticket_match.pk %}">{{ ticket_match.pk }}</a>
+              <a href="{% url 'admin:match-detail' pk=ticket_match.pk %}">{{ ticket_match.pk }}</a>
             </td>
             <td>{{ ticket_match.ticket_offer.user }}</td>
             <td><span class="badge">{{ ticket_match.ticket_offer.is_automatch|yesno:'Automatch,Manual' }}</td>
@@ -57,7 +57,7 @@
               {{ ticket_match.get_status_display }}
             </td>
             <td>
-              <a href="{% url 'admin:match_detail' pk=ticket_match.pk %}">Details</a>
+              <a href="{% url 'admin:match-detail' pk=ticket_match.pk %}">Details</a>
             </td>
           </tr>
         {% empty %}

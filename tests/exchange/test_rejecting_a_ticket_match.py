@@ -11,11 +11,11 @@ def test_offer_rejection(factories, user_client, models):
 
     assert len(mail.outbox) == 0
 
-    response = user_client.get(reverse('match_confirm', kwargs={'pk': ticket_match.pk}))
+    response = user_client.get(reverse('match-confirm', kwargs={'pk': ticket_match.pk}))
     assert response.status_code == status.HTTP_200_OK
 
     response = user_client.post(
-        reverse('match_confirm', kwargs={'pk': ticket_match.pk}),
+        reverse('match-confirm', kwargs={'pk': ticket_match.pk}),
         {'_reject': True},
     )
     assert response.status_code == status.HTTP_302_FOUND
@@ -41,7 +41,7 @@ def test_offer_rejection_is_automatched(user_client, factories, models):
     assert len(mail.outbox) == 0
 
     response = user_client.post(
-        reverse('match_confirm', kwargs={'pk': ticket_match.pk}),
+        reverse('match-confirm', kwargs={'pk': ticket_match.pk}),
         {'_reject': True},
     )
     assert response.status_code == status.HTTP_302_FOUND

@@ -3,13 +3,13 @@
 {% block content %}
   <div class="row">
     <div class="span6 offset3">
-      <form method="post" class="well" action="{% url 'offer_cancel' pk=ticket_offer.pk %}">
+      <form method="post" class="well" action="{% url 'offer-cancel' pk=ticket_offer.pk %}">
         {{ form.errors }}
         <h2>Cancel Ticket Offer</h2>
         <p>This will cancel your ticket offer.  This action cannot be undone.</p>
         {% csrf_token %}
         <div class="form-actions">
-          <a class="btn" href="{% url 'offer_detail' pk=ticket_offer.pk %}">Nevermind</a>
+          <a class="btn" href="{% url 'offer-detail' pk=ticket_offer.pk %}">Nevermind</a>
           <button type="submit" class="btn btn-danger pull-right">Yes, I want to cancel my ticket offer.</button>
           {# TODO: they could have come from 'dashboard' #}
         </div>

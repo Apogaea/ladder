@@ -20,7 +20,7 @@
         {% endif %}
         {% csrf_token %}
         <div class="form-actions">
-          <a class="btn" href="{% url 'offer_detail' pk=ticket_offer.pk %}">Nevermind</a>
+          <a class="btn" href="{% url 'offer-detail' pk=ticket_offer.pk %}">Nevermind</a>
           <button type="submit" class="btn btn-danger pull-right">Yes, I want to proceed.</button>
         </div>
       </form>

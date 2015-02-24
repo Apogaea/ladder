@@ -8,11 +8,11 @@
         {{ ladder_user }}
       </h1>
     </div>
-    <form method="post" action="{% url 'admin:user_change' pk=ladder_user.pk %}">
+    <form method="post" action="{% url 'admin:user-change' pk=ladder_user.pk %}">
       {% include 'form_as_fieldsets.html' %}
       <div class="form-actions">
         <button type="submit" class="btn btn-success">Save</button>
-        <a class="btn pull-right" href="{% url 'admin:user_detail' pk=ladder_user.pk %}">Cancel</a>
+        <a class="btn pull-right" href="{% url 'admin:user-detail' pk=ladder_user.pk %}">Cancel</a>
       </div>
     </form>
   </div>

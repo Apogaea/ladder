@@ -22,7 +22,7 @@
         <tr>
           <td>{{ ladder_user.pk }}</td>
           <td>
-            <a href="{% url 'admin:user_detail' pk=ladder_user.pk %}">{{ ladder_user.email }}</a>
+            <a href="{% url 'admin:user-detail' pk=ladder_user.pk %}">{{ ladder_user.email }}</a>
             {% if ladder_user.is_admin %} <span class="badge badge-info">Admin</span>{% endif %}</td>
           <td>{{ ladder_user.display_name }}</td>
           <td>{{ ladder_user.profile.phone_number }}</td>

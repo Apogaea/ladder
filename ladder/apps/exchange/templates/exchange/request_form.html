@@ -28,7 +28,7 @@
         <div class="form-actions">
           {% if ticket_request %}
             <button type="submit" class="btn btn-success">Save</button>
-            <a class="btn" href="{% url 'request_detail' pk=ticket_request.pk %}">Cancel</a>
+            <a class="btn" href="{% url 'request-detail' pk=ticket_request.pk %}">Cancel</a>
             {# TODO: they could have come from 'dashboard' #}
           {% else %}
             <button type="submit" class="btn btn-success">Request a Ticket</button>

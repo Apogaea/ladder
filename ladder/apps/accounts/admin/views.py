@@ -35,7 +35,7 @@ class AdminUserChangeView(AdminRequiredMixin, UpdateView):
     context_object_name = 'ladder_user'
 
     def get_success_url(self):
-        return reverse('admin:user_detail', kwargs={'pk': self.object.pk})
+        return reverse('admin:user-detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
         profile = form.instance.profile

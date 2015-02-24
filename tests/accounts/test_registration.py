@@ -33,7 +33,7 @@ def test_initiate_registration(client, mocker):
         'phone_number': '555-444-3333',  # The form takes care of formatting.
     })
 
-    target_url = reverse('register_success')
+    target_url = reverse('register-success')
 
     assert response.get('location', '').endswith(target_url)
     assert len(mail.outbox) == 1
@@ -69,7 +69,7 @@ def test_registration_confirm_phone_number(client, mocker):
     response = client.post(url)
 
     target_url = reverse(
-        'register_verify_phone_number',
+        'register-verify-phone-number',
         kwargs={
             'token': generate_registration_token(email, phone_number),
         },
@@ -88,7 +88,7 @@ def test_registration_complete(User, client):
     phone_number = '5554443333'
 
     url = reverse(
-        'register_verify_phone_number',
+        'register-verify-phone-number',
         kwargs={
             'token': generate_registration_token(email, phone_number),
         },

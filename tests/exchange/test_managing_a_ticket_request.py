@@ -6,7 +6,7 @@ from rest_framework import status
 def test_cancel_request_page(factories, user_client):
     request = factories.TicketRequestFactory(user=user_client.user)
 
-    url = reverse('request_cancel', kwargs={'pk': request.pk})
+    url = reverse('request-cancel', kwargs={'pk': request.pk})
 
     response = user_client.get(url)
 
@@ -16,7 +16,7 @@ def test_cancel_request_page(factories, user_client):
 def test_cancelling_request(factories, user_client, models):
     request = factories.TicketRequestFactory(user=user_client.user)
 
-    url = reverse('request_cancel', kwargs={'pk': request.pk})
+    url = reverse('request-cancel', kwargs={'pk': request.pk})
 
     response = user_client.post(url)
 
@@ -30,7 +30,7 @@ def test_match_confirm_page(factories, user_client):
     request = factories.TicketRequestFactory(user=user_client.user)
     match = factories.TicketMatchFactory(ticket_request=request)
 
-    url = reverse('match_confirm', kwargs={'pk': match.pk})
+    url = reverse('match-confirm', kwargs={'pk': match.pk})
 
     response = user_client.get(url)
 

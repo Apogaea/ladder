@@ -19,7 +19,7 @@
               {% endif %}
             </form>
           </div>
-            <form action="{% url 'send_confirmation_code' pk=phone_number.pk %}">
+            <form action="{% url 'send-confirmation-code' pk=phone_number.pk %}">
               <p><button type="submit" class="btn">Resend Confirmation Code</button></p>
             </form>
         </div>

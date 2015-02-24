@@ -18,16 +18,16 @@
       {% for ticket_request in page_obj.object_list %}
         <tr>
           <td>
-            <a href="{% url 'admin:request_detail' pk=ticket_request.pk %}">{{ ticket_request.pk }}</a>
+            <a href="{% url 'admin:request-detail' pk=ticket_request.pk %}">{{ ticket_request.pk }}</a>
           </td>
           <td>{{ ticket_request.user }}</td>
           <td>{{ ticket_request.get_status_display }}</td>
           <td>
-            <a href="{% url 'admin:request_detail' pk=ticket_request.pk %}">Details</a>
+            <a href="{% url 'admin:request-detail' pk=ticket_request.pk %}">Details</a>
             {% if ticket_request.is_fulfilled %}
-              | <a href="{% url 'admin:match_detail' pk=ticket_request.get_accepted_match.pk %}">View Match</a>
+              | <a href="{% url 'admin:match-detail' pk=ticket_request.get_accepted_match.pk %}">View Match</a>
             {% elif ticket_request.is_reserved %}
-              | <a href="{% url 'admin:match_detail' pk=ticket_request.get_pending_match.pk %}">View Pending Match</a>
+              | <a href="{% url 'admin:match-detail' pk=ticket_request.get_pending_match.pk %}">View Pending Match</a>
             {% endif %}
           </td>
         </tr>

@@ -46,7 +46,7 @@ class AdminOfferToggleTerminateView(AdminRequiredMixin, UpdateView):
         return super(AdminOfferToggleTerminateView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse('admin:offer_detail', kwargs={'pk': self.object.pk})
+        return reverse('admin:offer-detail', kwargs={'pk': self.object.pk})
 
 
 #

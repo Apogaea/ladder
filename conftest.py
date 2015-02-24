@@ -91,6 +91,14 @@ def user_webtest_client(webtest_client, user):
     return web_test.app
 
 
+@pytest.fixture()
+def admin_webtest_client(webtest_client, admin_user):
+    web_test = WebTest(methodName='__call__')
+    web_test()
+    web_test.authenticate(admin_user)
+    return web_test.app
+
+
 @pytest.fixture()  # NOQA
 def User(db):
     """

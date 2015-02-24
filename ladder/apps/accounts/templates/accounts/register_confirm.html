@@ -4,7 +4,7 @@
   <div class="row">
     <div class="span4 offset4">
       {% if token_valid %}
-        <form action="{% url 'register_confirm' token=token %}" method="post" class="well">
+        <form action="{% url 'register-confirm' token=token %}" method="post" class="well">
             <p>
                 To complete your registration, we will text you a code to verify your ownership
                 of the submitted phone number.
@@ -23,7 +23,7 @@
         <p>
             An account with the email address <code>{{ email }}</code> has
             already been registered.  You can <a href="{% url 'login' %}">login</a>
-            or <a href="{% url 'password_reset' %}">reset your password</a>.
+            or <a href="{% url 'password-reset' %}">reset your password</a>.
         </p>
         {% elif phone_number_already_registered %}
         <p>

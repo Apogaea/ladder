@@ -10,7 +10,7 @@ from rest_framework import status
 
 
 def test_password_reset_page(client):
-    response = client.get(reverse('password_reset'))
+    response = client.get(reverse('password-reset'))
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -18,11 +18,11 @@ def test_password_reset_page(client):
 def test_initiate_password_reset(client, factories):
     user = factories.UserWithProfileFactory()
 
-    response = client.post(reverse('password_reset'), {
+    response = client.post(reverse('password-reset'), {
         'email': user.email,
     })
 
-    assert response.get('location', '').endswith(reverse('password_reset_done'))
+    assert response.get('location', '').endswith(reverse('password-reset-done'))
     assert len(mail.outbox) == 1
 
 
@@ -32,7 +32,7 @@ def test_password_reset_confirm_page(client, factories):
     token = default_token_generator.make_token(user)
 
     response = client.get(reverse(
-        'password_reset_confirm_and_login',
+        'password-reset-confirm-and-login',
         kwargs={
             'uidb64': uidb64,
             'token': token,
@@ -48,7 +48,7 @@ def test_password_reset_confirming(client, factories, User):
     token = default_token_generator.make_token(user)
 
     url = reverse(
-        'password_reset_confirm_and_login',
+        'password-reset-confirm-and-login',
         kwargs={
             'uidb64': uidb64,
             'token': token,

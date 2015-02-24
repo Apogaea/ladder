@@ -16,7 +16,7 @@ urlpatterns = patterns(
     ),
 
     # Site Urls
-    url(r'^$', views.SiteIndexView.as_view(), name='site_index'),
+    url(r'^$', views.SiteIndexView.as_view(), name='site-index'),
     url(r'^about/$', views.AboutView.as_view(), name='about'),
     url(r'^faq/$', views.FAQView.as_view(), name='faq'),
 )
@@ -26,19 +26,23 @@ urlpatterns += patterns(
     'authtools.views',
     url(r'^login/$', 'login', name='login'),
     url(r'^logout/$', 'logout_then_login', name='logout'),
-    url(r'^password-reset/$', 'password_reset', name='password_reset'),
+    url(r'^password-reset/$', 'password_reset', name='password-reset'),
     url(
         r'^password-reset-done/$', 'password_reset_done',
-        name='password_reset_done',
+        name='password-reset-done',
+    ),
+    url(
+        r'^password-reset-done/$', 'password_reset_done',
+        name='password_reset_done',  # authtools uses underscore view names.
     ),
     url(
         r'^password-reset-confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         'password_reset_confirm_and_login',
-        name='password_reset_confirm_and_login',
+        name='password-reset-confirm-and-login',
     ),
     url(
         r'^password-reset-complete/$', 'password_reset_complete',
-        name='password_reset_complete',
+        name='password-reset-complete',
     ),
 )
 

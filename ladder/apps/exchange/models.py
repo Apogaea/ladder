@@ -130,7 +130,7 @@ class TicketRequest(BaseMatchModel):
         ordering = ('-created_at',)
 
     def get_absolute_url(self):
-        return reverse('request_detail', kwargs={'pk': self.pk})
+        return reverse('request-detail', kwargs={'pk': self.pk})
 
     @cached_property
     def is_active(self):
@@ -154,7 +154,7 @@ class TicketOffer(BaseMatchModel):
         ordering = ('-created_at',)
 
     def get_absolute_url(self):
-        return reverse('offer_detail', kwargs={'pk': self.pk})
+        return reverse('offer-detail', kwargs={'pk': self.pk})
 
     @cached_property
     def is_active(self):
@@ -258,7 +258,7 @@ class TicketMatch(TimestampableModel):
             return 'Expired'
 
     def get_absolute_url(self):
-        return reverse('match_detail', kwargs={'pk': self.pk})
+        return reverse('match-detail', kwargs={'pk': self.pk})
 
 
 class LadderProfile(models.Model):

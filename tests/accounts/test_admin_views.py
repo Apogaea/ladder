@@ -6,7 +6,7 @@ from rest_framework import status
 def test_admin_user_index_page(admin_client, factories):
     factories.UserWithProfileFactory.create_batch(20)
 
-    response = admin_client.get(reverse('admin:user_list'))
+    response = admin_client.get(reverse('admin:user-list'))
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -14,7 +14,7 @@ def test_admin_user_detail_page(factories, admin_client):
     user = factories.UserWithProfileFactory()
 
     response = admin_client.get(reverse(
-        'admin:user_detail', kwargs={'pk': user.pk},
+        'admin:user-detail', kwargs={'pk': user.pk},
     ))
     assert response.status_code == status.HTTP_200_OK
 
@@ -27,7 +27,7 @@ def test_admin_change_user(factories, admin_client, User):
         is_active=True,
         is_superuser=True,
     )
-    url = reverse('admin:user_change', kwargs={'pk': user.pk})
+    url = reverse('admin:user-change', kwargs={'pk': user.pk})
 
     response = admin_client.post(url, {
         'phone_number': '555-555-5555',
@@ -36,7 +36,7 @@ def test_admin_change_user(factories, admin_client, User):
         'is_active': False,
         'is_superuser': False,
     })
-    expected_location = reverse('admin:user_detail', kwargs={'pk': user.pk})
+    expected_location = reverse('admin:user-detail', kwargs={'pk': user.pk})
     assert response.get('location', '').endswith(expected_location)
 
     updated_user = User.objects.get(pk=user.pk)
