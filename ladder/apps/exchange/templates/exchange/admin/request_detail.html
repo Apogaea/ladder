@@ -1,0 +1,70 @@
+{% extends 'admin/index.html' %}
+{% load ladder_tags %}
+
+{% block right_main %}
+  <div class="well">
+    <div class="page-header">
+      <h1>
+        Ticket Request #{{ ticket_request.pk }}
+      </h1>
+    </div>
+    <form id="request-terminate" method="post" action="{% url 'admin:request-toggle-terminate' pk=ticket_request.pk %}">
+      {% csrf_token %}
+      {% if ticket_request.is_terminated %}
+        <button type="submit" class="btn btn-warning">Reverse Termination</button>
+      {% else %}
+        <button type="submit" class="btn btn-danger">Terminate Ticket Request</button>
+      {% endif %}
+    </form>
+    <div>
+      <dl class="dl-horizontal">
+        <dt>Id:</dt>
+        <dd>{{ ticket_request.pk }}</dd>
+        <dt>User:</dt>
+        <dd>
+          <a href="{% url 'admin:user-detail' pk=ticket_request.user.pk %}">{{ ticket_request.user }}</a>
+        </dd>
+        <dt>Created:</dt>
+        <dd>{{ ticket_request.created_at }}</dd>
+        <dt>Status:</dt>
+        <dd>{{ ticket_request.get_status_display }}</dd>
+        <dt>Cancelled:</dt>
+        <dd>{{ ticket_request.is_cancelled|yesno|title }}</dd>
+        <dt>Terminated:</dt>
+        <dd>{{ ticket_request.is_terminated|yesno|title }}</dd>
+      </dl>
+    </div>
+    <h2>Match History</h2>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Offering User</th>
+          <th>Auto/Manual</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket_match in ticket_request.matches.all %}
+          <tr>
+            <td>
+              <a href="{% url 'admin:match-detail' pk=ticket_match.pk %}">{{ ticket_match.pk }}</a>
+            </td>
+            <td>{{ ticket_match.ticket_offer.user }}</td>
+            <td><span class="badge">{{ ticket_match.ticket_offer.is_automatch|yesno:'Automatch,Manual' }}</td>
+            <td>
+              {{ ticket_match.get_status_display }}
+            </td>
+            <td>
+              <a href="{% url 'admin:match-detail' pk=ticket_match.pk %}">Details</a>
+            </td>
+          </tr>
+        {% empty %}
+        <tr><td>-</td><td colspan="5">No Matches</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}

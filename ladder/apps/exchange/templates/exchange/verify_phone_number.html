@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="row">
+    <div class="span8 offset2">
+      <h1>Verify ownership of {{ phone_number }}</h1>
+      <p class="lead">Enter the confirmation code to verify your phone number.  The code
+      will be valid until {{ phone_number.expires_at|date }}.</p>
+      <div class="row">
+        <div class="span3 offset2">
+          <div class="well">
+            <form method="post">
+              {% include 'form_as_fieldsets.html' %}
+              <button type="submit" class="btn btn-primary">Verify</button>
+              {% if not phone_number.attempts == 0 %}
+                <br />
+                <br />
+                <p class="text-warning"><span class="badge badge-warning">{{ phone_number.attempts_remaining }}</span> attempts remaining.</p>
+              {% endif %}
+            </form>
+          </div>
+            <form action="{% url 'send-confirmation-code' pk=phone_number.pk %}">
+              <p><button type="submit" class="btn">Resend Confirmation Code</button></p>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

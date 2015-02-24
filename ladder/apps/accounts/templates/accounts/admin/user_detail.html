@@ -1,0 +1,35 @@
+{% extends 'admin/index.html' %}
+{% load ladder_tags %}
+
+{% block right_main %}
+  <div class="well">
+    <div class="page-header">
+      <h1>
+        {{ ladder_user }}
+        <small><a href="{% url 'admin:user-change' pk=ladder_user.pk %}">Edit</a></small>
+      </h1>
+    </div>
+    <div>
+      <dl class="dl-horizontal">
+        <dt>Email:</dt>
+        <dd>
+          {{ ladder_user.email }}
+          {% if ladder_user.is_admin %} <span class="badge badge-info">Admin</span>{% endif %}
+        </dd>
+        <dt>Display Name:</dt>
+        <dd>{{ ladder_user.display_name }}</dd>
+        <dt>Phone Number:</dt>
+        <dd>{{ ladder_user.profile.phone_number }}</dd>
+        <dt>Status:</dt>
+        <dd><span class="badge badge-info">
+          {{ ladder_user.is_active|yesno:"Active,Inactive" }}
+        </span></dd>
+        <dt>Date Joined:</dt>
+        <dd>{{ ladder_user.date_joined }}</dd>
+        <dt>Last Login:</dt>
+        <dd>{{ ladder_user.date_joined }}</dd>
+      </dl>
+    </div>
+  </div>
+
+{% endblock %}

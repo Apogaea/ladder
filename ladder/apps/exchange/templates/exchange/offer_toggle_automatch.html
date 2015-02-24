@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="row">
+    <div class="span6 offset3">
+      <form method="post" class="well">
+        {{ form.errors }}
+        {% if ticket_offer.is_automatch %}
+          <h2>Disable Auto-Matching</h2>
+          <p>
+            Your ticket will no longer be matched with the first available ticket
+            requester.  Instead you will given a choice of who to give your
+            ticket.
+          </p>
+        {% else %}
+          <h2>Enable Auto-Matching</h2>
+          <p>
+            Your ticket will be matched with the first person in line.
+          </p>
+        {% endif %}
+        {% csrf_token %}
+        <div class="form-actions">
+          <a class="btn" href="{% url 'offer-detail' pk=ticket_offer.pk %}">Nevermind</a>
+          <button type="submit" class="btn btn-danger pull-right">Yes, I want to proceed.</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

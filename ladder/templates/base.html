@@ -1,59 +1,55 @@
 <!doctype HTML>
-{% load compress %}
-{% load url from future %}
+{% load static %}
+{% load pipeline %}
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="description" content="{% block seo_description %}{% endblock %}" />
-  <meta name="keywords" content="{% block seo_keywords %}{% endblock %}" />
-  <title>{% block title %}Apogaea Ladder Program{% endblock %}</title>
-  <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" />
-  {% compress css %}
-    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/bootstrap-responsive.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/ladder.scss' %}" />
-  {% endcompress %}
-  {% compress js %}
-    <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/angular.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/ladder.js' %}"></script>
-  {% endcompress %}
-</head>
-<body>
-  <div class="navbar">
-    <div class="navbar-inner">
-      <a class="brand" href="{% url 'site_index' %}">Ladder</a>
-      <ul class="nav">
-        {% if user.is_authenticated %}
-          <li><a href="{% url 'dashboard' %}">Exchange</a></li>
-        {% endif %}
-      </ul>
-      <ul class="nav pull-right">
-        {% if user.is_authenticated %}
-          <li><a href="{% url 'logout' %}">Logout</a></li>
-        {% else %}
-          <li><a href="{% url 'login' %}">Login</a></li>
-          <li><a href="{% url 'register' %}">Register</a></li>
-        {% endif %}
-      </ul>
-    </div>
-  </div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="{% block seo_description %}{% endblock %}" />
+        <meta name="keywords" content="{% block seo_keywords %}{% endblock %}" />
+        <title>{% block title %}Apogaea Ladder Program{% endblock %}</title>
+        <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" />
+        {% stylesheet 'base' %}
+        {% javascript 'base' %}
+    </head>
+    <body>
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'site-index' %}">Ladder</a>
+                <ul class="nav navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}">Exchange</a></li>
+                    <li><a href="{% url 'about' %}">About</a></li>
+                    <li><a href="{% url 'faq' %}">FAQ</a></li>
+                    {% endif %}
+                </ul>
+                <ul class="nav navbar-nav pull-right">
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% if user.is_admin %}
+                    <li><a href="{% url 'admin:index' %}">Admin</a></li>
+                    {% endif %}
+                    {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'register' %}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
 
-  <div class="container">
-    {% block messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-          <button class="close" data-dismiss="alert">&times;</button>
-          <h4 class="alert=heading">{{ message.tags|title }}</h4>
-          {{ message }}
+        <div class="container">
+            {% block messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <button class="close" data-dismiss="alert">&times;</button>
+                <h4 class="alert=heading">{{ message.tags|title }}</h4>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endblock %}
+            {% block content %}
+            {% endblock %}
         </div>
-      {% endfor %}
-    {% endblock %}
-    {% block content %}
-    {% endblock %}
-  </div>
-  <div id="footer">
-  </div>
-</body>
+        <div id="footer">
+        </div>
+    </body>
 </html>

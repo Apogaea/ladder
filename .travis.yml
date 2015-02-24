@@ -1,10 +1,33 @@
+sudo: false
 language: python
+cache:
+  directories:
+    - $HOME/.pip-cache/
 python:
   - "2.7"
 env:
   global:
-    - DJANGO_SETTINGS_MODULE=ladder.settings_travis
-    - secure: "UkdzZa48PgBJ3Up5HSK1VaKY1lynq+jgcOul5dZZBC4NLUcqW/zn5PM26UmWWSiETG/Zsry7mjmx6g/vLXzKr5zvg+m1CkM9juUAxHxQR8ObrHbaxnjWv+q7CujbGkgFJ/JpXg2wo/A6H18mo0ttafYSPy5L89uPV6cy4IjbZd8="
-    - secure: "NtEPpWG9WQ048AbSqMpJQztOhJJFjpjnv7dk8mciXr3VlVbcYoGfijhZbyRxtxbpeOsOY/NkzNm+Wf7XLzKx9NATyKf1U8wxFlzU6yPC0knC42Mpe6dZ89HYW/uK0A8m8sIFzSGNaOdP8DnSq0Vjr78eJHNibf2NLH3iUJBM+NU="
-install: pip install -r requirements.txt
-script: "python manage.py test ladder"
+    - DJANGO_SECRET_KEY='not-a-good-secret-key'
+    - DJANGO_EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend'
+    - DJANGO_DEBUG='True'
+    - DJANGO_STATIC_ROOT='ladder/public/static/'
+    - DJANGO_MEDIA_ROOT='ladder/public/media/'
+    # Sqlite Configuration
+    #DATABASE_URL='sqlite:///sqlite_database'
+    - DATABASE_URL="postgresql://postgres:@localhost:5432/ladder"
+    # Dev creds
+    - TWILIO_ACCOUNT_SID='AC1c3ddb839dc4119fb322b014996841d6'
+    - TWILIO_AUTH_TOKEN='cebe4dac1eb6194d3668679225b6f288'
+    - TWILIO_PHONE_NUMBER='+15005550006'
+  matrix:
+    - TOX_ENV=py27-dj17
+    - TOX_ENV=flake8
+before_script:
+  - psql -c 'create database ladder;' -U postgres
+install:
+  - pip install --upgrade pip
+  - pip install tox==1.8.0
+script:
+  - tox -e $TOX_ENV
+after_script:
+  - cat .tox/$TOX_ENV/log/*.log

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block left_sidebar %}
+  <div class="well">
+    <ul class="nav nav-list">
+      <li class="nav-header">Frequently Asked Questions</li>
+      <li><a href="#offer">Offer a ticket</a></li>
+    </ul>
+  </div>
+{% endblock %}
+
+{% block right_main %}
+  <div class="well">
+    <h3>Frequently Asked Questions</h3>
+    <dl>
+      <dt>Why do you need both my email address and my phone number?</dt>
+      <dd>
+        Verifying both of these pieces of information helps us enforce one
+        account per person and keep the exchange fair.
+      </dd>
+      <dt>Does the exchange guarantee that I get a ticket?</dt>
+      <dd>
+        No.  But it does guarantee that nobody can cut in line in front of you.
+      </dd>
+      <dt>I forgot my password, how do I log in?</dt>
+      <dd>
+        Head on over to the <a href="{% url 'password-reset' %}">forgot
+        password</a> page and do a password reset.
+      </dd>
+    </dl>
+  </div>
+{% endblock %}

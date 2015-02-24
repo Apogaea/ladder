@@ -1,0 +1,20 @@
+{% extends 'admin/index.html' %}
+{% load ladder_tags %}
+
+{% block right_main %}
+  <div class="well">
+    <div class="page-header">
+      <h1>
+        {{ ladder_user }}
+      </h1>
+    </div>
+    <form method="post" action="{% url 'admin:user-change' pk=ladder_user.pk %}">
+      {% include 'form_as_fieldsets.html' %}
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success">Save</button>
+        <a class="btn pull-right" href="{% url 'admin:user-detail' pk=ladder_user.pk %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+{% endblock %}

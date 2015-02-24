@@ -1,0 +1,37 @@
+{% extends 'admin/index.html' %}
+{% load ladder_tags %}
+
+{% block right_main %}
+  <div class="well">
+    <div class="page-header">
+      <h1>
+        Ticket Match #{{ ticket_match.pk }}
+      </h1>
+    </div>
+    <div>
+      <dl class="dl-horizontal">
+        <dt>Id:</dt>
+        <dd>{{ ticket_match.pk }}</dd>
+        <dt>Offering User:</dt>
+        <dd>{{ ticket_match.ticket_offer.user }}</dd>
+        <dt>Requesting User:</dt>
+        <dd>{{ ticket_match.ticket_request.user }}</dd>
+        <dt>Created:</dt>
+        <dd>{{ ticket_match.created_at }}</dd>
+        <dt>Status:</dt>
+        <dd>{{ ticket_match.get_status_display }}</dd>
+        <dt>Terminated:</dt>
+        <dd>{{ ticket_match.is_terminated|yesno|title }}</dd>
+      </dl>
+    </div>
+    <form method="post" action="{% url 'admin:match-toggle-terminate' pk=ticket_match.pk %}">
+      {% csrf_token %}
+      {% if ticket_match.is_terminated %}
+        <button type="submit" class="btn btn-warning">Reverse Termination</button>
+      {% else %}
+        <button type="submit" class="btn btn-danger">Terminate Ticket Match</button>
+      {% endif %}
+    </form>
+  </div>
+
+{% endblock %}
