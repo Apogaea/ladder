@@ -1,5 +1,4 @@
 import datetime
-import urllib
 import mock
 
 from ladder.apps.accounts.utils import (
@@ -58,4 +57,7 @@ def test_registration_link_reversing(frozen_now):
     token = generate_registration_token(email, phone)
     path = reverse_registration_url(email, phone)
 
-    assert urllib.quote(token) in path
+    p1, p2, p3 = token.split(':')
+    assert p1 in path
+    assert p2 in path
+    assert p3 in path
