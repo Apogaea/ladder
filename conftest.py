@@ -1,4 +1,5 @@
 import pytest
+import mock
 
 from django_webtest import (
     WebTest as BaseWebTest,
@@ -131,3 +132,19 @@ def user_client(user, client):
     assert client.login(username=user.email, password='secret')
     client.user = user
     return client
+
+
+@pytest.fixture()
+def admin_client(admin_user, client):
+    assert client.login(username=admin_user.email, password='secret')
+    client.user = admin_user
+    return client
+
+
+@pytest.fixture()
+def frozen_now(mocker):
+    from django.utils import timezone
+    now = timezone.datetime.now()
+
+    mocker.patch('datetime.datetime', now=mock.Mock(return_value=now))
+    return now

@@ -1,66 +1,47 @@
 from django.core.urlresolvers import reverse
-from django.contrib.auth import get_user_model
-from django.test import TestCase
-
-User = get_user_model()
 
 from rest_framework import status
 
-from accounts.tests.factories import (
-    UserWithProfileFactory, SuperUserWithProfileFactory,
-)
+
+def test_admin_user_index_page(admin_client, factories):
+    factories.UserWithProfileFactory.create_batch(20)
+
+    response = admin_client.get(reverse('admin:user_list'))
+    assert response.status_code == status.HTTP_200_OK
 
 
-class WithAuthenticatedSuperUserMixin(object):
-    def setUp(self):
-        self.super_user = SuperUserWithProfileFactory(password='secret')
-        self.assertTrue(self.client.login(
-            username=self.super_user.email,
-            password='secret',
-        ))
+def test_admin_user_detail_page(factories, admin_client):
+    user = factories.UserWithProfileFactory()
+
+    response = admin_client.get(reverse(
+        'admin:user_detail', kwargs={'pk': user.pk},
+    ))
+    assert response.status_code == status.HTTP_200_OK
 
 
-class UserIndexTest(WithAuthenticatedSuperUserMixin, TestCase):
-    def test_admin_user_index_page(self):
-        for i in range(20):
-            UserWithProfileFactory()
+def test_admin_change_user(factories, admin_client, User):
+    user = factories.UserWithProfileFactory(
+        _profile__phone_number='555-444-3333',
+        email='original@example.com',
+        display_name='original',
+        is_active=True,
+        is_superuser=True,
+    )
+    url = reverse('admin:user_change', kwargs={'pk': user.pk})
 
-        response = self.client.get(reverse('admin:user_list'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    response = admin_client.post(url, {
+        'phone_number': '555-555-5555',
+        'email': 'test-email@example.com',
+        'display_name': 'test-display_name',
+        'is_active': False,
+        'is_superuser': False,
+    })
+    expected_location = reverse('admin:user_detail', kwargs={'pk': user.pk})
+    assert response.get('location', '').endswith(expected_location)
 
-    def test_admin_user_detail_page(self):
-        user = UserWithProfileFactory()
-
-        response = self.client.get(reverse(
-            'admin:user_detail', kwargs={'pk': user.pk},
-        ))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_admin_change_user(self):
-        user = UserWithProfileFactory(
-            _profile__phone_number='555-444-3333',
-            email='original@example.com',
-            display_name='original',
-            is_active=True,
-            is_superuser=True,
-        )
-        url = reverse('admin:user_change', kwargs={'pk': user.pk})
-
-        response = self.client.post(url, {
-            'phone_number': '555-555-5555',
-            'email': 'test-email@example.com',
-            'display_name': 'test-display_name',
-            'is_active': False,
-            'is_superuser': False,
-        })
-        self.assertRedirects(
-            response,
-            reverse('admin:user_detail', kwargs={'pk': user.pk}),
-        )
-
-        updated_user = User.objects.get(pk=user.pk)
-        self.assertEqual(updated_user.email, 'test-email@example.com')
-        self.assertEqual(updated_user.display_name, 'test-display_name')
-        self.assertEqual(updated_user.profile.phone_number, '555-555-5555')
-        self.assertFalse(updated_user.is_active)
-        self.assertFalse(updated_user.is_superuser)
+    updated_user = User.objects.get(pk=user.pk)
+    assert updated_user.email == 'test-email@example.com'
+    assert updated_user.display_name == 'test-display_name'
+    assert updated_user.profile.phone_number == '555-555-5555'
+    assert not updated_user.is_active
+    assert not updated_user.is_superuser
