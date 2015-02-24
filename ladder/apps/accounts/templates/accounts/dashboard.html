@@ -50,9 +50,6 @@
                 <a href="{% url 'offer-detail' pk=ticket_offer.pk %}">Detail</a>
                 {% if ticket_offer.is_active %}
                 | <a href="{% url 'offer-cancel' pk=ticket_offer.pk %}">Cancel</a>
-                {% if ticket_offer.is_automatch %}
-                | <a href="{% url 'offer-select-recipient' pk=ticket_offer.pk %}">Select Recipient</a>
-                {% endif %}
                 {% endif %}
             </td>
         </tr>

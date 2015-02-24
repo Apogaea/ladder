@@ -1,26 +1,36 @@
 import json
 
 from django.views.generic import (
-    DetailView, CreateView, UpdateView, FormView,
+    DetailView,
+    CreateView,
+    UpdateView,
 )
 from django.contrib import messages
 from django.db.models import Q
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 from django.utils import timezone
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import (
+    reverse,
+    reverse_lazy,
+)
 
 from authtools.views import LoginRequiredMixin
 
 from ladder.apps.exchange.models import (
-    TicketOffer, TicketRequest, TicketMatch
+    TicketOffer,
+    TicketRequest,
+    TicketMatch
 )
 from ladder.apps.exchange.forms import (
-    TicketOfferForm, TicketRequestForm, NoFieldsTicketOfferForm,
-    SelectTicketRequestForm, NoFieldsTicketRequestForm,
+    TicketOfferForm,
+    TicketRequestForm,
+    NoFieldsTicketOfferForm,
+    NoFieldsTicketRequestForm,
     NoFieldsTicketMatchForm,
 )
 from ladder.apps.exchange.emails import (
-    send_match_confirmation_email, send_request_fulfilled_email,
+    send_match_confirmation_email,
+    send_request_fulfilled_email,
     send_offer_accepted_email,
 )
 
@@ -36,6 +46,32 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
             return redirect(reverse("dashboard"))
         return super(OfferCreateView, self).dispatch(request, *args, **kwargs)
 
+    def get_front_of_request_line(self):
+        """
+        Fetch the first *front* of the ticket request line.
+        """
+        front_of_line = list(TicketRequest.objects.is_active().order_by(
+            'created_at',
+        )[:3])
+        return front_of_line
+
+    def get_context_data(self, **kwargs):
+        context = super(OfferCreateView, self).get_context_data(**kwargs)
+        context['ticket_request_choices'] = self.get_front_of_request_line()
+        return context
+
+    def create_match(self, ticket_offer, ticket_request):
+        match = TicketMatch.objects.create(
+            ticket_offer=ticket_offer,
+            ticket_request=ticket_request,
+        )
+        # Send an email to the ticket requester with a confirmation link.
+        send_match_confirmation_email(match)
+        messages.success(
+            self.request, "Your ticket offer has been matched with a ticket request.",
+        )
+        return redirect(self.get_success_url())
+
     def form_valid(self, form):
         self.object = ticket_offer = form.save(commit=False)
         ticket_offer.user = self.request.user
@@ -45,15 +81,7 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
             # the same time.  Two matches will be created.
             try:
                 ticket_request = TicketRequest.objects.is_active().order_by('created_at')[0]
-                match = TicketMatch.objects.create(
-                    ticket_offer=ticket_offer,
-                    ticket_request=ticket_request,
-                )
-                # Send an email to the ticket requester with a confirmation link.
-                send_match_confirmation_email(match)
-                messages.success(
-                    self.request, "Your ticket offer has been matched with a ticket request.",
-                )
+                return self.create_match(ticket_offer, ticket_request)
             except IndexError:
                 messages.success(
                     self.request,
@@ -62,7 +90,12 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
                     "enters the system",
                 )
             return redirect(self.get_success_url())
-        return redirect(reverse('offer-select-recipient', kwargs={'pk': ticket_offer.pk}))
+        elif form.cleaned_data.get('ticket_request'):
+            ticket_request = form.cleaned_data['ticket_request']
+            return self.create_match(ticket_offer, ticket_request)
+
+        # Something weird happened, but lets just kick them back to the page.
+        return self.form_invalid(form)
 
 
 class OfferDetailView(LoginRequiredMixin, DetailView):
@@ -72,35 +105,6 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return self.request.user.ticket_offers.all()
-
-
-class OfferToggleAutomatchView(LoginRequiredMixin, UpdateView):
-    template_name = 'exchange/offer_toggle_automatch.html'
-    model = TicketOffer
-    form_class = NoFieldsTicketOfferForm
-    context_object_name = 'ticket_offer'
-
-    def get_success_url(self):
-        return reverse('offer-detail', kwargs={'pk': self.object.pk})
-
-    def get_queryset(self):
-        return self.request.user.ticket_offers.is_active()
-
-    def form_valid(self, form):
-        form.instance.is_automatch = not form.instance.is_automatch
-        self.object = form.save()
-        if form.instance.is_automatch:
-            messages.success(
-                self.request,
-                'Your ticket offer has been switched to Automatic Matching and '
-                'will be matched with the next ticket request in line.',
-            )
-            return super(OfferToggleAutomatchView, self).form_valid(form)
-        else:
-            return redirect(reverse(
-                'offer-select-recipient',
-                kwargs={'pk': form.instance.pk},
-            ))
 
 
 class OfferCancelView(LoginRequiredMixin, UpdateView):
@@ -117,55 +121,6 @@ class OfferCancelView(LoginRequiredMixin, UpdateView):
         form.instance.is_cancelled = True
         messages.success(self.request, 'Your ticket offer has been cancelled')
         return super(OfferCancelView, self).form_valid(form)
-
-
-class OfferSelectRecipientView(LoginRequiredMixin, FormView):
-    """
-    Presents the person offering their ticket with a choice of 3 ticket
-    requests.
-    """
-    template_name = 'exchange/select_offer_recipient.html'
-    form_class = SelectTicketRequestForm
-
-    def get_ticket_offer(self):
-        return get_object_or_404(
-            self.request.user.ticket_offers.is_active().filter(is_automatch=False),
-            pk=self.kwargs['pk'],
-        )
-
-    def get_ticket_request_queryset(self):
-        front_of_line = TicketRequest.objects.is_active().order_by(
-            'created_at',
-        )[:3].values_list('pk', flat=True)
-        return TicketRequest.objects.is_active().filter(pk__in=front_of_line)
-
-    def get_form(self, form_class):
-        form = super(OfferSelectRecipientView, self).get_form(form_class)
-        form.fields['ticket_request'].queryset = self.get_ticket_request_queryset()
-        return form
-
-    def get_context_data(self, **kwargs):
-        kwargs = super(OfferSelectRecipientView, self).get_context_data(**kwargs)
-        kwargs['ticket_offer'] = self.get_ticket_offer()
-        kwargs['ticket_request_choices'] = self.get_ticket_request_queryset()
-        return kwargs
-
-    def form_valid(self, form):
-        ticket_offer = self.get_ticket_offer()
-        ticket_request = form.cleaned_data['ticket_request']
-        # Race Condition.  If two people select the same recipient at the same
-        # time, two offers may be sent to to the requester.
-        ticket_match = TicketMatch.objects.create(
-            ticket_request=ticket_request,
-            ticket_offer=ticket_offer,
-        )
-        messages.success(
-            self.request,
-            'The ticket requester has been contacted.  Once they accept your '
-            'ticket, we will put both of you in touch with each other',
-        )
-        send_match_confirmation_email(ticket_match)
-        return redirect(ticket_offer.get_absolute_url())
 
 
 class RequestCreateView(LoginRequiredMixin, CreateView):

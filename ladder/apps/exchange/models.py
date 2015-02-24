@@ -136,6 +136,14 @@ class TicketRequest(BaseMatchModel):
     def get_absolute_url(self):
         return reverse('request-detail', kwargs={'pk': self.pk})
 
+    @property
+    def place_in_line(self):
+        if not self.is_active:
+            return None
+        return TicketRequest.objects.filter(
+            created_at__lt=self.created_at,
+        ).is_active().count()
+
     @cached_property
     def is_active(self):
         if self.is_cancelled or self.is_terminated:
