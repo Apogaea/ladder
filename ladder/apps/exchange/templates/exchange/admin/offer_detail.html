@@ -8,7 +8,7 @@
         Ticket Offer #{{ ticket_offer.pk }}
       </h1>
     </div>
-    <form method="post" action="{% url 'admin:offer-toggle-terminate' pk=ticket_offer.pk %}">
+    <form id="offer-terminate" method="post" action="{% url 'admin:offer-toggle-terminate' pk=ticket_offer.pk %}">
       {% csrf_token %}
       {% if ticket_offer.is_terminated %}
         <button type="submit" class="btn btn-warning">Reverse Termination</button>
