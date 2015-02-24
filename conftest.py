@@ -113,7 +113,9 @@ def admin_user(User):
     try:
         return User.objects.get(email='admin@example.com')
     except User.DoesNotExist:
+        from django.utils import timezone
         return User.objects.create_superuser(
+            last_login=timezone.now(),
             display_name='admin',
             email='admin@example.com',
             password='secret',
@@ -127,7 +129,9 @@ def user(User):
             email='test@example.com',
         )
     except User.DoesNotExist:
+        from django.utils import timezone
         return User.objects.create_user(
+            last_login=timezone.now(),
             display_name='Test User',
             email='test@example.com',
             password='secret',
@@ -150,8 +154,19 @@ def admin_client(admin_user, client):
 
 @pytest.fixture()
 def frozen_now(mocker):
+    import time
+    import datetime
     from django.utils import timezone
-    now = timezone.datetime.now()
 
+    now = timezone.datetime.now()
+    now_time = time.time()
+    today = datetime.date.today()
+
+    # datetime
     mocker.patch('datetime.datetime', now=mock.Mock(return_value=now))
+    mocker.patch('django.utils.timezone.now', mock.Mock(return_value=now))
+    # date
+    mocker.patch('datetime.date', today=mock.Mock(return_value=today))
+    # time
+    mocker.patch('time.time', mock.Mock(return_value=now_time))
     return now
