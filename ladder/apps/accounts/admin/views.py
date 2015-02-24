@@ -40,5 +40,6 @@ class AdminUserChangeView(AdminRequiredMixin, UpdateView):
     def form_valid(self, form):
         profile = form.instance.profile
         profile.phone_number = form.cleaned_data['phone_number']
+        profile.max_allowed_matches = form.cleaned_data['max_allowed_matches']
         profile.save()
         return super(AdminUserChangeView, self).form_valid(form)

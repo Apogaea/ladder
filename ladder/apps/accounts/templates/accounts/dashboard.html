@@ -18,6 +18,19 @@
     begin that process here.</p>
     <p><a href="{% url 'offer-create' %}" class="btn btn-primary btn-large">Offer a Ticket</a></p>
 </div>
+{% elif user.profile.has_reached_max_allowed_matches %}
+<div class="hero-unit">
+    <h2>Maximum Reached</h2>
+    <p>
+        Currently, your profile is only authorized to distribute
+        {{ user.profile.max_allowed_matches }} tickets.  If you have more tickets
+        than this feel free to contact an admin at
+        <strong>piper</strong> <em>at</em> <strong>apogaea</strong>
+        <em>dot</em> <strong>com</strong> and we'll happily increase your
+        limit.
+    </p>
+    <p><a href="{% url 'offer-create' %}" class="btn btn-primary btn-large">Offer a Ticket</a></p>
+</div>
 {% endif %}
 {% if user.profile.can_request_ticket %}
 <div class="hero-unit">
