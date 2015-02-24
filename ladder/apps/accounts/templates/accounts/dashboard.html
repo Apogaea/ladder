@@ -1,101 +1,101 @@
 {% extends "two_column.html" %}
 
 {% block left_sidebar %}
-  <div class="well">
+<div class="well">
     <h3>Account</h3>
     <a href="{% url 'account-edit' %}">Edit</a>
     <dl class="dl-horizontal">
-      <dt>Name:</dt>
-      <dd>{{ user }}</dd>
-      <dt>Phone Number:</dt>
-      <dd>{{ user.profile.phone_number }} </dd>
+        <dt>Name:</dt>
+        <dd>{{ user }}</dd>
+        <dt>Phone Number:</dt>
+        <dd>{{ user.profile.phone_number }} </dd>
     </dl>
-  </div><!-- Account Information -->
-  {% if user.profile.can_offer_ticket %}
-    <div class="hero-unit">
-      <h2>I have a ticket to offer</h2>
-      <p>If you have a ticket that you would like to offer to someone,
-      begin that process here.</p>
-      <p><a href="{% url 'offer-create' %}" class="btn btn-primary btn-large">Offer a Ticket</a></p>
-    </div>
-  {% endif %}
-  {% if user.profile.can_request_ticket %}
-    <div class="hero-unit">
-      <h2>I need a ticket</h2>
-      <p>If you are in need of a ticket, create your ticket request
-      here.</p>
-      <p><a href="{% url 'request-create' %}" class="btn btn-primary btn-large">Request a Ticket</a></p>
-    </div>
-  {% endif %}
+</div><!-- Account Information -->
+{% if user.profile.can_offer_ticket %}
+<div class="hero-unit">
+    <h2>I have a ticket to offer</h2>
+    <p>If you have a ticket that you would like to offer to someone,
+    begin that process here.</p>
+    <p><a href="{% url 'offer-create' %}" class="btn btn-primary btn-large">Offer a Ticket</a></p>
+</div>
+{% endif %}
+{% if user.profile.can_request_ticket %}
+<div class="hero-unit">
+    <h2>I need a ticket</h2>
+    <p>If you are in need of a ticket, create your ticket request
+    here.</p>
+    <p><a href="{% url 'request-create' %}" class="btn btn-primary btn-large">Request a Ticket</a></p>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block right_main %}
-  <h2>Offers <small>Your history of ticket offers</h2>
-  <table class="table table-striped table-bordered">
+<h2>Offers <small>Your history of ticket offers</h2>
+<table class="table table-striped table-bordered">
     <thead>
-      <tr>
-        <th>Reference #</th>
-        <th>Created</th>
-        <th>Status</th>
-        <th>Links</th>
-      </tr>
+        <tr>
+            <th>Reference #</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Links</th>
+        </tr>
     </thead>
     <tbody>
-      {% for ticket_offer in user.ticket_offers.all %}
+        {% for ticket_offer in user.ticket_offers.all %}
         <tr>
-          <td>{{ ticket_offer.pk }}</td>
-          <td>{{ ticket_offer.created_at|date }}</td>
-          <td>{{ ticket_offer.get_status_display }}</td>
-          <td>
-              <a href="{% url 'offer-detail' pk=ticket_offer.pk %}">Detail</a>
-              {% if ticket_offer.is_active %}
+            <td>{{ ticket_offer.pk }}</td>
+            <td>{{ ticket_offer.created_at|date }}</td>
+            <td>{{ ticket_offer.get_status_display }}</td>
+            <td>
+                <a href="{% url 'offer-detail' pk=ticket_offer.pk %}">Detail</a>
+                {% if ticket_offer.is_active %}
                 | <a href="{% url 'offer-cancel' pk=ticket_offer.pk %}">Cancel</a>
                 {% if ticket_offer.is_automatch %}
-                  | <a href="{% url 'offer-select-recipient' pk=ticket_offer.pk %}">Select Recipient</a>
+                | <a href="{% url 'offer-select-recipient' pk=ticket_offer.pk %}">Select Recipient</a>
                 {% endif %}
-              {% endif %}
-          </td>
+                {% endif %}
+            </td>
         </tr>
-      {% empty %}
-      <tr><td>-</td><td colspan="3">No Offer History</td></tr>
-      {% endfor %}
+        {% empty %}
+        <tr><td>-</td><td colspan="3">No Offer History</td></tr>
+        {% endfor %}
     </tbody>
-  </table>
+</table>
 
-  <hr />
+<hr />
 
-  <h2>Requests <small>Your history of ticket requests</small></h2>
-  <table class="table table-striped table-bordered">
+<h2>Requests <small>Your history of ticket requests</small></h2>
+<table class="table table-striped table-bordered">
     <thead>
-      <tr>
-        <th>Reference #</th>
-        <th>Created</th>
-        <th>Status</th>
-        <th>Links</th>
-      </tr>
+        <tr>
+            <th>Reference #</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Links</th>
+        </tr>
     </thead>
     <tbody>
-      {% for ticket_request in user.ticket_requests.all %}
+        {% for ticket_request in user.ticket_requests.all %}
         <tr>
-          <td>{{ ticket_request.pk }}</td>
-          <td>{{ ticket_request.created_at|date }}</td>
-          <td>{{ ticket_request.get_status_display }}</td>
-          <td>
-              <a href="{% url 'request-detail' pk=ticket_request.pk %}">Detail</a>
-              {% if ticket_request.is_active %}
+            <td>{{ ticket_request.pk }}</td>
+            <td>{{ ticket_request.created_at|date }}</td>
+            <td>{{ ticket_request.get_status_display }}</td>
+            <td>
+                <a href="{% url 'request-detail' pk=ticket_request.pk %}">Detail</a>
+                {% if ticket_request.is_active %}
                 | <a href="{% url 'request-update' pk=ticket_request.pk %}">Edit</a>
                 | <a href="{% url 'request-cancel' pk=ticket_request.pk %}">Cancel</a>
-              {% elif ticket_request.is_reserved %}
+                {% elif ticket_request.is_reserved %}
                 {% if ticket_request.get_pending_match %}
-                  | <a href="{% url 'match-confirm' pk=ticket_request.get_pending_match.pk %}">Accept/Reject</a>
+                | <a href="{% url 'match-confirm' pk=ticket_request.get_pending_match.pk %}">Accept/Reject</a>
                 {% endif %}
-              {% endif %}
-            </ul>
-          </td>
+                {% endif %}
+                </ul>
+            </td>
         </tr>
-      {% empty %}
+        {% empty %}
         <tr><td>-</td><td colspan="3">No Request History</td></tr>
-      {% endfor %}
+        {% endfor %}
     </tbody>
-  </table>
+</table>
 {% endblock %}
