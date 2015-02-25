@@ -93,7 +93,6 @@
             <td>
                 <a href="{% url 'request-detail' pk=ticket_request.pk %}">Detail</a>
                 {% if ticket_request.is_active %}
-                | <a href="{% url 'request-update' pk=ticket_request.pk %}">Edit</a>
                 | <a href="{% url 'request-cancel' pk=ticket_request.pk %}">Cancel</a>
                 {% elif ticket_request.is_reserved %}
                 {% if ticket_request.get_pending_match %}

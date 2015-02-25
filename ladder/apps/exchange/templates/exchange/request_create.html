@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load argonauts %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <form method="post" class="well">
+            <h2>Create a Ticket Request</h2>
+            <p>Please inclued a personal message to accompany your ticket request.</p>
+            <div class="text-info">
+                <h5>Guidelines</h5>
+                <ul>
+                    <li>Why do you need a ticket?</li>
+                    <li>Be brief (200 characters or less).</li>
+                    <li>
+                        All tickets are assumed to be sold at face value.  Don't
+                        offer anything above face value.
+                    </li>
+                    <li>Nothing illegal.</li>
+                </ul>
+            </div>
+            {% csrf_token %}
+            <div>
+                {% include 'form_as_fieldsets.html' %}
+                <div id="message-preview">
+                    <!-- Message Preview -->
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Create Ticket Request</button>
+                <a class="btn" href="{% url 'dashboard' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script id="preview-template" type="text/x-handlebars-template">
+    <h4>Preview</h4>
+    <p class="text-muted">This is how your request will appear to others</p>
+    <blockquote class="pull-right">
+        {% verbatim %}
+        <p>{{ message }}</p>
+        {% endverbatim %}
+        <small><cite title="Source Title">{{ user.display_name }}</cite></small>
+    </blockquote>
+    <div class="clearfix"></div>
+    {% verbatim %}
+    <p class="pull-right">{{ charactersRemaining }} / 200</p>
+    {% endverbatim %}
+    <br /><br />
+</script>
+
+<script type="text/javascript">
+$(function(){
+    var PreviewView = Backbone.View.extend({
+        initialize: function(options) {
+            this.listenTo(this.model, "change", this.render);
+            $("textarea#id_message").bind("input propertychange", _.bind(this.updateMessage, this));
+            $("textarea#id_message").trigger("propertychange");
+        },
+        el: "#message-preview",
+        template: Handlebars.compile($("#preview-template").html()),
+        render: function() {
+            var context = this.model.toJSON();
+            context.charactersRemaining = 200 - context.message.length;
+            this.$el.html(this.template(context));
+        },
+        updateMessage: function(event) {
+            var message = $(event.currentTarget).val();
+            this.model.set("message", message);
+        }
+    });
+
+    new PreviewView({model: new Backbone.Model({message: ""})});
+})
+</script>
+{% endblock %}

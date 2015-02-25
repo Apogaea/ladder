@@ -1,5 +1,3 @@
-import json
-
 from django.views.generic import (
     DetailView,
     CreateView,
@@ -127,7 +125,7 @@ class OfferCancelView(LoginRequiredMixin, UpdateView):
 
 
 class RequestCreateView(LoginRequiredMixin, CreateView):
-    template_name = 'exchange/request_form.html'
+    template_name = 'exchange/request_create.html'
     model = TicketRequest
     form_class = TicketRequestForm
 
@@ -160,23 +158,6 @@ class RequestCreateView(LoginRequiredMixin, CreateView):
                 "as we find a ticket for you.",
             )
         return redirect(ticket_request.get_absolute_url())
-
-
-class RequestUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = 'exchange/request_form.html'
-    model = TicketRequest
-    context_object_name = 'ticket_request'
-    form_class = TicketRequestForm
-
-    def get_queryset(self):
-        return self.request.user.ticket_requests.is_active()
-
-    def get_context_data(self, **kwargs):
-        kwargs = super(RequestUpdateView, self).get_context_data(**kwargs)
-        form = kwargs['form']
-        message = form.data.get('message', self.get_object().message)
-        kwargs['message_as_json'] = json.dumps(message)
-        return kwargs
 
 
 class RequestCancelView(LoginRequiredMixin, UpdateView):
