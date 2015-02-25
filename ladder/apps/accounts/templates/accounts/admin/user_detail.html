@@ -31,5 +31,71 @@
       </dl>
     </div>
   </div>
+  <div>
+      <h3>Offer History</h3>
+      <table class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Auto/Manual</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ticket_offer in ladder_user.ticket_offers.all %}
+            <tr>
+              <td>
+                <a href="{% url 'admin:offer-detail' pk=ticket_offer.pk %}">{{ ticket_offer.pk }}</a>
+              </td>
+              <td><span class="badge">{{ ticket_offer.is_automatch|yesno:'Automatch,Manual' }}</td>
+              <td>{{ ticket_offer.get_status_display }}</td>
+              <td>
+                <a href="{% url 'admin:offer-detail' pk=ticket_offer.pk %}">Details</a>
+                {% if ticket_offer.is_fulfilled %}
+                  | <a href="{% url 'admin:match-detail' pk=ticket_offer.get_accepted_match.pk %}">View Match</a>
+                {% elif ticket_offer.is_reserved %}
+                  | <a href="{% url 'admin:match-detail' pk=ticket_offer.get_pending_match.pk %}">View Pending Match</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+          <tr><td>-</td><td colspan="5">No Offers</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
+  <div>
+      <h3>Request History</h3>
+      <table class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ticket_request in ladder_user.ticket_requests.all %}
+              <tr>
+                  <td>
+                      <a href="{% url 'admin:request-detail' pk=ticket_request.pk %}">{{ ticket_request.pk }}</a>
+                  </td>
+                  <td>{{ ticket_request.get_status_display }}</td>
+                  <td>
+                      <a href="{% url 'admin:request-detail' pk=ticket_request.pk %}">Details</a>
+                      {% if ticket_request.is_fulfilled %}
+                          | <a href="{% url 'admin:match-detail' pk=ticket_request.get_accepted_match.pk %}">View Match</a>
+                      {% elif ticket_request.is_reserved %}
+                          | <a href="{% url 'admin:match-detail' pk=ticket_request.get_pending_match.pk %}">View Pending Match</a>
+                      {% endif %}
+                  </td>
+              </tr>
+          {% empty %}
+              <tr><td>-</td><td colspan="3">No Requests</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
 
 {% endblock %}
