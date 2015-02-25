@@ -28,6 +28,13 @@ class UserChangeForm(BetterModelForm):
             "the exchange."
         ),
     )
+    is_active = forms.BooleanField(
+        help_text=(
+            "Users who are not active will not be able to log into the site. "
+            "(Note that deactivating a user will not remove any listings created "
+            "by that user)."
+        ),
+    )
 
     class Meta:
         model = User
