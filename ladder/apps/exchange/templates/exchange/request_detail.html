@@ -42,7 +42,19 @@
                         <td>{{ ticket_match.get_status_display }}</td>
                     </tr>
                     {% empty %}
-                    <tr><td>-</td><td colspan="3">Still waiting for a match</td></tr>
+                        <tr><td>-</td><td colspan="3">
+                            {% if ticket_request.is_active %}
+                                {% if ticket_request.place_in_line == 0 %}
+                                    You are first in line!
+                                {% else %}
+                                    Still waiting for a match (There {{ ticket_request.place_in_line|pluralize:"is,are" }} {{ ticket_request.place_in_line }} people ahead of you)
+                                {% endif %}
+                            {% elif ticket_request.is_cancelled %}
+                                This ticket request was cancelled.
+                            {% elif ticket_request.is_terminated %}
+                                This ticket request was terminated by an admin.
+                            {% endif %}
+                        </td></tr>
                     {% endfor %}
                 </tbody>
             </table>
