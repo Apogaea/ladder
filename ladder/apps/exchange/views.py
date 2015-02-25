@@ -33,6 +33,9 @@ from ladder.apps.exchange.emails import (
     send_request_fulfilled_email,
     send_offer_accepted_email,
 )
+from ladder.apps.exchange.mixins import (
+    WithMatchMixin,
+)
 
 
 class OfferCreateView(LoginRequiredMixin, CreateView):
@@ -98,19 +101,13 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
         return self.form_invalid(form)
 
 
-class OfferDetailView(LoginRequiredMixin, DetailView):
+class OfferDetailView(LoginRequiredMixin, WithMatchMixin, DetailView):
     template_name = 'exchange/offer_detail.html'
     model = TicketOffer
     context_object_name = 'ticket_offer'
 
     def get_queryset(self):
         return self.request.user.ticket_offers.all()
-
-    def get_context_data(self, **kwargs):
-        context = super(OfferDetailView, self).get_context_data(**kwargs)
-        context['pending_match'] = self.object.get_pending_match()
-        context['accepted_match'] = self.object.get_accepted_match()
-        return context
 
 
 class OfferCancelView(LoginRequiredMixin, UpdateView):
@@ -198,19 +195,13 @@ class RequestCancelView(LoginRequiredMixin, UpdateView):
         return super(RequestCancelView, self).form_valid(form)
 
 
-class RequestDetailView(LoginRequiredMixin, DetailView):
+class RequestDetailView(LoginRequiredMixin, WithMatchMixin, DetailView):
     template_name = 'exchange/request_detail.html'
     model = TicketRequest
     context_object_name = 'ticket_request'
 
     def get_queryset(self):
         return self.request.user.ticket_requests.all()
-
-    def get_context_data(self, **kwargs):
-        context = super(RequestDetailView, self).get_context_data(**kwargs)
-        context['pending_match'] = self.object.get_pending_match()
-        context['accepted_match'] = self.object.get_accepted_match()
-        return context
 
 
 class MatchDetailView(LoginRequiredMixin, DetailView):
