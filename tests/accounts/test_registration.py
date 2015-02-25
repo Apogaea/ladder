@@ -11,6 +11,7 @@ from ladder.apps.accounts.utils import (
 )
 
 
+@pytest.mark.django_db
 def test_registration_page(client):
     url = reverse('register')
     response = client.get(url)
