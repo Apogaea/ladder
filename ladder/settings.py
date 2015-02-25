@@ -108,6 +108,8 @@ PIPELINE_JS = {
         'source_filenames': (
             "js/jquery-2.1.0.js",
             "js/underscore-1.6.0.js",
+            "js/handlebars.js",
+            "js/backbone.js",
             "js/bootstrap.js",
             "js/ladder.js",
         ),
@@ -187,6 +189,7 @@ INSTALLED_APPS = [
     'pipeline',
     'storages',
     'authtools',
+    'argonauts',
     'raven.contrib.django.raven_compat',
     's3_folder_storage',
     'bootstrap3',

@@ -126,7 +126,7 @@ class TicketRequestQuerySet(MatchQuerySet):
 
 class TicketRequest(BaseMatchModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='ticket_requests')
-    message = models.TextField(max_length=1000)
+    message = models.TextField(max_length=200)
 
     objects = TicketRequestQuerySet.as_manager()
 

@@ -33,8 +33,4 @@ urlpatterns = patterns(
         r'^request/(?P<pk>\d+)/cancel/$', views.RequestCancelView.as_view(),
         name='request-cancel',
     ),
-    url(
-        r'^request/(?P<pk>\d+)/edit-request/$',
-        views.RequestUpdateView.as_view(), name='request-update',
-    ),
 )
