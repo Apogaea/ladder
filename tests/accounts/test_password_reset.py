@@ -1,3 +1,5 @@
+import pytest
+
 from django.core.urlresolvers import reverse
 from django.core import mail
 from django.contrib.auth.forms import (
@@ -9,6 +11,7 @@ from django.utils.encoding import force_bytes
 from rest_framework import status
 
 
+@pytest.mark.django_db
 def test_password_reset_page(client):
     response = client.get(reverse('password-reset'))
 
