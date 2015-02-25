@@ -1,5 +1,6 @@
 {% extends 'admin/index.html' %}
 {% load ladder_tags %}
+{% load humanize %}
 
 {% block right_main %}
   <div class="well">
@@ -11,7 +12,7 @@
     <form id="offer-terminate" method="post" action="{% url 'admin:offer-toggle-terminate' pk=ticket_offer.pk %}">
       {% csrf_token %}
       {% if ticket_offer.is_terminated %}
-        <button type="submit" class="btn btn-warning">Reverse Termination</button>
+        <button type="submit" class="btn btn-warning">Undo Termination</button>
       {% else %}
         <button type="submit" class="btn btn-danger">Terminate Ticket Offer</button>
       {% endif %}
@@ -27,7 +28,14 @@
         <dt>Created:</dt>
         <dd>{{ ticket_offer.created_at }}</dd>
         <dt>Status:</dt>
-        <dd>{{ ticket_offer.get_status_display }}</dd>
+        <dd>
+            {{ ticket_offer.get_status_display }}
+            {% if ticket_offer.is_reserved %}
+                for 
+                <a href="{% url 'admin:request-detail' pk=pending_match.ticket_request.pk %}">Request #{{ pending_match.ticket_request.pk }}</a>
+                <em> (Expires {{ pending_match.expires_at|naturaltime }})</em>
+            {% endif %}
+        </dd>
         <dt>Cancelled:</dt>
         <dd>{{ ticket_offer.is_cancelled|yesno|title }}</dd>
         <dt>Terminated:</dt>

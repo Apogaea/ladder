@@ -17,6 +17,9 @@ from ladder.apps.exchange.admin.forms import (
     RequestChangeListForm,
     MatchChangeListForm,
 )
+from ladder.apps.exchange.mixins import (
+    WithMatchMixin,
+)
 
 
 #
@@ -29,7 +32,7 @@ class AdminOfferListView(AdminRequiredMixin, BrowseView):
     paginate_by = settings.PAGINATE_BY
 
 
-class AdminOfferDetailView(AdminRequiredMixin, DetailView):
+class AdminOfferDetailView(AdminRequiredMixin, WithMatchMixin, DetailView):
     template_name = 'exchange/admin/offer_detail.html'
     model = TicketOffer
     context_object_name = 'ticket_offer'
@@ -59,7 +62,7 @@ class AdminRequestListView(AdminRequiredMixin, BrowseView):
     paginate_by = settings.PAGINATE_BY
 
 
-class AdminRequestDetailView(AdminRequiredMixin, DetailView):
+class AdminRequestDetailView(AdminRequiredMixin, WithMatchMixin, DetailView):
     template_name = 'exchange/admin/request_detail.html'
     model = TicketRequest
     context_object_name = 'ticket_request'
