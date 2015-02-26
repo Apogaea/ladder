@@ -11,6 +11,8 @@ from betterforms.forms import BetterForm
 
 from authtools.views import LoginRequiredMixin
 
+from ladder.apps.exchange.models import LadderProfile
+
 from ladder.apps.accounts.forms import UserChangeForm, InitiateRegistrationForm, UserCreationForm
 from ladder.apps.accounts.utils import (
     unsign_registration_token, send_phone_number_verification_sms,
@@ -122,9 +124,10 @@ class RegisterVerifyPhoneNumberView(VerifyTokenMixin, CreateView):
         form.instance.is_active = True
         self.object = user = form.save()
 
-        profile = user.profile
-        profile.phone_number = self.phone_number
-        profile.save()
+        LadderProfile.objects.create(
+            user=user,
+            phone_number=self.phone_number,
+        )
 
         user = authenticate(
             username=user.email,

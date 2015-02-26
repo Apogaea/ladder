@@ -126,3 +126,45 @@ def test_registration_complete(User, client):
     assert user.is_active
     assert user.display_name == 'test-display_name'
     assert user.profile.phone_number == phone_number
+
+
+@pytest.mark.django_db
+def test_registration_special_case_regression(User, client, factories):
+    factories.UserWithProfileFactory(_profile__phone_number='')
+
+    email = 'test@example.com'
+    phone_number = '5554443333'
+
+    url = reverse(
+        'register-verify-phone-number',
+        kwargs={
+            'token': generate_registration_token(email, phone_number),
+        },
+    )
+    target_url = reverse('dashboard')
+
+    code = generate_phone_number_code(phone_number)
+
+    response = client.post(url, {
+        'sms_code': code,
+        'display_name': 'test-display_name',
+        'password': 'secret',
+    })
+
+    assert response.get('location', '').endswith(target_url)
+
+    assert User.objects.filter(email=email).exists()
+
+    user = User.objects.get(email=email)
+
+    assert user.check_password('secret')
+    assert user.is_active
+
+    assert client.login(
+        username=user.email,
+        password='secret',
+    )
+
+    assert user.is_active
+    assert user.display_name == 'test-display_name'
+    assert user.profile.phone_number == phone_number
