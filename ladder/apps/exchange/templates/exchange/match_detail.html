@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-heading">
+    <h2>Ticket Match #{{ ticket_match.pk }}
+        <small>Status: <span class="label label-default">{{ ticket_match.get_status_display }}</span>
+    </h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="well">
+                <dl class="dl-horizontal">
+                    <dt>Created</dt>
+                    <dd>{{ ticket_match.created_at|date }}</dd>
+                    <dt>Accepted</dt>
+                    <dd>
+                        {% if ticket_match.accepted_at %}
+                            {{ ticket_match.accepted_at|date }}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+            {% if ticket_match.is_awaiting_confirmation and user == ticket_match.ticket_request.user %}
+                <form action="{% url 'match-confirm' pk=ticket_match.pk %}" method="post">
+                    {% csrf_token %}
+                    <div class="well">
+                        <h2>Accept the Ticket</h2>
+                        <p>Confirm that you still need a ticket.  You and the ticket-holder
+                        will receive an email with contact information on how to get in touch
+                        with each other.</p>
+                        <button class="btn btn-success btn-large" type="submit">Confirm and Get my Ticket</button>
+                    </div>
+                    <div class="well">
+                        <h2>Reject the Ticket</h2>
+                        <p>If you no longer need this ticket, then you can choose to release
+                        the ticket back onto the exchange.  Your ticket request will be
+                        cancelled if you choose this option.</p>
+                        <button class="btn btn-danger btn-large" type="submit" name="_reject" value="True">I Do Not Need This Ticket</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h2>Offer History</h2>
+            {% include 'exchange/admin/partials/history_table.html' with ticket_history_entries=ticket_match.ticket_offer.history.all %}
+            <h2>Request History</h2>
+            {% include 'exchange/admin/partials/history_table.html' with ticket_history_entries=ticket_match.ticket_request.history.all %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import itertools
 import datetime
 
 from django.db import models

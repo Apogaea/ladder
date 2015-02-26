@@ -3,57 +3,58 @@
 {% load humanize %}
 
 {% block right_main %}
-  <div class="well">
-    <div class="page-header">
-      <h1>
-        Ticket Match #{{ ticket_match.pk }}
-      </h1>
-    </div>
-    <form method="post" action="{% url 'admin:match-toggle-terminate' pk=ticket_match.pk %}">
-      {% csrf_token %}
-      {% if ticket_match.is_terminated %}
-        <button type="submit" class="btn btn-warning">Undo Termination</button>
-      {% else %}
-        <button type="submit" class="btn btn-danger">Terminate Ticket Match</button>
-      {% endif %}
-    </form>
-    <div>
-      <dl class="dl-horizontal">
-        <dt>Id:</dt>
-        <dd>{{ ticket_match.pk }}</dd>
-        <dt>Requesting User:</dt>
-        <dd>
-            <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_request.user.pk %}">
-                {{ ticket_match.ticket_request.user }}
-            </a>
-        </dd>
-        <dt>Created:</dt>
-        <dd>{{ ticket_match.created_at }}</dd>
-        <dt>Status:</dt>
-        <dd>
-            {{ ticket_match.get_status_display }}
-            {% if ticket_match.is_awaiting_confirmation %}
-                    <em> (Expires {{ ticket_match.expires_at|naturaltime }})</em>
+    <div class="well">
+        <div class="page-header">
+            <h1>
+                Ticket Match #{{ ticket_match.pk }}
+            </h1>
+        </div>
+        <form method="post" action="{% url 'admin:match-toggle-terminate' pk=ticket_match.pk %}">
+            {% csrf_token %}
+            {% if ticket_match.is_terminated %}
+                <button type="submit" class="btn btn-warning">Undo Termination</button>
+            {% else %}
+                <button type="submit" class="btn btn-danger">Terminate Ticket Match</button>
             {% endif %}
-        </dd>
-        <dt>Terminated:</dt>
-        <dd>{{ ticket_match.is_terminated|yesno|title }}</dd>
-      </dl>
+        </form>
+        <div>
+            <dl class="dl-horizontal">
+                <dt>Id:</dt>
+                <dd>{{ ticket_match.pk }}</dd>
+                <dt>Requesting User:</dt>
+                <dd>
+                <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_request.user.pk %}">
+                    {{ ticket_match.ticket_request.user }}
+                </a>
+                </dd>
+                <dt>Created:</dt>
+                <dd>{{ ticket_match.created_at }}</dd>
+                <dt>Status:</dt>
+                <dd>
+                {{ ticket_match.get_status_display }}
+                {% if ticket_match.is_awaiting_confirmation %}
+                    <em> (Expires {{ ticket_match.expires_at|naturaltime }})</em>
+                {% endif %}
+                </dd>
+                <dt>Terminated:</dt>
+                <dd>{{ ticket_match.is_terminated|yesno|title }}</dd>
+            </dl>
+        </div>
     </div>
-    <div>
-        <h3>Offer Details</h3>
+    <div class="well">
+        <h3>Offer</h3>
         <dl class="dl-horizontal">
             <dt>Id:</dt>
             <dd>
-                <a href="{% url 'admin:offer-detail' pk=ticket_match.ticket_offer.pk %}">
-                    Offer #{{ ticket_match.ticket_offer.pk }}
-                </a>
+            <a href="{% url 'admin:offer-detail' pk=ticket_match.ticket_offer.pk %}">
+                Offer #{{ ticket_match.ticket_offer.pk }}
+            </a>
             </dd>
             <dt>Offering User:</dt>
             <dd>
-                <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_offer.user.pk %}">
-                    {{ ticket_match.ticket_offer.user }}
-                </a>
+            <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_offer.user.pk %}">
+                {{ ticket_match.ticket_offer.user }}
+            </a>
             </dd>
             <dt>Created:</dt>
             <dd>{{ ticket_match.ticket_offer.created_at }}</dd>
@@ -64,21 +65,23 @@
             <dt>Cancelled:</dt>
             <dd>{{ ticket_match.ticket_offer.is_cancelled|yesno|title }}</dd>
         </dl>
+        <h4>History</h4>
+        {% include 'exchange/admin/partials/history_table.html' with ticket_history_entries=ticket_match.ticket_offer.history.all %}
     </div>
-    <div>
-        <h3>Request Details</h3>
+    <div class="well">
+        <h3>Request</h3>
         <dl class="dl-horizontal">
             <dt>Id:</dt>
             <dd>
-                <a href="{% url 'admin:request-detail' pk=ticket_match.ticket_request.pk %}">
-                    Request #{{ ticket_match.ticket_request.pk }}
-                </a>
+            <a href="{% url 'admin:request-detail' pk=ticket_match.ticket_request.pk %}">
+                Request #{{ ticket_match.ticket_request.pk }}
+            </a>
             </dd>
             <dt>Request User:</dt>
             <dd>
-                <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_request.user.pk %}">
-                    {{ ticket_match.ticket_request.user }}
-                </a>
+            <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_request.user.pk %}">
+                {{ ticket_match.ticket_request.user }}
+            </a>
             </dd>
             <dt>Created:</dt>
             <dd>{{ ticket_match.ticket_request.created_at }}</dd>
@@ -91,7 +94,7 @@
             <dt>Cancelled:</dt>
             <dd>{{ ticket_match.ticket_request.is_cancelled|yesno|title }}</dd>
         </dl>
+        <h4>History</h4>
+        {% include 'exchange/admin/partials/history_table.html' with ticket_history_entries=ticket_match.ticket_request.history.all %}
     </div>
-  </div>
-
 {% endblock %}

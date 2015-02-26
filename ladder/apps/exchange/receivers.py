@@ -3,7 +3,7 @@ def create_creation_history_entry(sender, instance, created, raw, **kwargs):
         return
 
     instance.history.create(
-        message="Ticket Request created.",
+        message="{0} created.".format(instance._meta.verbose_name.title()),
     )
 
 
@@ -20,7 +20,7 @@ def create_cancellation_history_entry(sender, instance, raw, **kwargs):
 
     if instance.is_cancelled:
         instance.history.create(
-            message="Ticket Request cancelled."
+            message="{0} cancelled.".format(instance._meta.verbose_name.title()),
         )
 
 
@@ -38,7 +38,7 @@ def create_termination_history_entry(sender, instance, raw, **kwargs):
         else:
             suffix = "terminated"
         instance.history.create(
-            message="Ticket Request {0}.".format(suffix)
+            message="{0} {1}.".format(instance._meta.verbose_name.title(), suffix)
         )
 
 
