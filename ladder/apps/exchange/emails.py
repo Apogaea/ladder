@@ -4,7 +4,7 @@ from ladder.core.emails import LadderEmail
 
 
 class MatchConfirmationEmail(BuildAbsoluteURIMixin, LadderEmail):
-    subject = "[Ladder] Ticket Offer Verification"
+    subject = "Ticket Offer Verification"
     template_name = 'exchange/mail/confirm_offer.html'
 
     def get_to(self):
@@ -27,7 +27,7 @@ send_match_confirmation_email = MatchConfirmationEmail.as_callable()
 
 
 class MatchInformationEmail(BuildAbsoluteURIMixin, LadderEmail):
-    subject = "[Ladder] Ticket Match Information"
+    subject = "Ticket Match Information"
 
     def get_to(self):
         return [self.args[1].email]
@@ -49,6 +49,6 @@ send_request_fulfilled_email = MatchInformationEmail.as_callable(
     template_name='exchange/mail/request_fulfilled.html',
 )
 send_offer_rejected_email = MatchInformationEmail.as_callable(
-    subject="[Ladder] Ticket Offer Rejected",
+    subject="Ticket Offer Rejected",
     template_name='exchange/mail/offer_rejected.html',
 )
