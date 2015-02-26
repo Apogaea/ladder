@@ -12,8 +12,6 @@
                     <li class="nav-header">Manage Request</li>
                     {% if ticket_request.is_active %}
                         <li><a href="{% url 'request-cancel' pk=ticket_request.pk %}">Cancel</a></li>
-                    {% elif ticket_request.is_reserved %}
-                    {% endif %}
                     {% endif %}
                 </ul>
                 <dl class="dl-horizontal">
