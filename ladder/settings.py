@@ -8,7 +8,7 @@ import dj_database_url
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 ADMINS = (
-    ('Piper', 'piper@thefuckingunicorns.com'),
+    ('Piper', 'pipermerriam@gmail.com'),
 )
 
 DEFAULT_FROM_EMAIL = 'ladder@apogaea.com'
