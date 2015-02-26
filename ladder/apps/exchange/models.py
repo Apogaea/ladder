@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime
 
 from django.db import models
@@ -6,6 +8,8 @@ from django.utils import timezone
 from django.conf import settings
 from django.utils.functional import cached_property
 from django.core.urlresolvers import reverse
+from django.utils.encoding import python_2_unicode_compatible
+from django.template.defaultfilters import truncatewords
 
 from localflavor.us import models as us_models
 
@@ -157,6 +161,30 @@ class TicketRequest(BaseMatchModel):
         return True
 
 
+@python_2_unicode_compatible
+class BaseHistoryModel(TimestampableModel):
+    """
+    - Creation.
+    - Cancelation
+    - Termination
+    - Match Found
+    - Match Confirmed
+    - Match Expired  (no event to tie to...)
+    """
+    message = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return truncatewords(self.message, 10)
+
+
+class TicketRequestHistory(BaseHistoryModel):
+    ticket_request = models.ForeignKey('TicketRequest', related_name='history')
+
+
 class TicketOffer(BaseMatchModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='ticket_offers')
 
@@ -177,6 +205,10 @@ class TicketOffer(BaseMatchModel):
         elif self.matches.is_accepted().exists():
             return False
         return True
+
+
+class TicketOfferHistory(BaseHistoryModel):
+    ticket_offer = models.ForeignKey('TicketOffer', related_name='history')
 
 
 class TicketMatchQuerySet(models.QuerySet):
