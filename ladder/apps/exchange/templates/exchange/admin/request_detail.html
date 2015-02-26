@@ -44,37 +44,14 @@
         <dd>{{ ticket_request.is_terminated|yesno|title }}</dd>
       </dl>
     </div>
-    <h2>Match History</h2>
-    <table class="table table-striped table-bordered">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Offering User</th>
-          <th>Auto/Manual</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for ticket_match in ticket_request.matches.all %}
-          <tr>
-            <td>
-              <a href="{% url 'admin:match-detail' pk=ticket_match.pk %}">{{ ticket_match.pk }}</a>
-            </td>
-            <td>{{ ticket_match.ticket_offer.user }}</td>
-            <td><span class="badge">{{ ticket_match.ticket_offer.is_automatch|yesno:'Automatch,Manual' }}</td>
-            <td>
-              {{ ticket_match.get_status_display }}
-            </td>
-            <td>
-              <a href="{% url 'admin:match-detail' pk=ticket_match.pk %}">Details</a>
-            </td>
-          </tr>
-        {% empty %}
-        <tr><td>-</td><td colspan="5">No Matches</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  </div>
+  <div class="well">
+      <h2>Request History</h2>
+      {% include 'exchange/admin/partials/history_table.html' with ticket_history_entries=ticket_request.history.all %}
+  </div>
+  <div class="well">
+      <h2>Match History</h2>
+      {% include 'exchange/admin/partials/match_table.html' with ticket_matches=ticket_request.matches.all %}
   </div>
 
 {% endblock %}

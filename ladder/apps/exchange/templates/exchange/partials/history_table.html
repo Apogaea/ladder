@@ -1,0 +1,20 @@
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Message</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for history_entry in ticket_history_entries %}
+            <tr>
+                <td>{{ history_entry.pk }}</td>
+                <td>{{ history_entry.message }}</td>
+                <td>{{ history_entry.created_at }}</td>
+            </tr>
+        {% empty %}
+            <tr><td>-</td><td colspan="5">No History</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
