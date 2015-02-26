@@ -229,10 +229,20 @@ class ConfirmTicketOfferView(LoginRequiredMixin, UpdateView):
                 )
                 # Send an email to the ticket requester with a confirmation link.
                 send_match_confirmation_email(new_match)
-            messages.info(self.request, 'Your ticket request has been successfully cancelled.')
+            messages.info(
+                self.request,
+                'Your ticket request has been successfully cancelled.',
+            )
             return redirect(reverse('dashboard'))
         else:
-            messages.info(self.request, 'You have successfully accepted the offered ticket.')
+            messages.success(
+                self.request,
+                (
+                    'You have successfully accepted your ticket.  Check your '
+                    'email for information on how to get in touch with the '
+                    'tickeholder.'
+                ),
+            )
             form.instance.accepted_at = timezone.now()
             match = form.save()
             # Send both users an email with info on how to get in touch with each other.
