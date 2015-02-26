@@ -17,7 +17,10 @@ class TicketOfferForm(BetterModelForm):
 
     class Meta:
         model = TicketOffer
-        fields = ('is_automatch',)
+        fields = (
+            'is_automatch',
+            'ticket_code',
+        )
 
     def clean_ticket_request(self):
         ticket_request_pk = self.cleaned_data.get('ticket_request')

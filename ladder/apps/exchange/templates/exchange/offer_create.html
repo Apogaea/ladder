@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load url from future %}
+{% load bootstrap3 %}
 
 {% block content %}
     <div class="row">
@@ -11,6 +11,9 @@
             <h1>Offer a ticket</h1>
             <p>Proceed to give your ticket to the next person who requests a ticket.</p>
         {% endif %}
+        <div class="col-md-4 col-md-offset-4 text-center">
+            {% bootstrap_field form.ticket_code %}
+        </div>
         {% for ticket_request in ticket_request_choices %}
             <div class="col-md-6">
                 <form id="recipient-select-{{ forloop.counter }}" action="." method="post" class="jumbotron">
@@ -20,6 +23,7 @@
                         <small><cite title="Source Title">{{ ticket_request.user.display_name }}</cite></small>
                     </blockquote>
                     <input type="hidden" name="ticket_request" value="{{ ticket_request.pk }}">
+                    <input type="hidden" name="ticket_code">
                     <button class="btn btn-large btn-block btn-success" type="submit">Go</button>
                 </form>
             </div>
@@ -33,9 +37,19 @@
             <form id="auto-match" action="." method="post" class="jumbotron">
                 {% csrf_token %}
                 <input type="hidden" name="is_automatch" value="1">
+                <input type="hidden" name="ticket_code">
                 <p class="text-info">Just give my ticket to the first person in line.</p>
                 <button class="btn btn-large btn-block btn-info" type="submit">Go</button>
             </form>
         </div>
     </div>
+
+<script type="text/javascript">
+$(function(){
+    $("input[name='ticket_code'][type='text']").bind("change", function(event) {
+        $("input[name='ticket_code'][type='hidden']").val($(event.currentTarget).val());
+    });
+    $("input[name='ticket_code'][type='text']").trigger("change");
+})
+</script>
 {% endblock %}

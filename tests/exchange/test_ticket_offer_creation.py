@@ -22,6 +22,7 @@ def test_offer_creation_for_next_person_in_line(factories, user_webtest_client, 
     assert not models.TicketMatch.objects.exists()
     assert len(mail.outbox) == 0
 
+    response.forms['auto-match']['ticket_code'] = 'test-code'
     create_response = response.forms['auto-match'].submit('submit')
 
     assert create_response.status_code == status.HTTP_302_FOUND
@@ -33,6 +34,7 @@ def test_offer_creation_for_next_person_in_line(factories, user_webtest_client, 
     ticket_offer = user.ticket_offers.get()
 
     assert ticket_offer.is_reserved
+    assert ticket_offer.ticket_code == 'test-code'
     assert ticket_request.is_reserved
 
     assert len(mail.outbox) == 1
@@ -57,12 +59,17 @@ def test_offer_creation_choosing_recipient(factories, user_webtest_client, model
     assert not models.TicketMatch.objects.exists()
     assert len(mail.outbox) == 0
 
-    create_response = response.forms['recipient-select-{0}'.format(index)].submit('submit')
+    form_key = 'recipient-select-{0}'.format(index)
+    response.forms[form_key]['ticket_code'] = 'test-code'
+    create_response = response.forms[form_key].submit('submit')
 
     assert create_response.status_code == status.HTTP_302_FOUND
 
     assert user.ticket_offers.exists()
     assert models.TicketMatch.objects.exists()
+
+    ticket_offer = user.ticket_offers.get()
+    assert ticket_offer.ticket_code == 'test-code'
 
     ticket_match = models.TicketMatch.objects.get()
 
@@ -89,6 +96,7 @@ def test_offer_creation_choosing_invalid_non_active_request(factories,
     assert not user.ticket_offers.exists()
     assert len(mail.outbox) == 0
 
+    response.forms['recipient-select-1']['ticket_code'] = 'test-code'
     response.forms['recipient-select-1']['ticket_request'].value = ticket_request.pk
     create_response = response.forms['recipient-select-1'].submit('submit')
 
@@ -118,6 +126,7 @@ def test_offer_creation_choosing_request_not_in_selection(factories,
     assert not user.ticket_offers.exists()
     assert len(mail.outbox) == 0
 
+    response.forms['recipient-select-1']['ticket_code'] = 'test-code'
     response.forms['recipient-select-1']['ticket_request'].value = ticket_request.pk
     create_response = response.forms['recipient-select-1'].submit('submit')
 

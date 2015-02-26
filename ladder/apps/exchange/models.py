@@ -187,6 +187,12 @@ class TicketRequestHistory(BaseHistoryModel):
 
 class TicketOffer(BaseMatchModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='ticket_offers')
+    ticket_code = models.CharField(
+        max_length=20,
+        help_text=(
+            "The confirmation code that was given to you when you purchased your ticket"
+        )
+    )
 
     is_automatch = models.BooleanField(blank=True, default=True)
 
