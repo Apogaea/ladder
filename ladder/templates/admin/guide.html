@@ -1,0 +1,93 @@
+{% extends 'admin/index.html' %}
+
+
+{% block right_main %}
+<div>
+    <h2>Exchange Administration <small><a href="{% url 'admin:index' %}"><span class="glyphicon glyphicon-link"></span></a></small></h2>
+    <p>
+        The <a href="{% url 'admin:index' %}">index</a> page of the admin gives
+        you tables showing the most recent users, ticket
+        requests/offers/matches.  This should provide an <em>at a glance</em>
+        view of the site.
+    </p>
+    <h2>User Administration <small><a href="{% url 'admin:user-list' %}"><span class="glyphicon glyphicon-link"></span></a></small></h2>
+    <p>
+        The <a href="{% url 'admin:user-list' %}">users</a> page of the admin
+        lists all of the user accounts registered for the exchange.
+    </p>
+    <p>
+        The list shows the following information about users.
+
+        <dl>
+            <dt>#</dt>
+            <dd>The <code>id</code> of the user</dd>
+            <dt>Email</dt>
+            <dd>The user's email address.  Users who are administrators of the
+            site are indicated with <span class="badge badge-info">Admin</span>
+            next to their email address.</dd>
+            <dt>Display Name</dt>
+            <dd>The name the user has chosen for display on the site.</dd>
+            <dt>Phone Number</dt>
+            <dd>The phone number the user registered with</dd>
+            <dt>Date Joined</dt>
+            <dd>The date the user registered on the site</dd>
+            <dt>Num Requests</dt>
+            <dd>The total number of ticket requests this user has created.
+            This includes active, reserved, cancelled, and terminated
+            requests.</dd>
+            <dt>Num Offers</dt>
+            <dd>The total number of ticket offers this user has created.
+            This includes active, reserved, cancelled, and terminated
+            offers.</dd>
+        </dl>
+    </p>
+    <h3>Searching</h3>
+    <p>
+        The search box at the top of the user list will allow you to search for
+        users based on their <strong>email address</strong> and
+        <strong>name</strong>.
+    </p>
+    <h3>User Details</h3>
+    <p>
+        When viewing the details of a user you can see additional information
+        about their account on the site including:
+        
+        <ul>
+            <li>The history of all ticket requests and offers the user has made
+                on the site.</li>
+            <li>The last time they logged in.</li>
+            <li>Link to edit the user's information.</li>
+            <li>Link to edit the user's information.</li>
+        </ul>
+    </p>
+    <h3>User Editing</h3>
+    <p>
+        As an admin, you can edit most parts of a user's information.  This includes:
+
+        <dl class="dl-horizontal">
+            <dt>Email Address</dt>
+            <dd>The email address that communications about tickets will be
+            sent to.  Must be unique across all users on the site.</dd>
+            <dt>Name</dt>
+            <dd>The name that will be displayed for the user. Must be unique
+            across all users on the site.</dd>
+            <dt>Max Allowed Matches</dt>
+            <dd>The total number of tickets this user is allowed to distribute
+            via the site.  Defaults to <code>2</code> for all users.  This
+            value can be increased on a user by user basis at an admin's
+            discretion.  The limit is in place to prevent a malicious user from
+            listing fake tickets.</dd>
+            <dt>Is Active</dt>
+            <dd>This controls whether a user is able to log into the site.  In
+            the event of a malicious user, this value should be unchecked to
+            disable their account.</dd>
+            <dt>Is Admin</dt>
+            <dd>Gives the user access to the admin part of the site.</dd>
+            <dt>Phone Number</dt>
+            <dd>The phone number associated with the user.</dd>
+        </dl>
+    </p>
+
+    <h2>Request Administration <small><a href="{% url 'admin:request-list' %}"><span class="glyphicon glyphicon-link"></span></a></small></h2>
+</div>
+{% endblock %}

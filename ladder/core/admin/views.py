@@ -41,6 +41,10 @@ class AdminIndexView(AdminRequiredMixin, TemplateView):
         return kwargs
 
 
+class AdminGuideView(AdminRequiredMixin, TemplateView):
+    template_name = 'admin/guide.html'
+
+
 class AdminLoginView(LoginView):
     disallow_authenticated = False
     template_name = 'admin/login.html'
