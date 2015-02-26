@@ -65,11 +65,11 @@ STATICFILES_STORAGE = excavator.env_string(
 )
 
 # User-uploaded files
-MEDIA_ROOT = excavator.env_string('DJANGO_MEDIA_ROOT', required=True)
+MEDIA_ROOT = excavator.env_string('DJANGO_MEDIA_ROOT')
 MEDIA_URL = excavator.env_string('DJANGO_MEDIA_URL', default='/media/')
 
 # Static files
-STATIC_ROOT = excavator.env_string('DJANGO_STATIC_ROOT', required=True)
+STATIC_ROOT = excavator.env_string('DJANGO_STATIC_ROOT')
 STATIC_URL = excavator.env_string('DJANGO_STATIC_URL', default='/static/')
 
 # Additional locations of static files
