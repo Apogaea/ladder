@@ -41,7 +41,10 @@ def test_initiate_registration(client, mocker):
 
     message = mail.outbox[0]
 
-    assert urllib.quote(token) in message.body
+    p1, p2, p3 = token.split(':')
+    assert p1 in message.body
+    assert p2 in message.body
+    assert p3 in message.body
 
 
 @pytest.mark.django_db
