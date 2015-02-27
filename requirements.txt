@@ -6,6 +6,9 @@ django-authtools==1.0.0
 django-betterforms==1.1.1
 django-bootstrap3==5.1.1
 django-cache-url==0.8.0
+django-cors-headers==1.0.0
+django-debug-toolbar-template-timings==0.6.4
+django-debug-toolbar==1.2.2
 django-emailtools==0.2.2
 django-localflavor==1.1
 django-pagination==1.0.7
@@ -22,4 +25,3 @@ pylibmc==1.4.1
 python-dotenv==0.1.0
 raven==5.2.0
 twilio==3.7.1
-django-cors-headers==1.0.0
