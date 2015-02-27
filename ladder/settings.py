@@ -11,7 +11,9 @@ ADMINS = (
     ('Piper', 'pipermerriam@gmail.com'),
 )
 
-DEFAULT_FROM_EMAIL = 'ladder@apogaea.com'
+DEFAULT_FROM_EMAIL = excavator.env_string(
+    'DJANGO_DEFAULT_FROM_EMAIL', default='ladder@apogaea.com',
+)
 
 MANAGERS = ADMINS
 
