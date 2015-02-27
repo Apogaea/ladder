@@ -22,3 +22,4 @@ pylibmc==1.4.1
 python-dotenv==0.1.0
 raven==5.2.0
 twilio==3.7.1
+django-cors-headers==1.0.0

@@ -125,6 +125,7 @@ PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 SECRET_KEY = excavator.env_string('DJANGO_SECRET_KEY', required=True)
 
 MIDDLEWARE_CLASSES = (
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -188,6 +189,7 @@ INSTALLED_APPS = [
     'ladder.apps.exchange',
 
     # 3rd Party
+    'corsheaders',
     'pipeline',
     'storages',
     'authtools',
@@ -316,3 +318,6 @@ DEBUG_TOOLBAR_PANELS = [
 
 # This is required to silence `1_6.W001` system check.
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# COORs headers
+CORS_ORIGIN_WHITELIST = excavator.env_list('CORS_ORIGIN_WHITELIST')
