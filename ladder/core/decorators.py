@@ -5,6 +5,8 @@ from authtools.views import DecoratorMixin
 
 
 def user_is_admin(user):
+    if user.is_anonymous():
+        return False
     return user.is_admin
 
 
