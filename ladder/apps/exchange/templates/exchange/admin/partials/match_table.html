@@ -4,7 +4,6 @@
             <th>#</th>
             <th>Offering User</th>
             <th>Requesting User</th>
-            <th>Auto/Manual</th>
             <th>Status</th>
             <th>Created</th>
             <th>Actions</th>
@@ -21,11 +20,6 @@
                 </td>
                 <td>
                     <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_request.user.pk %}">{{ ticket_match.ticket_request.user }}</a>
-                </td>
-                <td>
-                    <span class="badge">
-                        {{ ticket_match.ticket_offer.is_automatch|yesno:'Automatch,Manual' }}
-                    </span>
                 </td>
                 <td>{{ ticket_match.get_status_display }}</td>
                 <td>{{ ticket_match.created_at }}</td>
