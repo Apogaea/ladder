@@ -43,9 +43,17 @@ class UserChangeForm(BetterModelForm):
             'email',
             'display_name',
             'is_active',
-            'is_superuser',
-            'max_allowed_matches',
+            'is_staff',
         )
+
+    def __init__(self, *args, **kwargs):
+        if kwargs.get('instance'):
+            instance = kwargs['instance']
+            initial = kwargs.get('initial', {})
+            initial.setdefault('phone_number', instance.profile.phone_number)
+            initial.setdefault('max_allowed_matches', instance.profile.max_allowed_matches)
+            kwargs['initial'] = initial
+        super(UserChangeForm, self).__init__(*args, **kwargs)
 
     def clean_email(self):
         User = get_user_model()
