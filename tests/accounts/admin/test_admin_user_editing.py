@@ -23,7 +23,7 @@ def test_updating_a_user_via_the_admin(models, admin_webtest_client, user):
     response.form['max_allowed_matches'] = '10'
     response.form['display_name'] = 'new-name'
     response.form['is_active'] = False
-    response.form['is_superuser'] = True
+    response.form['is_staff'] = True
 
     change_response = response.form.submit()
     assert change_response.status_code == status.HTTP_302_FOUND
@@ -38,4 +38,4 @@ def test_updating_a_user_via_the_admin(models, admin_webtest_client, user):
     assert updated_user.profile.max_allowed_matches == 10
     assert updated_user.display_name == 'new-name'
     assert updated_user.is_active is False
-    assert updated_user.is_superuser is True
+    assert updated_user.is_staff is True
