@@ -101,7 +101,7 @@ class BaseMatchModel(TimestampableModel):
         elif self.is_fulfilled:
             return u'Fulfilled'
         elif self.is_reserved:
-            return u'Reserved'
+            return u'Awaiting Confirmation'
         elif self.is_active:
             return u'Active'
         else:

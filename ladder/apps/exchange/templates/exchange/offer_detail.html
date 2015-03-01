@@ -54,19 +54,19 @@
                         </dl>
                     </p>
                 {% elif ticket_offer.is_active %}
-                    {% if ticket_offer.is_automatch %}
-                        <p class="lead">
-                        This offer is currently active and will be matched with the
-                        next ticket request that enters the exchange.
-                        </p>
-                    {% endif %}
+                    <p class="lead">
+                    This offer is currently active and will be matched with the
+                    next ticket request that enters the exchange.
+                    </p>
                 {% elif ticket_offer.is_cancelled %}
                     <p class="lead">
-                    This offer is currently cancelled.
+                        This offer is currently cancelled.
                     </p>
                 {% elif ticket_offer.is_terminated %}
                     <p class="lead">
-                    This offer is currently terminated.
+                        This Ticket Offer was terminated.  If you think this
+                        was done in error, feel free to contact
+                        <a href="mailto:tickets@apogaea.com">tickets@apogaea.com</a>
                     </p>
                 {% endif %}
             </div>

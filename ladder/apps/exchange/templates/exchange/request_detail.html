@@ -81,6 +81,16 @@
                 {% elif ticket_request.is_fulfilled %}
                     <p class="lead">
                         This Ticket Request was successfully matched.
+                        <dl class="dl-horizontal">
+                            <dt>Match ID:</dt>
+                            <dd>{{ accepted_match.pk }}</dd>
+                            <dt>Name:</dt>
+                            <dd>{{ accepted_match.ticket_offer.user.display_name }}</dd>
+                            <dt>Phone Number:</dt>
+                            <dd>{{ accepted_match.ticket_offer.user.profile.phone_number }} </dd>
+                            <dt>Email:</dt>
+                            <dd>{{ accepted_match.ticket_offer.user.email }} </dd>
+                        </dl>
                     </p>
                 {% endif %}
             </div>
