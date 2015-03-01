@@ -4,7 +4,6 @@ from ladder.apps.accounts import views
 
 urlpatterns = patterns('',  # NOQA
     url(r'^$', views.DashboardView.as_view(), name='dashboard'),
-    url(r'^edit/$', views.EditAccountView.as_view(), name='account-edit'),
     url(r'^register/$', views.RegisterView.as_view(), name='register'),
     url(r'^register/success/$', views.RegisterSuccessView.as_view(), name='register-success'),
     url(

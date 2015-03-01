@@ -1,8 +1,7 @@
 import logging
 
-from django.views.generic import FormView, TemplateView, UpdateView, CreateView
+from django.views.generic import FormView, TemplateView, CreateView
 from django.core import signing
-from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -13,7 +12,10 @@ from authtools.views import LoginRequiredMixin
 
 from ladder.apps.exchange.models import LadderProfile
 
-from ladder.apps.accounts.forms import UserChangeForm, InitiateRegistrationForm, UserCreationForm
+from ladder.apps.accounts.forms import (
+    InitiateRegistrationForm,
+    UserCreationForm,
+)
 from ladder.apps.accounts.utils import (
     unsign_registration_token, send_phone_number_verification_sms,
 )
@@ -25,23 +27,6 @@ logger = logging.getLogger(__name__)
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/dashboard.html'
-
-
-class EditAccountView(LoginRequiredMixin, UpdateView):
-    template_name = 'accounts/account_edit.html'
-    form_class = UserChangeForm
-    success_url = reverse_lazy('dashboard')
-
-    def get_object(self):
-        return self.request.user
-
-    def get_initial(self):
-        initial = super(EditAccountView, self).get_initial()
-        return initial
-
-    def form_valid(self, form):
-        messages.success(self.request, "Your profile was successfully updated")
-        return super(EditAccountView, self).form_valid(form)
 
 
 class RegisterView(FormView):

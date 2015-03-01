@@ -43,12 +43,6 @@ class InitiateRegistrationForm(BetterForm):
             raise forms.ValidationError(self.error_messages['duplicate_phone_number'])
 
 
-class UserChangeForm(BetterModelForm):
-    class Meta:
-        model = User
-        fields = ('display_name',)
-
-
 class UserCreationForm(BetterModelForm):
     error_messages = {
         'duplicate_username': "A user with that %(username)s already exists.",
