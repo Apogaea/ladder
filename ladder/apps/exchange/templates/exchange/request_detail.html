@@ -17,6 +17,19 @@
                 <dl class="dl-horizontal">
                     <dt>Created</dt>
                     <dd>{{ ticket_request.created_at|date }}</dd>
+                    {% if ticket_request.is_active %}
+                        <dt>Place in line.</dt>
+                        <dd>
+                            {% if ticket_request.place_in_line == 0 %}
+                                You are at the front of the line!
+                            {% else %}
+                                There {{ ticket_request.place_in_line|pluralize:"is,are" }} 
+                                {{ ticket_request.place_in_line }} 
+                                {{ ticket_request.place_in_line|pluralize:"person,people" }} 
+                                ahead of you in line.
+                            {% endif %}
+                        </dd>
+                    {% endif %}
                 </dl>
             </div>
             {% if pending_match %}
