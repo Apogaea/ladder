@@ -190,7 +190,8 @@ class TicketOffer(BaseMatchModel):
     ticket_code = models.CharField(
         max_length=20,
         help_text=(
-            "The confirmation code that was given to you when you purchased your ticket"
+            "The TicketFly confirmation code that was given to you when you "
+            "purchased your ticket"
         )
     )
 
