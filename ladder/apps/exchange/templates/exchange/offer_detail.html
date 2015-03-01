@@ -8,18 +8,15 @@
     <div class="row">
         <div class="col-md-4">
             <div class="well">
-                <h3>Manage Offer</h3>
-                <ul class="nav nav-list">
-                    {% if ticket_offer.is_active %}
-                        <li><a href="{% url 'offer-cancel' pk=ticket_offer.pk %}">Cancel</a></li>
-                    {% endif %}
-                </ul>
                 <dl class="dl-horizontal">
                     <dt>Created</dt>
                     <dd>{{ ticket_offer.created_at|date }}</dd>
                     <dt>Ticket Code:</dt>
                     <dd>{{ ticket_offer.ticket_code }}</dd>
                 </dl>
+                {% if ticket_offer.is_active %}
+                    <a class="btn btn-danger" href="{% url 'offer-cancel' pk=ticket_offer.pk %}">Cancel</a>
+                {% endif %}
             </div>
         </div>
         <div class="col-md-8">
