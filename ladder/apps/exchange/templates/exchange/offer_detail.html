@@ -8,18 +8,15 @@
     <div class="row">
         <div class="col-md-4">
             <div class="well">
-                <h3>Manage Offer</h3>
-                <ul class="nav nav-list">
-                    {% if ticket_offer.is_active %}
-                        <li><a href="{% url 'offer-cancel' pk=ticket_offer.pk %}">Cancel</a></li>
-                    {% endif %}
-                </ul>
                 <dl class="dl-horizontal">
                     <dt>Created</dt>
                     <dd>{{ ticket_offer.created_at|date }}</dd>
                     <dt>Ticket Code:</dt>
                     <dd>{{ ticket_offer.ticket_code }}</dd>
                 </dl>
+                {% if ticket_offer.is_active %}
+                    <a class="btn btn-danger" href="{% url 'offer-cancel' pk=ticket_offer.pk %}">Cancel</a>
+                {% endif %}
             </div>
         </div>
         <div class="col-md-8">
@@ -54,19 +51,19 @@
                         </dl>
                     </p>
                 {% elif ticket_offer.is_active %}
-                    {% if ticket_offer.is_automatch %}
-                        <p class="lead">
-                        This offer is currently active and will be matched with the
-                        next ticket request that enters the exchange.
-                        </p>
-                    {% endif %}
+                    <p class="lead">
+                    This offer is currently active and will be matched with the
+                    next ticket request that enters the exchange.
+                    </p>
                 {% elif ticket_offer.is_cancelled %}
                     <p class="lead">
-                    This offer is currently cancelled.
+                        This offer is currently cancelled.
                     </p>
                 {% elif ticket_offer.is_terminated %}
                     <p class="lead">
-                    This offer is currently terminated.
+                        This Ticket Offer was terminated.  If you think this
+                        was done in error, feel free to contact
+                        <a href="mailto:tickets@apogaea.com">tickets@apogaea.com</a>
                     </p>
                 {% endif %}
             </div>

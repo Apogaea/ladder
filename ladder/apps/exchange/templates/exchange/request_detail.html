@@ -8,15 +8,11 @@
     <div class="row">
         <div class="col-md-4">
             <div class="well">
-                <ul class="nav nav-list">
-                    <li class="nav-header">Manage Request</li>
-                    {% if ticket_request.is_active %}
-                        <li><a href="{% url 'request-cancel' pk=ticket_request.pk %}">Cancel</a></li>
-                    {% endif %}
-                </ul>
                 <dl class="dl-horizontal">
                     <dt>Created</dt>
                     <dd>{{ ticket_request.created_at|date }}</dd>
+                    <dt>Message</dt>
+                    <dd><em>{{ ticket_request.message }}</em></dd>
                     {% if ticket_request.is_active %}
                         <dt>Place in line.</dt>
                         <dd>
@@ -31,6 +27,9 @@
                         </dd>
                     {% endif %}
                 </dl>
+                {% if ticket_request.is_active %}
+                    <a class="btn btn-danger" href="{% url 'request-cancel' pk=ticket_request.pk %}">Cancel</a>
+                {% endif %}
             </div>
             {% if pending_match %}
                 <form action="{% url 'match-confirm' pk=pending_match.pk %}" method="post">
@@ -53,6 +52,47 @@
             {% endif %}
         </div>
         <div class="col-md-8">
+            <div class="well">
+                {% if ticket_request.is_active %}
+                    <p class="lead">
+                        This Ticket Request is waiting to be matched.
+                        There {{ ticket_request.place_in_line|pluralize:"is,are" }} 
+                        {{ ticket_request.place_in_line }} 
+                        {{ ticket_request.place_in_line|pluralize:"person,people" }} 
+                        ahead of you in line.
+                    </p>
+                {% elif ticket_request.is_reserved %}
+                    <p class="lead">
+                        Congratulations!  We've found a ticket for you.  The
+                        only thing left to do is to confirm that you still need
+                        the ticket.
+                    </p>
+                {% elif ticket_request.is_cancelled %}
+                    <p class="lead">
+                        This Ticket Request was cancelled.
+                    </p>
+                {% elif ticket_request.is_terminated %}
+                    <p class="lead">
+                        This Ticket Request was terminated.  If you think this
+                        was done in error, feel free to contact
+                        <a href="mailto:tickets@apogaea.com">tickets@apogaea.com</a>
+                    </p>
+                {% elif ticket_request.is_fulfilled %}
+                    <p class="lead">
+                        This Ticket Request was successfully matched.
+                        <dl class="dl-horizontal">
+                            <dt>Match ID:</dt>
+                            <dd>{{ accepted_match.pk }}</dd>
+                            <dt>Name:</dt>
+                            <dd>{{ accepted_match.ticket_offer.user.display_name }}</dd>
+                            <dt>Phone Number:</dt>
+                            <dd>{{ accepted_match.ticket_offer.user.profile.phone_number }} </dd>
+                            <dt>Email:</dt>
+                            <dd>{{ accepted_match.ticket_offer.user.email }} </dd>
+                        </dl>
+                    </p>
+                {% endif %}
+            </div>
             <h2>Request History</h2>
             {% include "exchange//partials/history_table.html" with ticket_history_entries=ticket_request.history.all %}
             <h2>Match History</h2>
