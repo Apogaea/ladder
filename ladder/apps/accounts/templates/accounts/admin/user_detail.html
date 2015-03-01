@@ -39,7 +39,6 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Auto/Manual</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -50,7 +49,6 @@
                     <td>
                         <a href="{% url 'admin:offer-detail' pk=ticket_offer.pk %}">{{ ticket_offer.pk }}</a>
                     </td>
-                    <td><span class="badge">{{ ticket_offer.is_automatch|yesno:'Automatch,Manual' }}</td>
                     <td>{{ ticket_offer.get_status_display }}</td>
                     <td>
                         <a href="{% url 'admin:offer-detail' pk=ticket_offer.pk %}">Details</a>

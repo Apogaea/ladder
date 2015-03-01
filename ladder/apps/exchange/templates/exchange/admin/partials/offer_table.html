@@ -3,7 +3,6 @@
         <tr>
             <th>#</th>
             <th>Offering User</th>
-            <th>Auto/Manual</th>
             <th>Status</th>
             <th>Created At</th>
             <th>Actions</th>
@@ -16,7 +15,6 @@
                     <a href="{% url 'admin:offer-detail' pk=ticket_offer.pk %}">{{ ticket_offer.pk }}</a>
                 </td>
                 <td>{{ ticket_offer.user }}</td>
-                <td><span class="badge">{{ ticket_offer.is_automatch|yesno:'Automatch,Manual' }}</td>
                 <td>{{ ticket_offer.get_status_display }}</td>
                 <td>{{ ticket_offer.created_at }}</td>
                 <td>
