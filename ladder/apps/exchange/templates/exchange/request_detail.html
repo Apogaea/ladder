@@ -53,6 +53,37 @@
             {% endif %}
         </div>
         <div class="col-md-8">
+            <div class="well">
+                {% if ticket_request.is_active %}
+                    <p class="lead">
+                        This Ticket Request is waiting to be matched.
+                        There {{ ticket_request.place_in_line|pluralize:"is,are" }} 
+                        {{ ticket_request.place_in_line }} 
+                        {{ ticket_request.place_in_line|pluralize:"person,people" }} 
+                        ahead of you in line.
+                    </p>
+                {% elif ticket_request.is_reserved %}
+                    <p class="lead">
+                        Congratulations!  We've found a ticket for you.  The
+                        only thing left to do is to confirm that you still need
+                        the ticket.
+                    </p>
+                {% elif ticket_request.is_cancelled %}
+                    <p class="lead">
+                        This Ticket Request was cancelled.
+                    </p>
+                {% elif ticket_request.is_terminated %}
+                    <p class="lead">
+                        This Ticket Request was terminated.  If you think this
+                        was done in error, feel free to contact
+                        <a href="mailto:tickets@apogaea.com">tickets@apogaea.com</a>
+                    </p>
+                {% elif ticket_request.is_fulfilled %}
+                    <p class="lead">
+                        This Ticket Request was successfully matched.
+                    </p>
+                {% endif %}
+            </div>
             <h2>Request History</h2>
             {% include "exchange//partials/history_table.html" with ticket_history_entries=ticket_request.history.all %}
             <h2>Match History</h2>
