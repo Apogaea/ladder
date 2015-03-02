@@ -160,3 +160,36 @@ def frozen_now(mocker):
     # time
     mocker.patch('time.time', mock.Mock(return_value=now_time))
     return now
+
+
+@pytest.fixture()
+def active_registration_window(settings):
+    from django.utils import timezone
+    open_date = timezone.now() - timezone.timedelta(10)
+    close_date = timezone.now() + timezone.timedelta(10)
+
+    settings.REGISTRATION_OPEN_DATE = open_date
+    settings.REGISTRATION_CLOSE_DATE = close_date
+    return settings
+
+
+@pytest.fixture()
+def before_registration_window(settings):
+    from django.utils import timezone
+    open_date = timezone.now() + timezone.timedelta(10)
+    close_date = timezone.now() + timezone.timedelta(20)
+
+    settings.REGISTRATION_OPEN_DATE = open_date
+    settings.REGISTRATION_CLOSE_DATE = close_date
+    return settings
+
+
+@pytest.fixture()
+def after_registration_window(settings):
+    from django.utils import timezone
+    open_date = timezone.now() - timezone.timedelta(20)
+    close_date = timezone.now() - timezone.timedelta(10)
+
+    settings.REGISTRATION_OPEN_DATE = open_date
+    settings.REGISTRATION_CLOSE_DATE = close_date
+    return settings

@@ -3,6 +3,8 @@ import os
 import excavator
 import django_cache_url
 import dj_database_url
+import pytz
+import datetime
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -167,6 +169,14 @@ AUTH_USER_MODEL = 'accounts.User'
 # The amount of time in seconds that a user has to accept a match.
 ONE_DAY_IN_SECONDS = 24 * 60 * 60
 DEFAULT_ACCEPT_TIME = 2 * ONE_DAY_IN_SECONDS
+
+# Registration Window
+REGISTRATION_OPEN_DATE = datetime.datetime(
+    year=2015, month=3, day=21, hour=1, tzinfo=pytz.timezone('MST'),
+)
+REGISTRATION_CLOSE_DATE = datetime.datetime(
+    year=2015, month=5, day=1, hour=0, tzinfo=pytz.timezone('MST'),
+)
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'ladder.wsgi.application'

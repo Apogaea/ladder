@@ -3,7 +3,10 @@ from django.contrib.auth import get_user_model
 
 from localflavor.us.forms import USPhoneNumberField
 
-from betterforms.forms import BetterModelForm
+from betterforms.forms import (
+    BetterModelForm,
+    BetterForm,
+)
 from betterforms.changelist import SearchForm
 
 User = get_user_model()
@@ -12,6 +15,10 @@ User = get_user_model()
 class UserChangeListForm(SearchForm):
     SEARCH_FIELDS = ('email', 'display_name')
     model = User
+
+
+class GeneratePreRegistrationUrlForm(BetterForm):
+    email = forms.EmailField()
 
 
 class UserChangeForm(BetterModelForm):

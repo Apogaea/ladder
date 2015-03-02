@@ -12,7 +12,7 @@ from ladder.apps.accounts.utils import (
 
 
 @pytest.mark.django_db
-def test_registration_page(client):
+def test_registration_page(client, active_registration_window):
     url = reverse('register')
     response = client.get(url)
 
@@ -20,7 +20,7 @@ def test_registration_page(client):
 
 
 @pytest.mark.django_db
-def test_initiate_registration(client, mocker):
+def test_initiate_registration(client, mocker, active_registration_window):
     url = reverse('register')
     email = 'test@example.com'
     phone_number = '5554443333'
@@ -48,7 +48,7 @@ def test_initiate_registration(client, mocker):
 
 
 @pytest.mark.django_db
-def test_registration_confirm_page(client):
+def test_registration_confirm_page(client, active_registration_window):
     email = 'test@example.com'
     phone_number = '5554443333'
 
@@ -62,7 +62,7 @@ def test_registration_confirm_page(client):
 
 
 @pytest.mark.django_db
-def test_registration_confirm_phone_number(client, mocker):
+def test_registration_confirm_phone_number(client, mocker, active_registration_window):
     email = 'test@example.com'
     phone_number = '5554443333'
 
@@ -89,7 +89,7 @@ def test_registration_confirm_phone_number(client, mocker):
 
 
 @pytest.mark.django_db
-def test_registration_complete(User, client):
+def test_registration_complete(User, client, active_registration_window):
     email = 'test@example.com'
     phone_number = '5554443333'
 
@@ -129,7 +129,7 @@ def test_registration_complete(User, client):
 
 
 @pytest.mark.django_db
-def test_registration_special_case_regression(User, client, factories):
+def test_registration_special_case_regression(User, client, factories, active_registration_window):
     factories.UserWithProfileFactory(_profile__phone_number='')
 
     email = 'test@example.com'
