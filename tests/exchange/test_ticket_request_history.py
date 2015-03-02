@@ -66,27 +66,3 @@ def test_request_match_confirmation_history_event(factories, models):
     match.save()
 
     assert request.history.count() == num_entries + 1
-
-
-def test_request_match_termination_history_event(factories, models):
-    request = factories.TicketRequestFactory()
-    match = factories.TicketMatchFactory(ticket_request=request)
-
-    num_entries = request.history.count()
-
-    match.is_terminated = True
-    match.save()
-
-    assert request.history.count() == num_entries + 1
-
-
-def test_request_match_undo_termination_history_event(factories, models):
-    request = factories.TicketRequestFactory()
-    match = factories.TicketMatchFactory(ticket_request=request, is_terminated=True)
-
-    num_entries = request.history.count()
-
-    match.is_terminated = False
-    match.save()
-
-    assert request.history.count() == num_entries + 1

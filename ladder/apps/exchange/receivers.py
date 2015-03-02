@@ -63,21 +63,3 @@ def create_match_confirmation_history_entries(sender, instance, raw, **kwargs):
         message = "Ticket Match #{0} confirmed".format(instance.pk)
         instance.ticket_request.history.create(message=message)
         instance.ticket_offer.history.create(message=message)
-
-
-def create_match_termination_history_entries(sender, instance, raw, **kwargs):
-    if raw or instance.pk is None:
-        return
-
-    is_currently_terminated = sender.objects.filter(
-        pk=instance.pk, is_terminated=True,
-    ).exists()
-
-    if is_currently_terminated is not instance.is_terminated:
-        if is_currently_terminated:
-            suffix = "termination reversed"
-        else:
-            suffix = "terminated"
-        message = "Ticket Match #{0} {1}".format(instance.pk, suffix)
-        instance.ticket_request.history.create(message=message)
-        instance.ticket_offer.history.create(message=message)

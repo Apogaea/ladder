@@ -60,7 +60,8 @@ class AdminIndexView(AdminRequiredMixin, TemplateView):
                 'accepted': TicketMatch.objects.is_accepted().count(),
                 'expired': TicketMatch.objects.is_expired().count(),
                 'pending': TicketMatch.objects.is_awaiting_confirmation().count(),
-                'terminated': TicketMatch.objects.filter(is_terminated=True).count(),
+                'terminated': TicketMatch.objects.is_terminated().count(),
+                'cancelled': TicketMatch.objects.is_cancelled().count(),
             },
         }
         return meta

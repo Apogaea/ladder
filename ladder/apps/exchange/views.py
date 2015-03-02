@@ -219,8 +219,6 @@ class ConfirmTicketOfferView(LoginRequiredMixin, UpdateView):
             ticket_request = form.instance.ticket_request
             ticket_request.is_cancelled = True
             ticket_request.save()
-            form.instance.is_terminated = True
-            form.instance.save()
             if TicketRequest.objects.is_active().exists():
                 ticket_request = TicketRequest.objects.is_active().order_by('created_at')[0]
                 new_match = TicketMatch.objects.create(

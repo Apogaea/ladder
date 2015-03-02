@@ -14,7 +14,7 @@ def test_offer_is_active_with_no_match(factories):
 
 def test_offer_is_active_with_cancelled_match(factories):
     offer = factories.TicketOfferFactory()
-    factories.TicketMatchFactory(ticket_offer=offer, is_terminated=True)
+    factories.TicketMatchFactory(ticket_offer=offer, ticket_request__is_terminated=True)
 
     assert_is_active(offer)
 

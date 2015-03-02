@@ -19,7 +19,6 @@ class ExchangeConfig(AppConfig):
             create_termination_history_entry,
             create_match_creation_history_entries,
             create_match_confirmation_history_entries,
-            create_match_termination_history_entries,
         )
         dispatch.receiver(post_save, sender='exchange.TicketRequest')(
             create_creation_history_entry,
@@ -44,7 +43,4 @@ class ExchangeConfig(AppConfig):
         )
         dispatch.receiver(pre_save, sender='exchange.TicketMatch')(
             create_match_confirmation_history_entries,
-        )
-        dispatch.receiver(pre_save, sender='exchange.TicketMatch')(
-            create_match_termination_history_entries,
         )

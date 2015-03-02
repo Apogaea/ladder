@@ -9,14 +9,9 @@
                 Ticket Match #{{ ticket_match.pk }}
             </h1>
         </div>
-        <form method="post" action="{% url 'admin:match-toggle-terminate' pk=ticket_match.pk %}">
-            {% csrf_token %}
-            {% if ticket_match.is_terminated %}
-                <button type="submit" class="btn btn-warning">Undo Termination</button>
-            {% else %}
-                <button type="submit" class="btn btn-danger">Terminate Ticket Match</button>
-            {% endif %}
-        </form>
+        {% if not ticket_match.is_terminated %}
+            <a class="btn btn-danger" href="{% url 'admin:match-terminate' pk=ticket_match.pk %}">Terminate Match</a>
+        {% endif %}
         <div>
             <dl class="dl-horizontal">
                 <dt>Id:</dt>

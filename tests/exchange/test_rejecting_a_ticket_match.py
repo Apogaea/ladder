@@ -26,7 +26,7 @@ def test_offer_rejection(factories, user_client, models):
 
     assert ticket_offer.is_active
     assert ticket_request.is_cancelled
-    assert ticket_match.is_terminated
+    assert ticket_match.is_cancelled
 
     assert len(mail.outbox) == 0
 
@@ -53,7 +53,7 @@ def test_offer_rejection_is_automatched(user_client, factories, models):
     assert ticket_offer.is_reserved
     assert pending_request.is_reserved
     assert ticket_request.is_cancelled
-    assert ticket_match.is_terminated
+    assert ticket_match.is_cancelled
 
     assert len(mail.outbox) == 1
     assert mail.outbox[0].to, pending_request.user.email
