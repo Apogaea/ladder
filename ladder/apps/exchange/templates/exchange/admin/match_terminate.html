@@ -22,8 +22,8 @@
                 </p>
                 <form id="terminate-request" action="." method="post">
                     {% csrf_token %}
-                    <input type="hidden" name="{{ form.terminate_request.html_name }}" value="1">
-                    <input type="hidden" name="{{ form.terminate_offer.html_name }}" value="0">
+                    <input type="hidden" name="{{ form.terminate_request.html_name }}" value="true">
+                    <input type="hidden" name="{{ form.terminate_offer.html_name }}" value="false">
                     <button class="btn btn-danger" type="submit">Terminate Request Only</button>
                 </form>
             </div>
@@ -37,8 +37,8 @@
                 </p>
                 <form id="terminate-both" action="." method="post">
                     {% csrf_token %}
-                    <input type="hidden" name="{{ form.terminate_request.html_name }}" value="1">
-                    <input type="hidden" name="{{ form.terminate_offer.html_name }}" value="1">
+                    <input type="hidden" name="{{ form.terminate_request.html_name }}" value="true">
+                    <input type="hidden" name="{{ form.terminate_offer.html_name }}" value="true">
                     <button class="btn btn-danger" type="submit">Terminate Both</button>
                 </form>
             </div>
@@ -52,8 +52,8 @@
                 </p>
                 <form id="terminate-offer" action="." method="post">
                     {% csrf_token %}
-                    <input type="hidden" name="{{ form.terminate_request.html_name }}" value="0">
-                    <input type="hidden" name="{{ form.terminate_offer.html_name }}" value="1">
+                    <input type="hidden" name="{{ form.terminate_request.html_name }}" value="false">
+                    <input type="hidden" name="{{ form.terminate_offer.html_name }}" value="true">
                     <button class="btn btn-danger" type="submit">Terminate Offer Only</button>
                 </form>
             </div>

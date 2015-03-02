@@ -32,6 +32,9 @@ def test_terminating_request_only(factories, admin_webtest_client, models):
     request = models.TicketRequest.objects.get(pk=match.ticket_request.pk)
     assert request.is_terminated
 
+    offer = models.TicketOffer.objects.get(pk=match.ticket_offer.pk)
+    assert not offer.is_terminated
+
 
 def test_terminating_request_matches_offer_with_next_request(factories, admin_webtest_client, models):
     match = factories.TicketMatchFactory()
@@ -79,6 +82,9 @@ def test_terminating_offer_only(factories, admin_webtest_client, models):
 
     offer = models.TicketOffer.objects.get(pk=match.ticket_offer.pk)
     assert offer.is_terminated
+
+    request = models.TicketRequest.objects.get(pk=match.ticket_request.pk)
+    assert not request.is_terminated
 
 
 def test_terminating_offer_will_auto_match_request_with_active_offer(factories,
