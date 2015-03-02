@@ -32,12 +32,46 @@ class AdminIndexView(AdminRequiredMixin, TemplateView):
     def get_recent_matches(self):
         return TicketMatch.objects.order_by('-created_at')[:10]
 
+    def get_exchange_metadata(self):
+        meta = {
+            'users': {
+                'deactivated': User.objects.filter(is_active=False).count(),
+                'active': User.objects.filter(is_active=True).count(),
+                'total': User.objects.count(),
+            },
+            'requests': {
+                'total': TicketRequest.objects.count(),
+                'active': TicketRequest.objects.is_active().count(),
+                'pending': TicketRequest.objects.is_reserved().count(),
+                'fulfilled': TicketRequest.objects.is_fulfilled().count(),
+                'cancelled': TicketRequest.objects.filter(is_cancelled=True).count(),
+                'terminated': TicketRequest.objects.filter(is_terminated=True).count(),
+            },
+            'offers': {
+                'total': TicketOffer.objects.count(),
+                'active': TicketOffer.objects.is_active().count(),
+                'pending': TicketOffer.objects.is_reserved().count(),
+                'fulfilled': TicketOffer.objects.is_fulfilled().count(),
+                'cancelled': TicketOffer.objects.filter(is_cancelled=True).count(),
+                'terminated': TicketOffer.objects.filter(is_terminated=True).count(),
+            },
+            'matches': {
+                'total': TicketMatch.objects.count(),
+                'accepted': TicketMatch.objects.is_accepted().count(),
+                'expired': TicketMatch.objects.is_expired().count(),
+                'pending': TicketMatch.objects.is_awaiting_confirmation().count(),
+                'terminated': TicketMatch.objects.filter(is_terminated=True).count(),
+            },
+        }
+        return meta
+
     def get_context_data(self, **kwargs):
         kwargs = super(AdminIndexView, self).get_context_data()
         kwargs['recently_registered_users'] = self.get_recent_users()
-        kwargs['recently_requests'] = self.get_recent_requests()
-        kwargs['recently_offers'] = self.get_recent_offers()
-        kwargs['recently_matches'] = self.get_recent_matches()
+        kwargs['recent_requests'] = self.get_recent_requests()
+        kwargs['recent_offers'] = self.get_recent_offers()
+        kwargs['recent_matches'] = self.get_recent_matches()
+        kwargs['exchange_meta'] = self.get_exchange_metadata()
         return kwargs
 
 
