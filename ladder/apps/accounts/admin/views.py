@@ -1,4 +1,8 @@
-from django.views.generic import DetailView, UpdateView
+from django.views.generic import (
+    DetailView,
+    UpdateView,
+    FormView,
+)
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -8,8 +12,12 @@ from betterforms.views import BrowseView
 from ladder.core.decorators import AdminRequiredMixin
 
 from ladder.apps.accounts.admin.forms import (
+    GeneratePreRegistrationUrlForm,
     UserChangeListForm,
     UserChangeForm,
+)
+from ladder.apps.accounts.utils import (
+    reverse_pre_registration_url,
 )
 
 User = get_user_model()
@@ -20,6 +28,16 @@ class AdminUserListView(AdminRequiredMixin, BrowseView):
     model = User
     form_class = UserChangeListForm
     paginate_by = settings.PAGINATE_BY
+
+
+class AdminGeneratePreRegistrationLink(AdminRequiredMixin, FormView):
+    form_class = GeneratePreRegistrationUrlForm
+    template_name = 'accounts/admin/generate_pre_registration_link.html'
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        token_url = self.request.build_absolute_uri(reverse_pre_registration_url(email))
+        return self.render_to_response(self.get_context_data(form=form, token_url=token_url))
 
 
 class AdminUserDetailView(AdminRequiredMixin, DetailView):

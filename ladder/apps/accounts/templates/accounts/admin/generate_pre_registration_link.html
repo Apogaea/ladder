@@ -1,0 +1,15 @@
+{% extends 'admin/index.html' %}
+
+{% block right_main %}
+    <div class="col-md-8">
+        <form action="." method="post" class="form-search">
+            {% include 'form_as_fieldsets.html' %}
+            <button class="btn btn-default" type="submit">Submit</button>
+        </form>
+        {% if token_url %}
+            <code>
+                {{ token_url }}
+            </code>
+        {% endif %}
+    </div>
+{% endblock %}

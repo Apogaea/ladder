@@ -5,6 +5,10 @@ from ladder.apps.accounts import views
 urlpatterns = patterns('',  # NOQA
     url(r'^$', views.DashboardView.as_view(), name='dashboard'),
     url(r'^register/$', views.RegisterView.as_view(), name='register'),
+    url(
+        r'^registration-closed/$', views.RegistrationClosedView.as_view(),
+        name='registration-closed',
+    ),
     url(r'^register/success/$', views.RegisterSuccessView.as_view(), name='register-success'),
     url(
         r'^register/(?P<token>[-a-zA-Z0-9_:]+)/$',

@@ -5,6 +5,8 @@ from django.core import signing
 from django.contrib.auth import authenticate, login as auth_login
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.utils import timezone
+from django.conf import settings
 
 from betterforms.forms import BetterForm
 
@@ -17,7 +19,9 @@ from ladder.apps.accounts.forms import (
     UserCreationForm,
 )
 from ladder.apps.accounts.utils import (
-    unsign_registration_token, send_phone_number_verification_sms,
+    unsign_registration_token,
+    send_phone_number_verification_sms,
+    unsign_pre_registration_token,
 )
 from ladder.apps.accounts.models import User
 from ladder.apps.accounts.emails import send_registration_verification_email
@@ -29,20 +33,69 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/dashboard.html'
 
 
-class RegisterView(FormView):
+class RegistrationClosedView(TemplateView):
+    template_name = 'accounts/registration-closed.html'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(RegistrationClosedView, self).get_context_data(**kwargs)
+        context['registration_open_at'] = settings.REGISTRATION_OPEN_DATE
+        context['registration_close_at'] = settings.REGISTRATION_CLOSE_DATE
+        return context
+
+
+class EnforceRegistrationWindowMixin(object):
+    """
+    Mixin that allows for registration outside of the allowed registration
+    window with a special token, as well as enforcing the registration window.
+    """
+    def dispatch(self, *args, **kwargs):
+        is_with_registration_window = self.is_with_registration_window()
+        is_token_valid = self.is_token_valid()
+
+        if is_token_valid or is_with_registration_window:
+            return super(EnforceRegistrationWindowMixin, self).dispatch(*args, **kwargs)
+        else:
+            return redirect('registration-closed')
+
+    def is_with_registration_window(self):
+        open_at = settings.REGISTRATION_OPEN_DATE
+        close_at = settings.REGISTRATION_CLOSE_DATE
+        return open_at <= timezone.now() <= close_at
+
+    def is_token_valid(self):
+        if 'token' in self.request.GET:
+            try:
+                return unsign_pre_registration_token(self.request.GET['token'])
+            except signing.BadSignature:
+                pass
+        return False
+
+
+class RegisterView(EnforceRegistrationWindowMixin, FormView):
     template_name = 'accounts/register.html'
     form_class = InitiateRegistrationForm
     success_url = reverse_lazy('register-success')
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
+        if not self.is_with_registration_window():
+            try:
+                token_email = self.is_token_valid()
+            except signing.BadSignature:
+                form.form_error("Bad registration token")
+                return self.form_invalid(form)
+            if email != token_email:
+                form.form_error(
+                    "Email address does not match pre-registration token."
+                )
+                return self.form_invalid(form)
         phone_number = form.cleaned_data['phone_number']
         send_registration_verification_email(email, phone_number)
         logger.info("REGISTRATION INITIATED: %s - %s", email, phone_number)
         return super(RegisterView, self).form_valid(form)
 
 
-class RegisterSuccessView(TemplateView):
+class RegisterSuccessView(EnforceRegistrationWindowMixin, TemplateView):
     template_name = 'accounts/register_success.html'
 
 
@@ -80,7 +133,7 @@ class VerifyTokenMixin(object):
         return kwargs
 
 
-class RegisterConfirmView(VerifyTokenMixin, FormView):
+class RegisterConfirmView(EnforceRegistrationWindowMixin, VerifyTokenMixin, FormView):
     form_class = BetterForm
     template_name = 'accounts/register_confirm.html'
 
@@ -92,7 +145,8 @@ class RegisterConfirmView(VerifyTokenMixin, FormView):
         return super(RegisterConfirmView, self).form_valid(form)
 
 
-class RegisterVerifyPhoneNumberView(VerifyTokenMixin, CreateView):
+class RegisterVerifyPhoneNumberView(EnforceRegistrationWindowMixin,
+                                    VerifyTokenMixin, CreateView):
     model = User
     form_class = UserCreationForm
     template_name = 'accounts/register_verify_phone_number.html'

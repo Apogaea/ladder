@@ -1,5 +1,6 @@
 import datetime
 import logging
+import urllib
 
 from django.core import signing
 from django.core.urlresolvers import reverse
@@ -64,3 +65,27 @@ def send_phone_number_verification_sms(phone_number):
     )
     logger.info(message)
     return send_twilio_sms(phone_number, message)
+
+
+PRE_REGISTRATION_SALT = 'ladder:pre-registration-link'
+PRE_REGISTRATION_TOKEN_MAX_AGE = 60 * 60 * 24 * 2  # 2 days
+
+
+def generate_pre_registration_token(email):
+    return signing.dumps(email, salt=PRE_REGISTRATION_SALT)
+
+
+def reverse_pre_registration_url(email):
+    token = generate_pre_registration_token(email)
+    base_url = reverse('register')
+    params = {'token': token}
+    return '?'.join((
+        base_url,
+        urllib.urlencode(params),
+    ))
+
+
+def unsign_pre_registration_token(token):
+    return signing.loads(
+        token, salt=PRE_REGISTRATION_SALT, max_age=PRE_REGISTRATION_TOKEN_MAX_AGE,
+    )
