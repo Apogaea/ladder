@@ -20,6 +20,9 @@
                     <li><a href="{% url 'dashboard' %}">Exchange</a></li>
                     <li><a href="{% url 'about' %}">About</a></li>
                     <li><a href="{% url 'faq' %}">FAQ</a></li>
+                    <li><p class="navbar-text">|</p></li>
+                    <li><p class="navbar-text">Pending Requests: <span class="badge">{{ num_active_requests }}</span></p></li>
+                    <li><p class="navbar-text">Ticket Matches: <span class="badge">{{ num_fulfilled_requests }}</span></p></li>
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav pull-right">

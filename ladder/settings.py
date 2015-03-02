@@ -144,6 +144,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
+    'ladder.apps.exchange.context_processors.exchange_stats',
 )
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, "ladder", "templates"),
