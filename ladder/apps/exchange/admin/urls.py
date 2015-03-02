@@ -30,8 +30,8 @@ urlpatterns = patterns('',  # NOQA
     url(r'^matches/$', views.AdminMatchListView.as_view(), name='match-list'),
     url(r'^matches/(?P<pk>\d+)/$', views.AdminMatchDetailView.as_view(), name='match-detail'),
     url(
-        r'^matches/(?P<pk>\d+)/toggle-terminate/$',
-        views.AdminMatchToggleTerminateView.as_view(),
-        name='match-toggle-terminate',
+        r'^matches/(?P<pk>\d+)/terminate/$',
+        views.AdminMatchTerminateView.as_view(),
+        name='match-terminate',
     ),
 )

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <ol class="breadcrumb">
+                <li><a class="btn btn-primary" href="{% url 'admin:match-detail' pk=ticket_match.pk %}"><span class="glyphicon glyphicon-chevron-left"></span> Cancel</a></li>
+            </ol>
+        </div>
+        <div class="col-md-4">
+            <div class="well">
+                <h3>Terminate Request Only</h3>
+                <p>
+                    The Ticket Request will be terminated.  The ticket offer
+                    will be automatically matched with the next pending ticket
+                    request.
+                </p>
+                <p class="text-warning">
+                    This action cannot be undone since the offer will
+                    automatically be matched with a pending request.
+                </p>
+                <form id="terminate-request" action="." method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="{{ form.terminate_request.html_name }}" value="1">
+                    <input type="hidden" name="{{ form.terminate_offer.html_name }}" value="0">
+                    <button class="btn btn-danger" type="submit">Terminate Request Only</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="well">
+                <h3>Terminate Both</h3>
+                <p>
+                    Both the Ticket Request and Ticket Offer will be
+                    terminated.
+                </p>
+                <form id="terminate-both" action="." method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="{{ form.terminate_request.html_name }}" value="1">
+                    <input type="hidden" name="{{ form.terminate_offer.html_name }}" value="1">
+                    <button class="btn btn-danger" type="submit">Terminate Both</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="well">
+                <h3>Terminate Offer Only</h3>
+                <p>
+                    The Ticket Offer will be terminated.  The ticket request
+                    will go back into the queue at its original position.
+                </p>
+                <form id="terminate-offer" action="." method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="{{ form.terminate_request.html_name }}" value="0">
+                    <input type="hidden" name="{{ form.terminate_offer.html_name }}" value="1">
+                    <button class="btn btn-danger" type="submit">Terminate Offer Only</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
