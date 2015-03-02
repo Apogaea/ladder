@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import logging
 
 from django.db import models
 from django.db.models import Q
@@ -14,6 +15,9 @@ from django.template.defaultfilters import truncatewords
 from localflavor.us import models as us_models
 
 from ladder.core.abstract_models import TimestampableModel
+
+
+logger = logging.getLogger(__file__)
 
 
 def default_match_expiration():
@@ -105,7 +109,8 @@ class BaseMatchModel(TimestampableModel):
         elif self.is_active:
             return u'Active'
         else:
-            assert False, 'this should not be possible'
+            logger.error("Unknown status for %s:%s", self._meta.verbose_name, self.pk)
+            return u'Unknown'
 
     def get_pending_match(self):
         return self.matches.is_awaiting_confirmation().first()
@@ -311,6 +316,9 @@ class TicketMatch(TimestampableModel):
             return 'Awaiting Confirmation'
         elif self.is_expired:
             return 'Expired'
+        else:
+            logger.error("Unknown status for %s:%s", self._meta.verbose_name, self.pk)
+            return u'Unknown'
 
     def get_absolute_url(self):
         return reverse('match-detail', kwargs={'pk': self.pk})

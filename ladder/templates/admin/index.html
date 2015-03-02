@@ -14,7 +14,58 @@
       <li><a href="{% url 'admin:request-list' %}">Requests</a></li>
       <li><a href="{% url 'admin:match-list' %}">Matches</a></li>
     </ul>
-  </div>
+</div>
+{% if exchange_meta %}
+    <div class="well">
+        <h2>Exchange Information</h2>
+        <dl class="dl-horizontal">
+            <h3>Users</h3>
+            <dt>Active:</dt>
+            <dd>{{ exchange_meta.users.active }}</dd>
+            <dt>Deactivated:</dt>
+            <dd>{{ exchange_meta.users.deactivated }}</dd>
+            <dt>Total:</dt>
+            <dd>{{ exchange_meta.users.total }}</dd>
+            <h3>Ticket Requests</h3>
+            <dt>Active:</dt>
+            <dd>{{ exchange_meta.requests.active }}</dd>
+            <dt>Pending Confirmation:</dt>
+            <dd>{{ exchange_meta.requests.pending }}</dd>
+            <dt>Fulfilled:</dt>
+            <dd>{{ exchange_meta.requests.fulfilled }}</dd>
+            <dt>Cancelled:</dt>
+            <dd>{{ exchange_meta.requests.cancelled }}</dd>
+            <dt>Terminated:</dt>
+            <dd>{{ exchange_meta.requests.terminated }}</dd>
+            <dt>Total:</dt>
+            <dd>{{ exchange_meta.requests.total }}</dd>
+            <h3>Ticket Offers</h3>
+            <dt>Active:</dt>
+            <dd>{{ exchange_meta.offers.active }}</dd>
+            <dt>Pending Confirmation:</dt>
+            <dd>{{ exchange_meta.offers.pending }}</dd>
+            <dt>Fulfilled:</dt>
+            <dd>{{ exchange_meta.offers.fulfilled }}</dd>
+            <dt>Cancelled:</dt>
+            <dd>{{ exchange_meta.offers.cancelled }}</dd>
+            <dt>Terminated:</dt>
+            <dd>{{ exchange_meta.offers.terminated }}</dd>
+            <dt>Total:</dt>
+            <dd>{{ exchange_meta.offers.total }}</dd>
+            <h3>Ticket Matches</h3>
+            <dt>Accepted:</dt>
+            <dd>{{ exchange_meta.matches.accepted }}</dd>
+            <dt>Expired:</dt>
+            <dd>{{ exchange_meta.matches.expired }}</dd>
+            <dt>Pending Confirmation:</dt>
+            <dd>{{ exchange_meta.matches.pending }}</dd>
+            <dt>Terminated:</dt>
+            <dd>{{ exchange_meta.matches.terminated }}</dd>
+            <dt>Total:</dt>
+            <dd>{{ exchange_meta.matches.total }}</dd>
+        </dl>
+    </div>
+{% endif %}
 {% endblock %}
 
 {% block right_main %}
@@ -47,17 +98,17 @@
 </div>
 
 <div>
-    <h2>Recently Ticket Offers</h2>
-    {% include 'exchange/admin/partials/offer_table.html' with ticket_offers=recently_offers %}
+    <h2>Recent Ticket Offers</h2>
+    {% include 'exchange/admin/partials/offer_table.html' with ticket_offers=recent_offers %}
 </div>
 
 <div>
-    <h2>Recently Ticket Requests</h2>
-    {% include 'exchange/admin/partials/request_table.html' with ticket_requests=recently_requests %}
+    <h2>Recent Ticket Requests</h2>
+    {% include 'exchange/admin/partials/request_table.html' with ticket_requests=recent_requests %}
 </div>
 
 <div>
     <h2>Recently Ticket Matches</h2>
-    {% include 'exchange/admin/partials/match_table.html' with ticket_matches=recently_matches %}
+    {% include 'exchange/admin/partials/match_table.html' with ticket_matches=recent_matches %}
 </div>
 {% endblock %}
