@@ -99,7 +99,7 @@ class RegisterView(EnforceRegistrationWindowMixin, FormView):
         return super(RegisterView, self).form_valid(form)
 
 
-class RegisterSuccessView(EnforceRegistrationWindowMixin, TemplateView):
+class RegisterSuccessView(TemplateView):
     template_name = 'accounts/register_success.html'
 
 
