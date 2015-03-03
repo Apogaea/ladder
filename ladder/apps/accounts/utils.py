@@ -75,8 +75,9 @@ def generate_pre_registration_token(email):
     return signing.dumps(email, salt=PRE_REGISTRATION_SALT)
 
 
-def reverse_pre_registration_url(email):
-    token = generate_pre_registration_token(email)
+def reverse_pre_registration_url(email, token=None):
+    if token is None:
+        token = generate_pre_registration_token(email)
     base_url = reverse('register')
     params = {'token': token}
     return '?'.join((

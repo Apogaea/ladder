@@ -90,7 +90,11 @@ class RegisterView(EnforceRegistrationWindowMixin, FormView):
                 )
                 return self.form_invalid(form)
         phone_number = form.cleaned_data['phone_number']
-        send_registration_verification_email(email, phone_number)
+        # this may be None which is ok.
+        pre_registration_token = self.request.GET.get('token')
+        send_registration_verification_email(
+            email, phone_number, pre_registration_token=pre_registration_token,
+        )
         logger.info("REGISTRATION INITIATED: %s - %s", email, phone_number)
         return super(RegisterView, self).form_valid(form)
 
@@ -138,7 +142,8 @@ class RegisterConfirmView(EnforceRegistrationWindowMixin, VerifyTokenMixin, Form
     template_name = 'accounts/register_confirm.html'
 
     def get_success_url(self, **kwargs):
-        return reverse('register-verify-phone-number', kwargs=self.kwargs)
+        redirect_url = reverse('register-verify-phone-number', kwargs=self.kwargs)
+        return redirect_url
 
     def form_valid(self, form):
         send_phone_number_verification_sms(self.phone_number)
