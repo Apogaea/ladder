@@ -1,3 +1,4 @@
+import urllib
 import logging
 
 from django.views.generic import FormView, TemplateView, CreateView
@@ -143,6 +144,11 @@ class RegisterConfirmView(EnforceRegistrationWindowMixin, VerifyTokenMixin, Form
 
     def get_success_url(self, **kwargs):
         redirect_url = reverse('register-verify-phone-number', kwargs=self.kwargs)
+        if 'token' in self.request.GET:
+            redirect_url = '?'.join((
+                redirect_url,
+                urllib.urlencode({'token': self.request.GET['token']}),
+            ))
         return redirect_url
 
     def form_valid(self, form):

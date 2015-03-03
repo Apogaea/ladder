@@ -80,6 +80,37 @@ def test_pre_registration_email_contains_token(client, mocker,
 
 
 @pytest.mark.django_db
+def test_pre_registration_send_sms_code(client, mocker, User,
+                                        before_registration_window):
+    email = 'test@example.com'
+    phone_number = '5554443333'
+    token = generate_pre_registration_token(email)
+
+    url = reverse_registration_url(email, phone_number)
+    url = '?'.join((
+        url,
+        urllib.urlencode({'token': token}),
+    ))
+    target_url = reverse('dashboard')
+
+    send_twilio_sms = mocker.patch('ladder.apps.accounts.utils.send_twilio_sms')
+
+    response = client.post(url)
+
+    target_url = reverse(
+        'register-verify-phone-number',
+        kwargs={
+            'token': generate_registration_token(email, phone_number),
+        },
+    )
+    target_url = '?'.join((
+        target_url,
+        urllib.urlencode({'token': token}),
+    ))
+    assert response.get('location', '').endswith(target_url)
+
+
+@pytest.mark.django_db
 def test_pre_registration_phone_confirmation_step(client, mocker, User,
                                                   before_registration_window):
     email = 'test@example.com'
