@@ -26,7 +26,7 @@
                 </li>
             </ul>
             </p>
-            <form action="{% url 'register-verify-phone-number' token=token %}" method="post" class="well">
+            <form action="{% url 'register-verify-phone-number' token=token %}?{{ request.GET.urlencode }}" method="post" class="well">
                 {% csrf_token %}
                 <p>
                     Enter the six digit code that was sent via SMS to 
