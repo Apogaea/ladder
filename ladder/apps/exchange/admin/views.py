@@ -8,9 +8,6 @@ from betterforms.views import BrowseView
 
 from ladder.core.decorators import AdminRequiredMixin
 
-from ladder.apps.exchange.emails import (
-    send_match_confirmation_email,
-)
 from ladder.apps.exchange.models import (
     TicketOffer,
     TicketRequest,
@@ -51,7 +48,9 @@ class AdminOfferToggleTerminateView(AdminRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.is_terminated = not form.instance.is_terminated
-        return super(AdminOfferToggleTerminateView, self).form_valid(form)
+        form.save()
+        TicketMatch.objects.create_match(fail_silently=True, send_confirmation_email=True)
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('admin:offer-detail', kwargs={'pk': self.object.pk})
@@ -81,7 +80,9 @@ class AdminRequestToggleTerminateView(AdminRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.is_terminated = not form.instance.is_terminated
-        return super(AdminRequestToggleTerminateView, self).form_valid(form)
+        form.save()
+        TicketMatch.objects.create_match(fail_silently=True, send_confirmation_email=True)
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('admin:request-detail', kwargs={'pk': self.object.pk})
@@ -114,27 +115,9 @@ class AdminMatchTerminateView(AdminRequiredMixin, UpdateView):
             form.instance.ticket_request.is_terminated = True
             form.instance.ticket_request.save()
 
-            # TODO: repetative code.
-            if TicketRequest.objects.is_active().exists():
-                ticket_request = TicketRequest.objects.is_active().order_by('created_at')[0]
-                new_match = TicketMatch.objects.create(
-                    ticket_offer=form.instance.ticket_offer,
-                    ticket_request=ticket_request,
-                )
-                # Send an email to the ticket requester with a confirmation link.
-                send_match_confirmation_email(new_match)
         if form.cleaned_data.get('terminate_offer'):
             form.instance.ticket_offer.is_terminated = True
             form.instance.ticket_offer.save()
 
-            # TODO: repetative code.
-            if TicketOffer.objects.is_active().exists():
-                ticket_offer = TicketOffer.objects.is_active().order_by('created_at')[0]
-                new_match = TicketMatch.objects.create(
-                    ticket_request=form.instance.ticket_request,
-                    ticket_offer=ticket_offer,
-                )
-                # Send an email to the ticket requester with a confirmation link.
-                send_match_confirmation_email(new_match)
-
+        TicketMatch.objects.create_match(fail_silently=True, send_confirmation_email=True)
         return redirect(reverse('admin:match-detail', kwargs={'pk': form.instance.pk}))
