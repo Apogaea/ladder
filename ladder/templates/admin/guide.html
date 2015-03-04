@@ -89,5 +89,91 @@
     </p>
 
     <h2>Request Administration <small><a href="{% url 'admin:request-list' %}"><span class="glyphicon glyphicon-link"></span></a></small></h2>
+    <p>
+        A Ticket Request represents someone who needs a ticket.  Requests have
+        a message associated with them that is displayed to ticketholders
+        offering tickets through the exchange.
+    </p>
+    <h3>Ticket Request Details</h3>
+    <p>
+        <dl class="dl-horizontal">
+            <dt>User</dt>
+            <dd>The user requesting the ticket</dd>
+            <dt>Created</dt>
+            <dd>When the ticket request was created.</dd>
+            <dt>Message</dt>
+            <dd>
+                The message the user provided with their request.  This text
+                will be displayed to ticketholders.
+            </dd>
+            <dt>Status</dt>
+            <dd>The current status of the ticket request.</dd>
+            <dt>Cancelled</dt>
+            <dd>Is this ticket request cancelled?</dd>
+            <dt>Terminated</dt>
+            <dd>Is this ticket request terminated?</dd>
+            <dt>Request History</dt>
+            <dd>The history of events associated with this ticket request</dd>
+            <dt>Match History</dt>
+            <dd>The matches that this ticket request has been apart of.</dd>
+        </dl>
+    </p>
+    <h3>Terminating a Ticket Request</h3>
+    <p>
+        Termination is the mechanism through which an admin can disable a
+        ticket request.
+        <ul>
+            <li>
+                If the request is waiting to be matched, termination will remove it
+                from the queue.
+            </li>
+            <li>
+                If the request has been matched, terminating the request will
+                cause the matched ticket to be re-allocated to the next person
+                in line.
+            </li>
+        </ul>
+
+        Reversing the termination of a ticket request will place it back at
+        it's original place in line (which will normally be very near the front
+        if it was already matched with someone).
+    </p>
+    <h2>Offer Administration <small><a href="{% url 'admin:offer-list' %}"><span class="glyphicon glyphicon-link"></span></a></small></h2>
+    <p>
+        Ticket Offer administration is where admins can view all of the ticket
+        offers that have been created by ticketholders.  Given the nature of
+        supply/demand, it is likely that there will never be any ticket offers
+        waiting to be allocated.
+    </p>
+    <h3>Ticket Offer Details</h3>
+    <p>
+        <dl class="dl-horizontal">
+            <dt>User</dt>
+            <dd>The user offering the ticket</dd>
+            <dt>Created</dt>
+            <dd>When the ticket offer was created.</dd>
+            <dt>Ticket Code</dt>
+            <dd>The ticket confirmation code that was entered with the offer.</dd>
+            <dt>Status</dt>
+            <dd>The current status of the ticket offer.</dd>
+            <dt>Cancelled</dt>
+            <dd>Is this ticket offer cancelled?</dd>
+            <dt>Terminated</dt>
+            <dd>Is this ticket offer terminated?</dd>
+            <dt>Offer History</dt>
+            <dd>The history of events associated with this ticket offer</dd>
+            <dt>Match History</dt>
+            <dd>The matches that this ticket offer has been apart of.</dd>
+        </dl>
+    </p>
+    <h3>Terminating a Ticket Offer</h3>
+    <p>
+        Termination is the mechanism through which an admin can disable a
+        ticket offer.
+    </p>
+    <p>
+        If the ticket offer is currently matched with a ticket request, the
+        ticket request will resume it's place in the queue.
+    </p>
 </div>
 {% endblock %}
