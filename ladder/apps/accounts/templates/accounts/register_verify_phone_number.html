@@ -47,7 +47,7 @@
                 {% bootstrap_field form.password %}
                 <button class="btn btn-success" type="submit">Create Account</button>
             </form>
-            <form action="{% url 'register-confirm' token=token %}" method="post" class="well">
+            <form action="{% url 'register-confirm' token=token %}?{{ request.GET.urlencode }}" method="post" class="well">
                 {% csrf_token %}
                 <button class="btn btn-primary" type="submit">Re-Send Code</button>
             </form>
