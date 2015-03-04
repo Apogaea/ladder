@@ -10,6 +10,10 @@
         requests/offers/matches.  This should provide an <em>at a glance</em>
         view of the site.
     </p>
+    <p>
+        On the main admin index page, you can also see general statistics about
+        the exchange.
+    </p>
     <h2>User Administration <small><a href="{% url 'admin:user-list' %}"><span class="glyphicon glyphicon-link"></span></a></small></h2>
     <p>
         The <a href="{% url 'admin:user-list' %}">users</a> page of the admin
@@ -86,6 +90,19 @@
             <dt>Phone Number</dt>
             <dd>The phone number associated with the user.</dd>
         </dl>
+    </p>
+
+    <h2>Pre Registration Links<small><a href="{% url 'admin:generate-pre-registration-url' %}"><span class="glyphicon glyphicon-link"></span></a></small></h2>
+    <p>
+        Registration for the exchange is only open during a predetermined
+        period of time.  In the event that a user needs to register outside of
+        this timeframe, a special pre-registration link can be generated for
+        them.  Each link is specific to an email address (and thus can only be
+        used once).
+    </p>
+    <p>
+        Pre Registration links are only valid for two days (48 hours) from the
+        time they were generated.
     </p>
 
     <h2>Request Administration <small><a href="{% url 'admin:request-list' %}"><span class="glyphicon glyphicon-link"></span></a></small></h2>
@@ -174,6 +191,37 @@
     <p>
         If the ticket offer is currently matched with a ticket request, the
         ticket request will resume it's place in the queue.
+    </p>
+    <h2>Match Administration <small><a href="{% url 'admin:match-list' %}"><span class="glyphicon glyphicon-link"></span></a></small></h2>
+    <p>
+        Ticket Match Administration shows all of the matches between people
+        needing tickets (Ticket Requests) and ticketholders (Ticket Offers).
+    </p>
+    <h3>Ticket Match Details</h3>
+    <p>
+        <dl class="dl-horizontal">
+            <dt>Created</dt>
+            <dd>When the ticket match was created.</dd>
+            <dt>Status</dt>
+            <dd>The current status of the ticket match.</dd>
+            <dt>Cancelled</dt>
+            <dd>Is this ticket match cancelled?</dd>
+            <dt>Terminated</dt>
+            <dd>Is this ticket match terminated?</dd>
+            <dt>Ticket Request</dt>
+            <dd>Full information about the ticket request</dd>
+            <dt>Ticket Offer</dt>
+            <dd>Full information about the ticket offer</dd>
+        </dl>
+    </p>
+    <h3>Terminating a Ticket Offer</h3>
+    <p>
+        Matches themselves cannot be terminated, though the admin interface
+        exposes the ability to terminated the related ticket request or offer
+        or both.
+    </p>
+    <p>
+        The same caveats to termination apply to this termination.
     </p>
 </div>
 {% endblock %}

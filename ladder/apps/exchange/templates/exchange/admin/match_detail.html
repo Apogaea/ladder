@@ -16,12 +16,6 @@
             <dl class="dl-horizontal">
                 <dt>Id:</dt>
                 <dd>{{ ticket_match.pk }}</dd>
-                <dt>Requesting User:</dt>
-                <dd>
-                <a href="{% url 'admin:user-detail' pk=ticket_match.ticket_request.user.pk %}">
-                    {{ ticket_match.ticket_request.user }}
-                </a>
-                </dd>
                 <dt>Created:</dt>
                 <dd>{{ ticket_match.created_at }}</dd>
                 <dt>Status:</dt>
@@ -31,6 +25,8 @@
                     <em> (Expires {{ ticket_match.expires_at|naturaltime }})</em>
                 {% endif %}
                 </dd>
+                <dt>Cancelled:</dt>
+                <dd>{{ ticket_match.is_cancelled|yesno|title }}</dd>
                 <dt>Terminated:</dt>
                 <dd>{{ ticket_match.is_terminated|yesno|title }}</dd>
             </dl>
