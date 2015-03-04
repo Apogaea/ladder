@@ -192,8 +192,6 @@ class TicketOffer(BaseMatchModel):
         )
     )
 
-    is_automatch = models.BooleanField(blank=True, default=True)
-
     class Meta:
         ordering = ('-created_at',)
 
@@ -216,6 +214,28 @@ class TicketOfferHistory(BaseHistoryModel):
 
 
 class TicketMatchQuerySet(models.QuerySet):
+    def create_match(self, ticket_request=None, ticket_offer=None,
+                     fail_silently=False, send_confirmation_email=False):
+        if ticket_request is None:
+            try:
+                ticket_request = TicketRequest.objects.is_active().order_by('created_at')[0]
+            except IndexError:
+                if fail_silently:
+                    return
+                raise TicketRequest.DoesNotExist("No active ticket requests")
+        if ticket_offer is None:
+            try:
+                ticket_offer = TicketOffer.objects.is_active().order_by('created_at')[0]
+            except IndexError:
+                if fail_silently:
+                    return
+                raise TicketOffer.DoesNotExist("No active ticket offer")
+        match = self.create(ticket_request=ticket_request, ticket_offer=ticket_offer)
+        if send_confirmation_email:
+            from ladder.apps.exchange.emails import send_match_confirmation_email
+            send_match_confirmation_email(match)
+        return match
+
     def is_accepted(self):
         return self.filter(
             accepted_at__isnull=False,

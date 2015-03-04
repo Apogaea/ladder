@@ -1,4 +1,5 @@
 from django.core.urlresolvers import reverse
+from django.core import mail
 
 from rest_framework import status
 
@@ -18,10 +19,12 @@ def test_request_creation_view(user_client):
 
 
 def test_automatic_request_matching(user_client, models, factories):
-    factories.TicketOfferFactory(is_automatch=True)
+    factories.TicketOfferFactory()
 
     assert not user_client.user.ticket_requests.exists()
     assert not models.TicketMatch.objects.exists()
+
+    assert not mail.outbox
 
     response = user_client.post(
         reverse('request-create'), {'message': 'A nice heartfelt message'},
@@ -31,5 +34,8 @@ def test_automatic_request_matching(user_client, models, factories):
     assert user_client.user.ticket_requests.exists()
     assert models.TicketMatch.objects.exists()
     ticket_match = models.TicketMatch.objects.get()
-    expected_location = reverse('match-confirm', kwargs={'pk': ticket_match.pk})
+    expected_location = reverse('request-detail', kwargs={'pk': ticket_match.ticket_request.pk})
     assert response.get('location').endswith(expected_location)
+
+    # one email to both offerer and recipient.
+    assert len(mail.outbox) == 2

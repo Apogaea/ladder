@@ -61,13 +61,12 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
         context['ticket_request_choices'] = self.get_front_of_request_line()
         return context
 
-    def create_match(self, ticket_offer, ticket_request):
-        match = TicketMatch.objects.create(
+    def create_match(self, ticket_offer=None, ticket_request=None):
+        TicketMatch.objects.create_match(
             ticket_offer=ticket_offer,
             ticket_request=ticket_request,
+            send_confirmation_email=True,
         )
-        # Send an email to the ticket requester with a confirmation link.
-        send_match_confirmation_email(match)
         messages.success(
             self.request, "Your ticket offer has been matched with a ticket request.",
         )
@@ -77,13 +76,15 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
         self.object = ticket_offer = form.save(commit=False)
         ticket_offer.user = self.request.user
         ticket_offer.save()
-        if ticket_offer.is_automatch:
+        if form.cleaned_data.get('ticket_request'):
+            ticket_request = form.cleaned_data['ticket_request']
+            return self.create_match(ticket_offer, ticket_request)
+        else:
             # Possible race condition here.  Two offers are created at almost
             # the same time.  Two matches will be created.
             try:
-                ticket_request = TicketRequest.objects.is_active().order_by('created_at')[0]
-                return self.create_match(ticket_offer, ticket_request)
-            except IndexError:
+                return self.create_match(ticket_offer=ticket_offer)
+            except TicketRequest.DoesNotExist:
                 messages.success(
                     self.request,
                     "Your ticket offer has been created and will be "
@@ -91,12 +92,6 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
                     "enters the system",
                 )
             return redirect(self.get_success_url())
-        elif form.cleaned_data.get('ticket_request'):
-            ticket_request = form.cleaned_data['ticket_request']
-            return self.create_match(ticket_offer, ticket_request)
-
-        # Something weird happened, but lets just kick them back to the page.
-        return self.form_invalid(form)
 
 
 class OfferDetailView(LoginRequiredMixin, WithMatchMixin, DetailView):
@@ -120,8 +115,11 @@ class OfferCancelView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.is_cancelled = True
+        form.save()
         messages.success(self.request, 'Your ticket offer has been cancelled')
-        return super(OfferCancelView, self).form_valid(form)
+        # See if there is a new match to be made.
+        TicketMatch.objects.create_match(fail_silently=True, send_confirmation_email=True)
+        return redirect(self.get_success_url())
 
 
 class RequestCreateView(LoginRequiredMixin, CreateView):
@@ -142,16 +140,23 @@ class RequestCreateView(LoginRequiredMixin, CreateView):
         # Possible race condition here.  Two requests are created at almost
         # the same time.  The same offer may be matched with two requests.
         try:
-            ticket_offer = TicketOffer.objects.is_active().filter(
-                is_automatch=True,
-            ).order_by('created_at')[0]
-            ticket_match = TicketMatch.objects.create(
-                ticket_offer=ticket_offer,
-                ticket_request=ticket_request,
-            )
-            messages.success(self.request, "Your request has been matched with a ticket.")
-            return redirect(reverse('match-confirm', kwargs={'pk': ticket_match.pk}))
-        except IndexError:
+            ticket_match = TicketMatch.objects.create_match()
+            if ticket_match.ticket_request == ticket_request:
+                # mark it as accepted immediately.
+                ticket_match.accepted_at = timezone.now()
+                ticket_match.save()
+                # send out the appropriate emails.
+                send_offer_accepted_email(ticket_match, ticket_match.ticket_offer.user)
+                send_request_fulfilled_email(ticket_match, ticket_match.ticket_request.user)
+                messages.success(self.request, "Your request has been matched with a ticket.")
+                return redirect(reverse('request-detail', kwargs={'pk': ticket_request.pk}))
+            else:
+                # If some other match was made, then send the confirmation
+                # email.
+                send_match_confirmation_email(ticket_match)
+        except TicketOffer.DoesNotExist:
+            pass
+        finally:
             messages.success(
                 self.request,
                 "Your request has been created.  You will be notified as soon "
@@ -172,8 +177,10 @@ class RequestCancelView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.is_cancelled = True
+        form.save()
+        TicketMatch.objects.create_match(fail_silently=True, send_confirmation_email=True)
         messages.success(self.request, 'Your ticket request has been cancelled')
-        return super(RequestCancelView, self).form_valid(form)
+        return redirect(self.get_success_url())
 
 
 class RequestDetailView(LoginRequiredMixin, WithMatchMixin, DetailView):
@@ -219,14 +226,7 @@ class ConfirmTicketOfferView(LoginRequiredMixin, UpdateView):
             ticket_request = form.instance.ticket_request
             ticket_request.is_cancelled = True
             ticket_request.save()
-            if TicketRequest.objects.is_active().exists():
-                ticket_request = TicketRequest.objects.is_active().order_by('created_at')[0]
-                new_match = TicketMatch.objects.create(
-                    ticket_offer=form.instance.ticket_offer,
-                    ticket_request=ticket_request,
-                )
-                # Send an email to the ticket requester with a confirmation link.
-                send_match_confirmation_email(new_match)
+            TicketMatch.objects.create_match(fail_silently=True, send_confirmation_email=True)
             messages.info(
                 self.request,
                 'Your ticket request has been successfully cancelled.',

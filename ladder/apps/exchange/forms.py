@@ -18,7 +18,6 @@ class TicketOfferForm(BetterModelForm):
     class Meta:
         model = TicketOffer
         fields = (
-            'is_automatch',
             'ticket_code',
         )
 

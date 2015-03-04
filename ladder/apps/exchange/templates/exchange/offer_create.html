@@ -36,7 +36,6 @@
         <div class="col-md-6">
             <form id="auto-match" action="." method="post" class="jumbotron">
                 {% csrf_token %}
-                <input type="hidden" name="is_automatch" value="1">
                 <input type="hidden" name="ticket_code">
                 <p class="text-info">Just give my ticket to the first person in line.</p>
                 <button class="btn btn-large btn-block btn-info" type="submit">Go</button>
