@@ -209,13 +209,18 @@ INSTALLED_APPS = [
 ]
 
 if DEBUG:
-    INSTALLED_APPS += [
-        'django_extensions',
-        'debug_toolbar',
-    ]
+    try:
+        import django_extensions  # NOQA
+        INSTALLED_APPS.append('django_extensions')
+    except ImportError:
+        pass
+    try:
+        import debug_toolbar  # NOQA
+        INSTALLED_APPS.append('debug_toolbar')
+    except ImportError:
+        pass
 
 SESSION_COOKIE_HTTPONLY = True
-
 
 # Email Settings
 EMAIL_LAYOUT = 'mail/base.html'
