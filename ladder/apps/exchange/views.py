@@ -100,7 +100,9 @@ class OfferDetailView(LoginRequiredMixin, WithMatchMixin, DetailView):
     context_object_name = 'ticket_offer'
 
     def get_queryset(self):
-        return self.request.user.ticket_offers.all()
+        return self.request.user.ticket_offers.all().select_related().prefetch_related(
+            'history', 'matches',
+        )
 
 
 class OfferCancelView(LoginRequiredMixin, UpdateView):
@@ -189,7 +191,9 @@ class RequestDetailView(LoginRequiredMixin, WithMatchMixin, DetailView):
     context_object_name = 'ticket_request'
 
     def get_queryset(self):
-        return self.request.user.ticket_requests.all()
+        return self.request.user.ticket_requests.all().select_related().prefetch_related(
+            'history', 'matches',
+        )
 
 
 class MatchDetailView(LoginRequiredMixin, DetailView):
@@ -204,7 +208,7 @@ class MatchDetailView(LoginRequiredMixin, DetailView):
             ) | Q(
                 ticket_offer__user=self.request.user,
             )
-        )
+        ).select_related()
 
 
 class ConfirmTicketOfferView(LoginRequiredMixin, UpdateView):

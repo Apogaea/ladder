@@ -256,6 +256,15 @@ AWS_HEADERS = {
 }
 
 # Cache setup
+if 'MEMCACHIER_SERVERS' in os.environ:
+    # Special case for memcachier on heroku.
+    os.environ.setdefault('MEMCACHE_USERNAME', environ.get('MEMCACHIER_USERNAME'))
+    os.environ.setdefault('MEMCACHE_PASSWORD', environ.get('MEMCACHIER_PASSWORD'))
+    os.environ.setdefault(
+        'CACHE_URL',
+        'memcached://{0}'.format(os.environ['MEMCACHIER_SERVERS']),
+    )
+
 CACHES = {
     'default': django_cache_url.config(),
 }
