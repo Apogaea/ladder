@@ -1,1 +1,1 @@
-web: newrelic-admin run-program gunicorn ladder.wsgi -c ladder/gunicorn.conf -w
+web: newrelic-admin run-program gunicorn ladder.wsgi -c ladder/gunicorn.conf -w 3
