@@ -9,6 +9,13 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils import timezone
 from django.conf import settings
 
+from twilio.rest.exceptions import (
+    TwilioRestException,
+)
+from twilio.exceptions import (
+    TwilioException,
+)
+
 from betterforms.forms import BetterForm
 
 from authtools.views import LoginRequiredMixin
@@ -152,7 +159,18 @@ class RegisterConfirmView(EnforceRegistrationWindowMixin, VerifyTokenMixin, Form
         return redirect_url
 
     def form_valid(self, form):
-        send_phone_number_verification_sms(self.phone_number)
+        try:
+            send_phone_number_verification_sms(self.phone_number)
+        except TwilioRestException as err:
+            form.add_error(None, err.msg)
+            return self.form_invalid(form)
+        except TwilioException:
+            form.add_error(
+                None,
+                "Something went wrong sending your sms verification code. "
+                "Either try again or contact an admin for help",
+            )
+            return self.form_invalid(form)
         return super(RegisterConfirmView, self).form_valid(form)
 
 
