@@ -57,7 +57,7 @@ class UserCreationForm(BetterModelForm):
         super(UserCreationForm, self).__init__(*args, **kwargs)
 
     def clean_sms_code(self):
-        code = self.cleaned_data['sms_code']
+        code = self.cleaned_data['sms_code'].strip().replace(' ', '')
         if not code or not code == generate_phone_number_code(self.phone_number):
             raise forms.ValidationError('Incorrect Code')
 
