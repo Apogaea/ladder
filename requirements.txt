@@ -27,3 +27,4 @@ python-dotenv==0.1.0
 pytz==2014.10
 raven==5.2.0
 twilio==3.7.1
+django-pylibmc==0.5.0

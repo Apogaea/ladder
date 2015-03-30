@@ -262,7 +262,7 @@ if 'MEMCACHIER_SERVERS' in os.environ:
     os.environ.setdefault('MEMCACHE_PASSWORD', os.environ.get('MEMCACHIER_PASSWORD'))
     os.environ.setdefault(
         'CACHE_URL',
-        'memcached://{0}'.format(os.environ['MEMCACHIER_SERVERS']),
+        'djangopylibmc://{0}'.format(os.environ['MEMCACHIER_SERVERS']),
     )
 
 CACHES = {
