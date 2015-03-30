@@ -17,6 +17,8 @@ django-secure==1.0.1
 djangorestframework==3.0.5
 env-excavator==1.2.0
 gunicorn==18.0
+ipython==3.0.0
+newrelic==2.44.0.36
 phonenumbers==6.0.0
 psycopg2==2.6
 pyScss==1.1.5
@@ -25,4 +27,3 @@ python-dotenv==0.1.0
 pytz==2014.10
 raven==5.2.0
 twilio==3.7.1
-newrelic==2.44.0.36
