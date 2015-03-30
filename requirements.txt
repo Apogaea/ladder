@@ -12,6 +12,7 @@ django-emailtools==0.2.2
 django-localflavor==1.1
 django-pagination==1.0.7
 django-pipeline==1.4.6
+django-pylibmc-sasl==0.2.4
 django-s3-folder-storage==0.2
 django-secure==1.0.1
 djangorestframework==3.0.5
@@ -27,4 +28,3 @@ python-dotenv==0.1.0
 pytz==2014.10
 raven==5.2.0
 twilio==3.7.1
-django-pylibmc==0.5.0
