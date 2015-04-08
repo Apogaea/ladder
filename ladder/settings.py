@@ -126,14 +126,14 @@ PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 # Production installs need to have this environment variable set
 SECRET_KEY = excavator.env_string('DJANGO_SECRET_KEY', required=True)
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'ladder.apps.accounts.middleware.LogoutIfInactiveMiddleware',
-)
+]
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -145,6 +145,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
     'ladder.apps.exchange.context_processors.exchange_stats',
+    'ladder.core.context_processors.rollbar',
 )
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, "ladder", "templates"),
@@ -203,10 +204,20 @@ INSTALLED_APPS = [
     'storages',
     'authtools',
     'argonauts',
-    'raven.contrib.django.raven_compat',
     's3_folder_storage',
     'bootstrap3',
 ]
+
+try:
+    # Sentry error reporting.
+    import raven  # NOQA
+    INSTALLED_APPS.append('raven.contrib.django.raven_compat')
+    RAVEN_CONFIG = {
+        'dsn': excavator.env_string('SENTRY_DSN', default=None)
+    }
+except ImportError:
+    pass
+
 
 if DEBUG:
     try:
@@ -287,10 +298,20 @@ else:
         )),
     )
 
-# Sentry error reporting.
-RAVEN_CONFIG = {
-    'dsn': excavator.env_string('SENTRY_DSN', default=None)
-}
+# Rollbar
+# https://rollbar.com/
+try:
+    import rollbar  # NOQA
+    MIDDLEWARE_CLASSES.append('rollbar.contrib.django.middleware.RollbarNotifierMiddleware')
+
+    ROLLBAR = {
+        'access_token': excavator.env_string('ROLLBAR_ACCESS_TOKEN', default=None),
+        'environment': excavator.env_string('ROLLBAR_ENVIRONMENT', default='development'),
+        'branch': excavator.env_string('ROLLBAR_GIT_BRANCH', default='master'),
+        'root': BASE_DIR,
+    }
+except ImportError:
+    pass
 
 # django-rest-framework configuration.
 REST_FRAMEWORK = {
