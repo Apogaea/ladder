@@ -119,6 +119,12 @@ PIPELINE_JS = {
         ),
         'output_filename': 'base.js',
     },
+    'rollbar': {
+        'source_filenames': (
+            "js/rollbar.js",
+        ),
+        'output_filename': 'js/rollbar.js',
+    },
 }
 PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
