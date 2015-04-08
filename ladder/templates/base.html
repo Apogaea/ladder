@@ -1,6 +1,7 @@
 <!doctype HTML>
 {% load static %}
 {% load pipeline %}
+{% load argonauts %}
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -8,6 +9,10 @@
         <meta name="keywords" content="{% block seo_keywords %}{% endblock %}" />
         <title>{% block title %}Apogaea Ladder Program{% endblock %}</title>
         <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" />
+        {% if ROLLBAR_CONFIG %}
+            <script type="text/javascript">var _rollbarConfig = {{ ROLLBAR_CONFIG|json }};</script>
+            {% javascript 'rollbar' %}
+        {% endif %}
         {% stylesheet 'base' %}
         {% javascript 'base' %}
     </head>
