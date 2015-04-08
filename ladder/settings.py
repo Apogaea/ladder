@@ -212,6 +212,7 @@ INSTALLED_APPS = [
     'argonauts',
     's3_folder_storage',
     'bootstrap3',
+    'manifesto',
 ]
 
 try:
