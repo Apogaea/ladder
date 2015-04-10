@@ -101,6 +101,7 @@ PIPELINE_CSS = {
         'source_filenames': (
             "css/bootstrap.css",
             "css/bootstrap-responsive.css",
+            "css/bootstrap-black.css",
             "css/ladder.css",
         ),
         'output_filename': 'base.css',
