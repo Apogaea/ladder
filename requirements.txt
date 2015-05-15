@@ -29,3 +29,4 @@ python-dotenv==0.1.0
 pytz==2014.10
 rollbar==0.9.8
 twilio==3.7.1
+readline==6.2.4.1

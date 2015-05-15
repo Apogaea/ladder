@@ -24,37 +24,56 @@ def default_match_expiration():
 
 
 class MatchQuerySet(models.QuerySet):
+    def get_field_name(self):
+        if self.model is TicketRequest:
+            return 'ticket_request'
+        else:
+            return 'ticket_offer'
+
     def is_fulfilled(self):
-        return self.filter(
-            matches__accepted_at__isnull=False,
-        )
+        accepted_pks = TicketMatch.objects.is_accepted(
+        ).values_list(self.get_field_name(), flat=True)
+
+        return self.filter(pk__in=accepted_pks)
 
     def is_reserved(self):
-        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
+        awaiting_confirmation_pks = TicketMatch.objects.is_awaiting_confirmation(
+        ).values_list(self.get_field_name(), flat=True)
+
+        accepted_pks = TicketMatch.objects.is_accepted(
+        ).values_list(self.get_field_name(), flat=True)
+
         return self.exclude(
-            matches__accepted_at__isnull=False,
+            pk__in=accepted_pks,
         ).filter(
-            matches__accepted_at__isnull=True,
-            matches__created_at__gt=cutoff,
-            matches__ticket_request__is_cancelled=False,
-            matches__ticket_request__is_terminated=False,
-            matches__ticket_offer__is_cancelled=False,
-            matches__ticket_offer__is_terminated=False,
+            pk__in=awaiting_confirmation_pks,
         )
 
     def is_active(self):
-        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
-        return self.exclude(
-            Q(is_cancelled=True) | Q(is_terminated=True)
+        """
+        Not Any of:
+            - is_terminated
+            - is_cancelled
+            - has match that is accepted which:
+                - request and offer not terminated
+                - request and offer not expired
+            - has match that is not accepted and not expired which:
+                - request and offer not terminated
+                - request and offer not expired
+        """
+        awaiting_confirmation_pks = TicketMatch.objects.is_awaiting_confirmation(
+        ).values_list(self.get_field_name(), flat=True)
+
+        accepted_pks = TicketMatch.objects.is_accepted(
+        ).values_list(self.get_field_name(), flat=True)
+
+        return self.filter(
+            is_cancelled=False,
+            is_terminated=False,
         ).exclude(
-            matches__accepted_at__isnull=False,
+            pk__in=accepted_pks,
         ).exclude(
-            matches__accepted_at__isnull=True,
-            matches__created_at__gt=cutoff,
-            matches__ticket_request__is_cancelled=False,
-            matches__ticket_request__is_terminated=False,
-            matches__ticket_offer__is_cancelled=False,
-            matches__ticket_offer__is_terminated=False,
+            pk__in=awaiting_confirmation_pks,
         )
 
 
@@ -114,14 +133,11 @@ class BaseMatchModel(TimestampableModel):
 
 class TicketRequestQuerySet(MatchQuerySet):
     def is_active(self):
-        cutoff = timezone.now() - datetime.timedelta(seconds=settings.DEFAULT_ACCEPT_TIME)
+        expired_pks = TicketMatch.objects.is_expired(
+        ).values_list('ticket_request', flat=True)
+
         return super(TicketRequestQuerySet, self).is_active().exclude(
-            matches__accepted_at__isnull=True,
-            matches__created_at__lt=cutoff,
-            matches__ticket_request__is_cancelled=False,
-            matches__ticket_request__is_terminated=False,
-            matches__ticket_offer__is_cancelled=False,
-            matches__ticket_offer__is_terminated=False,
+            pk__in=expired_pks,
         )
 
 
