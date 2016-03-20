@@ -181,10 +181,10 @@ DEFAULT_ACCEPT_TIME = 2 * ONE_DAY_IN_SECONDS
 
 # Registration Window
 REGISTRATION_OPEN_DATE = datetime.datetime(
-    year=2015, month=3, day=21, hour=13, tzinfo=pytz.timezone(TIME_ZONE),
+    year=2016, month=3, day=21, hour=11, tzinfo=pytz.timezone(TIME_ZONE),
 )
 REGISTRATION_CLOSE_DATE = datetime.datetime(
-    year=2015, month=5, day=30, hour=0, tzinfo=pytz.timezone(TIME_ZONE),
+    year=2016, month=5, day=30, hour=0, tzinfo=pytz.timezone(TIME_ZONE),
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.
